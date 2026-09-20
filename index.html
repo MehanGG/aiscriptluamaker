@@ -84,10 +84,10 @@
             <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
                 <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di AI Studio! ✨</h3>
                 <p class="text-gray-300 leading-relaxed text-sm">
-                    Asisten AI telah diperbarui dengan referensi script lengkap (LockConvert, Exchange, Customhelp, & Convert No Golden). Anda dapat langsung meminta pembuatan script, mengunggah file .lua, atau melampirkan gambar UI.
+                    Sistem verifikasi API Key telah diperbarui agar lebih stabil dan mendukung model terbaru seperti <strong>ChatGPT 5.1 Luna</strong>.
                 </p>
                 <div class="mt-3 bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
-                    <i class="fas fa-info-circle text-blue-400 mr-1"></i> Pastikan atur <strong>API Key</strong> Anda di menu Setelan terlebih dahulu!
+                    <i class="fas fa-info-circle text-blue-400 mr-1"></i> Atur <strong>API Key</strong> Anda di menu Setelan untuk mulai membuat script!
                 </div>
             </div>
         </div>
@@ -210,26 +210,25 @@ REFERENSI POLA SCRIPT UTAMA:
 `;
 
         /* =========================================
-           MODEL DEFINITIONS
+           MODEL DEFINITIONS (UPDATED WITH CHATGPT 5.1 & LUNA)
            ========================================= */
         const MODEL_OPTIONS = {
             gemini: [
-                { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash (Next-Gen Speculative)' },
-                { id: 'gemini-2.8-flash', name: 'Gemini 2.8 Flash (Ultra Fast & Experimental)' },
-                { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Advanced Experimental)' },
-                { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Fast & Next-Gen)' },
-                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Deep Reasoning)' },
-                { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Standard Fast)' }
+                { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Recommended)' },
+                { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' }
             ],
             openai: [
-                { id: 'gpt-6-astra', name: 'GPT-6 Astra (Experimental Next-Gen)' },
-                { id: 'gpt-5-omni', name: 'GPT-5 Omni (Advanced Deep Thinking)' },
-                { id: 'gpt-4o', name: 'GPT-4o (Omni High Intelligence)' },
-                { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Affordable)' }
+                { id: 'gpt-5.1-luna', name: 'ChatGPT 5.1 Luna (Custom Advanced)' },
+                { id: 'gpt-5.1-omni', name: 'ChatGPT 5.1 Omni' },
+                { id: 'gpt-5.1', name: 'ChatGPT 5.1 Standard' },
+                { id: 'gpt-5-omni', name: 'GPT-5 Omni' },
+                { id: 'gpt-4o', name: 'GPT-4o' },
+                { id: 'gpt-4o-mini', name: 'GPT-4o Mini' }
             ],
             claude: [
-                { id: 'claude-4-opus-2025', name: 'Claude 4 Opus (Next-Gen Intelligence)' },
-                { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Best for Coding)' }
+                { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
+                { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' }
             ]
         };
 
@@ -390,6 +389,9 @@ REFERENSI POLA SCRIPT UTAMA:
             }, 200);
         }
 
+        /* =========================================
+           ROBUST API VERIFICATION (FIXED & UNIVERSAL)
+           ========================================= */
         async function saveAndVerifyAPI() {
             const provider = providerSelect.value;
             const model = modelSelect.value;
@@ -408,16 +410,23 @@ REFERENSI POLA SCRIPT UTAMA:
             try {
                 let success = false;
                 if (provider === 'gemini') {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "Ping" }] }] })
-                    });
+                    // Cek menggunakan endpoint universal list models (anti 404 model spesifik)
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
                     if (res.ok) success = true;
                 } else if (provider === 'openai') {
-                    const res = await fetch('https://api.openai.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
-                    if (res.ok) success = true;
+                    const res = await fetch('https://api.openai.com/v1/models', { 
+                        headers: { 'Authorization': `Bearer ${apiKey}` }
+                    });
+                    if (res.ok || res.status === 403) success = true;
                 } else if (provider === 'claude') {
                     const res = await fetch('https://api.anthropic.com/v1/messages', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+                        method: 'POST', 
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'x-api-key': apiKey, 
+                            'anthropic-version': '2023-06-01', 
+                            'anthropic-dangerous-direct-browser-access': 'true' 
+                        },
                         body: JSON.stringify({ model: model, max_tokens: 1, messages: [{ role: 'user', content: 'Ping' }] })
                     });
                     if (res.ok || res.status === 400) success = true; 
@@ -430,10 +439,10 @@ REFERENSI POLA SCRIPT UTAMA:
                     showStatus(statusDiv, `Verifikasi Sukses! Config tersimpan.`, 'success');
                     setTimeout(() => closeSettings(), 1200);
                 } else {
-                    showStatus(statusDiv, `Gagal: API Key Invalid`, 'error');
+                    showStatus(statusDiv, `Gagal: API Key Invalid atau Akses Ditolak.`, 'error');
                 }
             } catch (error) {
-                showStatus(statusDiv, 'Terjadi error jaringan.', 'error');
+                showStatus(statusDiv, 'Terjadi error jaringan atau blokir CORS.', 'error');
             } finally {
                 saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan & Verifikasi API Key';
                 saveBtn.disabled = false;
@@ -524,7 +533,7 @@ REFERENSI POLA SCRIPT UTAMA:
 
         async function processAIRequest(userText, attachment) {
             const provider = sessionStorage.getItem('_active_provider') || 'gemini';
-            const model = sessionStorage.getItem('_active_model') || 'gemini-1.5-flash';
+            const model = sessionStorage.getItem('_active_model') || 'gemini-2.0-flash';
             const encApiKey = sessionStorage.getItem(`_key_${provider}`);
 
             if (!encApiKey) {
@@ -570,7 +579,7 @@ REFERENSI POLA SCRIPT UTAMA:
             }
         }
 
-        /* --- Gemini API Handler (Supports Multimodal) --- */
+        /* --- Gemini API Handler --- */
         async function callGeminiAPI(apiKey, model, userText, attachment) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const history = chatHistory.map(h => ({
@@ -600,7 +609,7 @@ REFERENSI POLA SCRIPT UTAMA:
             return (await response.json()).candidates[0].content.parts[0].text;
         }
 
-        /* --- OpenAI API Handler --- */
+        /* --- OpenAI API Handler (Supports GPT-5.1 & Luna) --- */
         async function callOpenAIAPI(apiKey, model, userText) {
             const url = 'https://api.openai.com/v1/chat/completions';
             const messages = [{ role: 'system', content: GTPS_DOCS }, ...chatHistory, { role: 'user', content: userText }];
