@@ -21,8 +21,8 @@
             -webkit-touch-callout: none;
         }
         
-        /* Mengizinkan seleksi HANYA di dalam blok kode hasil AI, Log dan form input */
-        .allow-select, .chat-message pre, .chat-message code, .chat-message blockquote {
+        /* Mengizinkan seleksi HANYA di dalam blok kode hasil AI dan form input */
+        .allow-select, .chat-message pre, .chat-message code {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
             -ms-user-select: text !important;
@@ -43,22 +43,6 @@
         
         /* Fix for Overflowing Chat */
         .chat-message { word-wrap: break-word; overflow: hidden; }
-
-        /* Styling Khusus Untuk "Proses Berpikir" AI (Blockquote) */
-        .chat-message blockquote {
-            background-color: #000000;
-            border-left: 4px solid #10b981;
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
-            color: #34d399;
-            box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
-        }
-        
-        .chat-message blockquote p { margin-bottom: 4px; }
-        .chat-message blockquote p:last-child { margin-bottom: 0; }
 
         .typing-indicator span {
             display: inline-block; width: 6px; height: 6px; background-color: #9ca3af;
@@ -100,24 +84,46 @@
             <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
                 <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di AI Studio! ✨</h3>
                 <p class="text-gray-300 leading-relaxed text-sm">
-                    Saya adalah Asisten AI yang dilatih khusus menggunakan dokumentasi <strong>GTPS.cloud Lua API</strong>. 
+                    Saya adalah Asisten AI yang dilatih khusus menggunakan dokumentasi dan contoh script <strong>GTPS.cloud Lua API</strong>. Anda dapat melampirkan file script (.lua.txt) atau gambar UI dialog game untuk dianalisis.
                 </p>
-                <div class="mt-3 bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400 mb-2">
-                    <i class="fas fa-info-circle text-blue-400 mr-1"></i> Jangan lupa atur <strong>API Key</strong> Anda di menu Setelan sebelum meminta script!
-                </div>
-                <div class="bg-emerald-900/30 border border-emerald-800/50 p-3 rounded-lg text-xs text-emerald-400">
-                    <i class="fas fa-check-circle mr-1"></i> <strong>Sistem Berjalan Normal:</strong> Bug Markdown berhasil di-patch.
+                <div class="mt-3 bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
+                    <i class="fas fa-info-circle text-blue-400 mr-1"></i> Pastikan atur <strong>API Key</strong> Anda di menu Setelan terlebih dahulu!
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Attachment Preview Container -->
+    <div id="attachment-preview-container" class="px-6 hidden">
+        <div class="max-w-5xl mx-auto bg-gray-800/90 border border-gray-700 p-2.5 rounded-xl flex items-center justify-between shadow-lg">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div id="preview-icon-wrapper" class="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-blue-400 shrink-0">
+                    <i id="preview-fa-icon" class="fas fa-file-alt"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p id="preview-filename" class="text-xs font-semibold text-white truncate"></p>
+                    <p id="preview-filesize" class="text-[10px] text-gray-400"></p>
+                </div>
+            </div>
+            <button onclick="clearAttachment()" class="text-gray-400 hover:text-red-400 p-2 transition-colors"><i class="fas fa-times text-lg"></i></button>
+        </div>
+    </div>
+
     <!-- Input Area -->
     <footer class="glass-panel p-4 pb-6 z-20">
         <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative items-end">
-            <div class="flex-1 bg-gray-800/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500">
-                <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-5 py-4 focus:outline-none resize-none overflow-hidden max-h-40 text-sm leading-relaxed" placeholder="Deskripsikan script Lua yang ingin dibuat..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
+            <!-- Hidden File Input -->
+            <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.lua">
+
+            <div class="flex-1 bg-gray-800/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500 flex items-center pr-2">
+                <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-5 py-4 focus:outline-none resize-none overflow-hidden max-h-40 text-sm leading-relaxed" placeholder="Ketik perintah atau lampirkan file/gambar..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
+                
+                <!-- Attachment Trigger Button -->
+                <button type="button" onclick="document.getElementById('file-input').click()" class="text-gray-400 hover:text-white p-2.5 transition-colors rounded-xl hover:bg-gray-700/50 shrink-0" title="Lampirkan Gambar atau File Script">
+                    <i class="fas fa-paperclip text-lg"></i>
+                </button>
             </div>
+
             <button type="submit" id="send-btn" class="bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white w-14 h-14 rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-purple-500/30 shrink-0">
                 <i class="fas fa-paper-plane text-xl"></i>
             </button>
@@ -134,7 +140,6 @@
             </h2>
             
             <div class="space-y-5">
-                <!-- Provider Selection -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-300 mb-1.5">Provider AI</label>
                     <select id="ai-provider" onchange="onProviderChange()" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all shadow-inner cursor-pointer">
@@ -144,27 +149,23 @@
                     </select>
                 </div>
 
-                <!-- Model Selection -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-300 mb-1.5">Model AI</label>
                     <select id="ai-model" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all shadow-inner cursor-pointer">
-                        <!-- Populated dynamically by JS -->
                     </select>
                 </div>
 
-                <!-- API Key Input -->
                 <div>
                     <label id="api-key-label" class="block text-sm font-semibold text-gray-300 mb-1.5">API Key</label>
                     <input type="password" id="api-key-input" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all shadow-inner" placeholder="...">
                     <p class="text-[11px] text-gray-500 mt-2 flex gap-1.5 items-start">
-                        <i class="fas fa-lock mt-0.5"></i> 
-                        API Key disimpan secara aman menggunakan enkripsi Base64 di Memory Sesi Lokal Anda. Kunci otomatis terhapus saat tab ditutup.
+                        <i class="fas fa-lock mt-0.5"></i> Kunci disimpan aman menggunakan enkripsi sesi lokal dan otomatis terhapus saat tab ditutup.
                     </p>
                 </div>
                 
                 <div id="status-message" class="text-sm hidden rounded-xl p-3.5 font-medium shadow-inner"></div>
 
-                <button id="save-btn" onclick="saveAndVerifyAPI()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/25 mt-2">
+                <button id="save-btn" onclick="saveAndVerifyAPI()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg mt-2">
                     <i class="fas fa-save"></i> Simpan & Verifikasi API Key
                 </button>
             </div>
@@ -187,34 +188,17 @@
         document.addEventListener('dragstart', event => event.preventDefault());
         
         /* =========================================
-           DATA DOKUMEN GTPS API (SYSTEM PROMPT)
+           DATA DOKUMEN GTPS API & REFERENSI SCRIPT
            ========================================= */
         const GTPS_DOCS = `
 Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud.
-Tugasmu adalah membuat script berdasarkan dokumentasi resmi GTPS.cloud Lua API.
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan dokumentasi resmi GTPS.cloud Lua API dan referensi script Lock/Exchange yang disertakan.
 
-REFERENSI GTPS API:
-- **Player Class**: getName(), enterWorld(), getPosX(), getPosY(), getNetID(), hasMod(modID), hasRole(roleID), addMod(), getItemAmount(itemID), getXP(), setXP(), getLevel(), getGems(), addGems(), removeGems(), playAudio(), sendVariant(variantList), sendRawPacket(data), disconnect(), ban(), setRoleQuestLevel(), getInventoryItems(), doAction(str), getFriends(), getGrowpassPoints(), earnAchievement(), getOverlappingTiles().
-- **World Class**: getName(), getOwner(), addPunishment(), getTile(x,y), spawnItem(x,y,itemID,count), spawnGems(), getPlayers(), isGameActive(), onCreateExplosion(), setTileForeground(), getTiles(), removeDroppedItemsByID(), sendPlayerMessage(), placeTile(), hasTileAccess(), kill(), createNPC(), findNPCByName(), setWeather(), nuke(), setMachineCap(), getMachineCaps().
-- **Tile Class**: getTileID(), getTileItem(), getPosX(), getPosY(), getFlags(), getTileData().
-- **Item Class**: getName(), getID(), getPrice(), getCategoryType(), getTexture(), setFarmability().
-- **Guild Class**: getTitle(), getLevel(), getPoints(), addXP().
-- **Global Functions**: registerLuaPlaymod(config), registerLuaCommand(config), registerLuaEvent(config), registerLuaItem(config), getItem(itemID), getServerPlayers(), getServerWorlds(), getPlayer(userID), getPlayerByName(playerName), savePlayer(), print(...), getTodaysDate(), formatTime(), addCombinerRecipe().
-- **Callbacks Penting**: onPlayerChatCallback, onPlayerCommandCallback, onPlayerLoginCallback, onPlayerActionCallback, dll.
-- **Utilities**: timer.setTimeout, timer.setInterval, http.get, http.post, file.read, db.open.
-
-ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
-1. Pastikan selalu menggunakan fungsi yang terdaftar di atas.
-2. THINKING PROCESS: JABARKAN PROSES BERPIKIRMU terlebih dahulu sebelum memberikan kode. Gunakan format blockquote markdown dengan awalan "Log Proses:" atau "Thinking Process:", contoh:
-   > **Thinking Process:**
-   > - Creating a script...
-   > - Menganalisis parameter command user...
-   > - Checking for a Bug...
-   > - Memastikan fungsi callback yang tepat digunakan...
-   > - Fixing a Bug... (Jika ada konflik penamaan variabel)
-3. WAJIB KLARIFIKASI PARAMETER: Jika user meminta membuat fitur (misalnya command baru) namun TIDAK memberikan parameter penting (misalnya tidak memberitahu command tersebut butuh minimal Role ID berapa, durasi efek, dll), JANGAN buat script-nya dulu! Bertanyalah kepada user menggunakan format tag khusus ini:
-   <ASK>Command ini untuk Role ID berapa?</ASK>
-   (Hanya gunakan format tag <ASK>...</ASK> untuk pertanyaan klarifikasi yang mengharuskan user menginput jawaban, agar sistem UI kami menangkapnya).
+PENTING - ATURAN BERPIKIR DAN MENJAWAB:
+1. THINKING PROCESS INTERNAL: Lakukan proses analisis, pengecekan bug, dan validasi kode secara internal di balik layar. Jangan tampilkan text pemikiran atau log proses ke dalam output chat user. Langsung berikan hasil akhir yang rapi dan profesional.
+2. Jika user melampirkan gambar UI atau file script, analisa secara cermat isi file/gambar tersebut untuk membuat atau memperbaiki script Lua yang diminta.
+3. Gunakan standar fungsi GTPS.cloud (seperti Player Class, World Class, SQLite, DiscordBot, dialog string builder, dll).
+4. Jika parameter penting tidak lengkap, tanyakan secara langsung kepada user.
 `;
 
         /* =========================================
@@ -226,38 +210,87 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
                 { id: 'gemini-2.8-flash', name: 'Gemini 2.8 Flash (Ultra Fast & Experimental)' },
                 { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Advanced Experimental)' },
                 { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Fast & Next-Gen)' },
-                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Deep Reasoning & Complex)' },
+                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Deep Reasoning)' },
                 { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Standard Fast)' }
             ],
             openai: [
                 { id: 'gpt-6-astra', name: 'GPT-6 Astra (Experimental Next-Gen)' },
                 { id: 'gpt-5-omni', name: 'GPT-5 Omni (Advanced Deep Thinking)' },
                 { id: 'gpt-4o', name: 'GPT-4o (Omni High Intelligence)' },
-                { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Affordable)' },
-                { id: 'gpt-4-turbo', name: 'GPT-4 Turbo (Advanced Reasoning)' }
+                { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Affordable)' }
             ],
             claude: [
                 { id: 'claude-4-opus-2025', name: 'Claude 4 Opus (Next-Gen Intelligence)' },
-                { id: 'claude-fable-1.0', name: 'Claude Fable 1.0 (Speculative Narrative)' },
-                { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Best for Coding)' },
-                { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Lightning Fast)' }
+                { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Best for Coding)' }
             ]
         };
 
         /* =========================================
-           MARKDOWN CONFIGURATION & COPY FEATURE (FIXED FOR MARKED V11+)
+           ATTACHMENT HANDLING (FILE & IMAGE)
+           ========================================= */
+        let attachedFile = null; // { name, type, content (text or base64), mimeType }
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('attachment-preview-container');
+        const previewFilename = document.getElementById('preview-filename');
+        const previewFilesize = document.getElementById('preview-filesize');
+        const previewFaIcon = document.getElementById('preview-fa-icon');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            if (file.type.startsWith('image/')) {
+                reader.onload = function(uploadEvent) {
+                    const base64Data = uploadEvent.target.result.split(',')[1];
+                    attachedFile = {
+                        name: file.name,
+                        type: 'image',
+                        mimeType: file.type,
+                        content: base64Data
+                    };
+                    showPreviewUI(file.name, file.size, 'fa-image', 'text-green-400');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                reader.onload = function(uploadEvent) {
+                    const textContent = uploadEvent.target.result;
+                    attachedFile = {
+                        name: file.name,
+                        type: 'text',
+                        mimeType: file.type || 'text/plain',
+                        content: textContent
+                    };
+                    showPreviewUI(file.name, file.size, 'fa-file-code', 'text-blue-400');
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function showPreviewUI(name, size, iconClass, colorClass) {
+            previewFilename.textContent = name;
+            previewFilesize.textContent = (size / 1024).toFixed(1) + ' KB';
+            previewFaIcon.className = `fas ${iconClass}${colorClass}`;
+            previewContainer.classList.remove('hidden');
+        }
+
+        window.clearAttachment = function() {
+            attachedFile = null;
+            fileInput.value = '';
+            previewContainer.classList.add('hidden');
+        };
+
+        /* =========================================
+           MARKDOWN CONFIGURATION & COPY FEATURE
            ========================================= */
         const renderer = {
             code(token) {
-                // Kompatibilitas untuk versi Marked.js lama (string) maupun baru (object)
                 const codeText = typeof token === 'object' ? token.text : token;
                 const language = typeof token === 'object' ? token.lang : arguments[1];
-                
                 const escapedCode = String(codeText || '')
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
-                
                 const langDisplay = language ? language.toUpperCase() : 'LUA';
                 
                 return `
@@ -279,21 +312,18 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
         window.copyToClipboard = function(btn) {
             const container = btn.closest('.relative');
             const codeText = container.querySelector('code').innerText;
-            
             navigator.clipboard.writeText(codeText).then(() => {
                 const span = btn.querySelector('span');
                 const icon = btn.querySelector('i');
                 const originalText = span.innerText;
                 const originalIcon = icon.className;
-                
                 span.innerText = 'Copied!';
                 icon.className = 'fas fa-check text-green-400';
-                
                 setTimeout(() => {
                     span.innerText = originalText;
                     icon.className = originalIcon;
                 }, 2000);
-            }).catch(err => console.error('Failed to copy', err));
+            });
         };
 
         /* =========================================
@@ -311,7 +341,6 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
         const apiKeyLabel = document.getElementById('api-key-label');
 
         let chatHistory = [];
-        let isWaitingForAnswer = false;
 
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
@@ -329,17 +358,7 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
         function onProviderChange() {
             const provider = providerSelect.value;
             populateModels(provider);
-            
-            if (provider === 'gemini') {
-                apiKeyLabel.textContent = 'Google Gemini API Key';
-                apiKeyInput.placeholder = 'AIzaSy...';
-            } else if (provider === 'openai') {
-                apiKeyLabel.textContent = 'OpenAI API Key';
-                apiKeyInput.placeholder = 'sk-proj-...';
-            } else if (provider === 'claude') {
-                apiKeyLabel.textContent = 'Anthropic Claude API Key';
-                apiKeyInput.placeholder = 'sk-ant-api...';
-            }
+            apiKeyLabel.textContent = `${provider.toUpperCase()} API Key`;
             const saved = sessionStorage.getItem(`_key_${provider}`);
             apiKeyInput.value = saved ? decKey(saved) : '';
         }
@@ -400,13 +419,13 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
                     sessionStorage.setItem(`_key_${provider}`, encKey(apiKey));
                     sessionStorage.setItem('_active_provider', provider);
                     sessionStorage.setItem('_active_model', model);
-                    showStatus(statusDiv, `Verifikasi Sukses! Config ${provider.toUpperCase()} tersimpan.`, 'success');
+                    showStatus(statusDiv, `Verifikasi Sukses! Config tersimpan.`, 'success');
                     setTimeout(() => closeSettings(), 1200);
                 } else {
                     showStatus(statusDiv, `Gagal: API Key Invalid`, 'error');
                 }
             } catch (error) {
-                showStatus(statusDiv, 'Terjadi error jaringan saat memverifikasi API Key.', 'error');
+                showStatus(statusDiv, 'Terjadi error jaringan.', 'error');
             } finally {
                 saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan & Verifikasi API Key';
                 saveBtn.disabled = false;
@@ -418,7 +437,7 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
             element.innerHTML = text;
         }
 
-        function appendMessage(sender, text) {
+        function appendMessage(sender, text, attachment = null) {
             const wrapper = document.createElement('div');
             wrapper.className = `flex items-start gap-3 md:gap-4 w-full ${sender === 'user' ? 'flex-row-reverse' : ''}`;
             
@@ -431,61 +450,33 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
                 ? `bubble-user text-white rounded-2xl rounded-tr-none p-4 max-w-[90%] md:max-w-[85%] shadow-lg allow-select text-sm leading-relaxed`
                 : `bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[90%] md:max-w-[85%] shadow-xl border border-gray-700/50 chat-message allow-select text-sm leading-relaxed overflow-hidden`;
             
-            if(sender === 'ai') {
-                bubble.innerHTML = marked.parse(text);
-            } else {
-                bubble.textContent = text;
+            let contentHTML = '';
+            if (attachment) {
+                if (attachment.type === 'image') {
+                    contentHTML += `<div class="mb-3 rounded-lg overflow-hidden max-w-xs border border-white/20"><img src="data:${attachment.mimeType};base64,${attachment.content}" class="w-full h-auto object-cover"></div>`;
+                } else {
+                    contentHTML += `<div class="mb-3 bg-black/40 border border-white/10 p-2.5 rounded-lg flex items-center gap-2 text-xs font-mono text-gray-300"><i class="fas fa-file-code text-blue-400"></i> <span class="truncate">${attachment.name}</span></div>`;
+                }
             }
 
+            if(sender === 'ai') {
+                contentHTML += marked.parse(text);
+            } else {
+                contentHTML += `<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;
+            }
+
+            bubble.innerHTML = contentHTML;
             wrapper.innerHTML = icon;
             wrapper.appendChild(bubble);
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
 
-        function appendAskMessage(question) {
-            const index = chatHistory.length;
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex items-start gap-3 md:gap-4 w-full`;
-            wrapper.innerHTML = `
-                <div class="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg">
-                    <i class="fas fa-question text-white font-bold"></i>
-                </div>
-                <div class="bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[85%] shadow-xl border border-yellow-600/50 chat-message overflow-hidden">
-                    <p class="font-bold text-yellow-400 mb-2.5 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Parameter Dibutuhkan</p>
-                    <p class="mb-4 text-sm">${question}</p>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <input type="text" id="ask-input-${index}" class="allow-select flex-1 bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-yellow-500 transition-colors shadow-inner" placeholder="Ketik jawaban Anda disini...">
-                        <button onclick="submitAnswer(${index}, '${question.replace(/'/g, "\\'")}')" class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shrink-0">Kirim <i class="fas fa-check ml-1"></i></button>
-                    </div>
-                </div>
-            `;
-            chatContainer.appendChild(wrapper);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
-            
-            setTimeout(() => {
-                const inp = document.getElementById(`ask-input-${index}`);
-                if(inp) inp.focus();
-            }, 100);
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
         }
-
-        window.submitAnswer = function(index, question) {
-            const inputEl = document.getElementById(`ask-input-${index}`);
-            const answer = inputEl.value.trim();
-            if(!answer) return;
-
-            inputEl.disabled = true;
-            inputEl.nextElementSibling.disabled = true;
-            inputEl.nextElementSibling.innerHTML = '<i class="fas fa-check"></i>';
-            inputEl.classList.add('opacity-50');
-
-            isWaitingForAnswer = false;
-            
-            // Format context so AI knows it's answering the previous ask
-            const fullAnswer = `Jawaban untuk klarifikasi parameter "${question}": ${answer}`;
-            appendMessage('user', answer);
-            processAIRequest(fullAnswer);
-        };
 
         function showTyping() {
             const wrapper = document.createElement('div');
@@ -511,27 +502,26 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
            ========================================= */
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (isWaitingForAnswer) {
-                showStatus(document.getElementById('status-message'), 'Harap jawab pertanyaan AI yang sedang aktif.', 'error');
-                return;
-            }
             const text = userInput.value.trim();
-            if (!text) return;
+            if (!text && !attachedFile) return;
 
+            const currentAttachment = attachedFile;
             userInput.value = '';
             userInput.style.height = 'auto';
-            appendMessage('user', text);
-            processAIRequest(text);
+            clearAttachment();
+
+            appendMessage('user', text || '[Melampirkan File/Gambar]', currentAttachment);
+            processAIRequest(text, currentAttachment);
         });
 
-        async function processAIRequest(userText) {
+        async function processAIRequest(userText, attachment) {
             const provider = sessionStorage.getItem('_active_provider') || 'gemini';
             const model = sessionStorage.getItem('_active_model') || 'gemini-1.5-flash';
             const encApiKey = sessionStorage.getItem(`_key_${provider}`);
 
             if (!encApiKey) {
                 openSettings();
-                showStatus(document.getElementById('status-message'), `Harap masukkan API Key ${provider.toUpperCase()} terlebih dahulu!`, 'error');
+                showStatus(document.getElementById('status-message'), `Masukkan API Key terlebih dahulu!`, 'error');
                 return;
             }
 
@@ -541,58 +531,55 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
 
             try {
                 let aiReply = '';
+                let promptWithAttachment = userText;
+                if (attachment) {
+                    if (attachment.type === 'text') {
+                        promptWithAttachment = `${userText}\n\n[Isi File Lampiran (${attachment.name}):]\n${attachment.content}`;
+                    } else {
+                        promptWithAttachment = `${userText}\n[User melampirkan sebuah gambar UI/game asset]`;
+                    }
+                }
 
                 if (provider === 'gemini') {
-                    aiReply = await callGeminiAPI(apiKey, model, userText);
+                    aiReply = await callGeminiAPI(apiKey, model, promptWithAttachment, attachment);
                 } else if (provider === 'openai') {
-                    aiReply = await callOpenAIAPI(apiKey, model, userText);
+                    aiReply = await callOpenAIAPI(apiKey, model, promptWithAttachment);
                 } else if (provider === 'claude') {
-                    aiReply = await callClaudeAPI(apiKey, model, userText);
+                    aiReply = await callClaudeAPI(apiKey, model, promptWithAttachment);
                 }
 
                 removeTyping();
-
-                // Deteksi tag <ASK>...</ASK>
-                const askMatch = aiReply.match(/<ASK>(.*?)<\/ASK>/i);
-                if (askMatch) {
-                    isWaitingForAnswer = true;
-                    const question = askMatch[1].trim();
-                    
-                    // Render jika ada log/text reasoning sebelum pertanyaan ASK
-                    const contextText = aiReply.replace(/<ASK>.*?<\/ASK>/ig, '').trim();
-                    if (contextText.length > 0) {
-                        appendMessage('ai', contextText);
-                    }
-                    
-                    // Render UI Pertanyaan Interaktif
-                    appendAskMessage(question);
-
-                    // Push history context (tapi hapus tag agar tidak loop ke depan)
-                    chatHistory.push({ role: 'user', content: userText });
-                    chatHistory.push({ role: 'assistant', content: aiReply.replace(/<ASK>/ig, '[MEMINTA_KLARIFIKASI: ').replace(/<\/ASK>/ig, ']') });
-                } else {
-                    appendMessage('ai', aiReply);
-                    chatHistory.push({ role: 'user', content: userText });
-                    chatHistory.push({ role: 'assistant', content: aiReply });
-                }
+                appendMessage('ai', aiReply);
+                chatHistory.push({ role: 'user', content: promptWithAttachment });
+                chatHistory.push({ role: 'assistant', content: aiReply });
 
             } catch (error) {
                 removeTyping();
                 appendMessage('ai', `**Error System:** Gagal memproses data AI. \n\nPesan: \`${error.message}\``);
             } finally {
                 sendBtn.disabled = false;
-                if(!isWaitingForAnswer) userInput.focus();
+                userInput.focus();
             }
         }
 
-        /* --- Gemini API Handler --- */
-        async function callGeminiAPI(apiKey, model, userText) {
+        /* --- Gemini API Handler (Supports Multimodal) --- */
+        async function callGeminiAPI(apiKey, model, userText, attachment) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const history = chatHistory.map(h => ({
                 role: h.role === 'assistant' ? 'model' : h.role,
                 parts: [{ text: h.content }]
             }));
-            history.push({ role: 'user', parts: [{ text: userText }] });
+
+            const currentParts = [{ text: userText }];
+            if (attachment && attachment.type === 'image') {
+                currentParts.push({
+                    inline_data: {
+                        mime_type: attachment.mimeType,
+                        data: attachment.content
+                    }
+                });
+            }
+            history.push({ role: 'user', parts: currentParts });
 
             const payload = {
                 system_instruction: { parts: [{ text: GTPS_DOCS }] },
