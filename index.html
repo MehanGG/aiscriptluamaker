@@ -47,13 +47,13 @@
         /* Styling Khusus Untuk "Proses Berpikir" AI (Blockquote) */
         .chat-message blockquote {
             background-color: #000000;
-            border-left: 4px solid #10b981; /* Emerald green border */
+            border-left: 4px solid #10b981;
             border-radius: 8px;
             padding: 12px 16px;
             margin-bottom: 16px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.85rem;
-            color: #34d399; /* Emerald green text */
+            color: #34d399;
             box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
         }
         
@@ -106,7 +106,7 @@
                     <i class="fas fa-info-circle text-blue-400 mr-1"></i> Jangan lupa atur <strong>API Key</strong> Anda di menu Setelan sebelum meminta script!
                 </div>
                 <div class="bg-emerald-900/30 border border-emerald-800/50 p-3 rounded-lg text-xs text-emerald-400">
-                    <i class="fas fa-brain mr-1"></i> <strong>Pembaruan:</strong> AI kini akan menjabarkan proses berpikirnya dan dapat meminta detail requirement tambahan (seperti minimal Role ID) jika Anda tidak melengkapinya.
+                    <i class="fas fa-check-circle mr-1"></i> <strong>Sistem Berjalan Normal:</strong> Bug Markdown berhasil di-patch.
                 </div>
             </div>
         </div>
@@ -245,14 +245,19 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
         };
 
         /* =========================================
-           MARKDOWN CONFIGURATION & COPY FEATURE
+           MARKDOWN CONFIGURATION & COPY FEATURE (FIXED FOR MARKED V11+)
            ========================================= */
         const renderer = {
-            code(code, language) {
-                const escapedCode = code
+            code(token) {
+                // Kompatibilitas untuk versi Marked.js lama (string) maupun baru (object)
+                const codeText = typeof token === 'object' ? token.text : token;
+                const language = typeof token === 'object' ? token.lang : arguments[1];
+                
+                const escapedCode = String(codeText || '')
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
+                
                 const langDisplay = language ? language.toUpperCase() : 'LUA';
                 
                 return `
@@ -450,7 +455,7 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
                     <p class="font-bold text-yellow-400 mb-2.5 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Parameter Dibutuhkan</p>
                     <p class="mb-4 text-sm">${question}</p>
                     <div class="flex flex-col sm:flex-row gap-2">
-                        <input type="text" id="ask-input-${index}" class="allow-select flex-1 bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-yellow-500 transition-colors shadow-inner" placeholder="Answer here...">
+                        <input type="text" id="ask-input-${index}" class="allow-select flex-1 bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-yellow-500 transition-colors shadow-inner" placeholder="Ketik jawaban Anda disini...">
                         <button onclick="submitAnswer(${index}, '${question.replace(/'/g, "\\'")}')" class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shrink-0">Kirim <i class="fas fa-check ml-1"></i></button>
                     </div>
                 </div>
@@ -477,7 +482,7 @@ ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
             isWaitingForAnswer = false;
             
             // Format context so AI knows it's answering the previous ask
-            const fullAnswer = `Jawaban untuk "${question}": ${answer}`;
+            const fullAnswer = `Jawaban untuk klarifikasi parameter "${question}": ${answer}`;
             appendMessage('user', answer);
             processAIRequest(fullAnswer);
         };
