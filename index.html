@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTPS.cloud Script AI Generator</title>
+    <title>GTPS.cloud Script AI Studio</title>
     <!-- Tailwind CSS for UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Marked.js for Markdown parsing (Code blocks) -->
@@ -21,8 +21,8 @@
             -webkit-touch-callout: none;
         }
         
-        /* Mengizinkan seleksi hanya di dalam blok kode hasil AI dan form input */
-        .allow-select, .chat-message pre, .chat-message code {
+        /* Mengizinkan seleksi HANYA di dalam blok kode hasil AI, Log dan form input */
+        .allow-select, .chat-message pre, .chat-message code, .chat-message blockquote {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
             -ms-user-select: text !important;
@@ -30,13 +30,36 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        /* Glassmorphism & UI Effects */
+        .glass-panel { background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-header { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .bubble-ai { background: rgba(31, 41, 55, 0.85); backdrop-filter: blur(8px); }
+        .bubble-user { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        
+        /* Fix for Overflowing Chat */
+        .chat-message { word-wrap: break-word; overflow: hidden; }
 
-        .chat-bg { background-color: #111827; }
-        .glass-panel { background: rgba(31, 41, 55, 0.8); backdrop-filter: blur(10px); }
+        /* Styling Khusus Untuk "Proses Berpikir" AI (Blockquote) */
+        .chat-message blockquote {
+            background-color: #000000;
+            border-left: 4px solid #10b981; /* Emerald green border */
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #34d399; /* Emerald green text */
+            box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+        
+        .chat-message blockquote p { margin-bottom: 4px; }
+        .chat-message blockquote p:last-child { margin-bottom: 0; }
+
         .typing-indicator span {
             display: inline-block; width: 6px; height: 6px; background-color: #9ca3af;
             border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both;
@@ -49,54 +72,72 @@
         }
     </style>
 </head>
-<body class="chat-bg text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
+<body class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
 
     <!-- Header -->
-    <header class="glass-panel border-b border-gray-700 p-4 flex justify-between items-center z-10">
+    <header class="glass-header p-4 flex justify-between items-center z-20 shadow-md">
         <div class="flex items-center gap-3">
-            <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-robot text-white"></i></div>
-            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">GTPS Script AI Studio</h1>
+            <div class="bg-gradient-to-br from-blue-500 to-purple-600 p-2.5 rounded-xl shadow-lg">
+                <i class="fas fa-robot text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">GTPS Script Studio</h1>
+                <p class="text-xs text-gray-400 font-medium">Advanced Lua Generator</p>
+            </div>
         </div>
-        <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all shadow border border-gray-600 flex items-center gap-2">
-            <i class="fas fa-sliders"></i> Pengaturan AI & API
+        <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-gray-600 flex items-center gap-2 text-sm font-semibold hover:shadow-purple-500/20">
+            <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Setelan AI</span>
         </button>
     </header>
 
     <!-- Chat Container -->
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-6 flex flex-col scroll-smooth">
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 flex flex-col scroll-smooth z-10">
         <!-- Welcome Message -->
-        <div class="flex items-start gap-4">
-            <div class="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0">
+        <div class="flex items-start gap-4 w-full">
+            <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg">
                 <i class="fas fa-robot text-white"></i>
             </div>
-            <div class="bg-gray-800 rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-lg border border-gray-700">
-                <p>Halo! Saya adalah AI Generator khusus Script Lua untuk <strong>GTPS.cloud</strong>.</p>
-                <p class="mt-2 text-sm text-gray-400">Pilih provider AI favoritmu (Gemini, OpenAI, atau Claude), masukkan API Key-mu di Pengaturan, dan beri tahu saya script apa yang ingin kamu buat!</p>
+            <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
+                <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di AI Studio! ✨</h3>
+                <p class="text-gray-300 leading-relaxed text-sm">
+                    Saya adalah Asisten AI yang dilatih khusus menggunakan dokumentasi <strong>GTPS.cloud Lua API</strong>. 
+                </p>
+                <div class="mt-3 bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400 mb-2">
+                    <i class="fas fa-info-circle text-blue-400 mr-1"></i> Jangan lupa atur <strong>API Key</strong> Anda di menu Setelan sebelum meminta script!
+                </div>
+                <div class="bg-emerald-900/30 border border-emerald-800/50 p-3 rounded-lg text-xs text-emerald-400">
+                    <i class="fas fa-brain mr-1"></i> <strong>Pembaruan:</strong> AI kini akan menjabarkan proses berpikirnya dan dapat meminta detail requirement tambahan (seperti minimal Role ID) jika Anda tidak melengkapinya.
+                </div>
             </div>
         </div>
     </main>
 
     <!-- Input Area -->
-    <footer class="glass-panel border-t border-gray-700 p-4 pb-6">
-        <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative">
-            <textarea id="user-input" rows="1" class="allow-select flex-1 bg-gray-800 text-white border border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden" placeholder="Ketik perintah script (contoh: Buatkan script event custom command /givegems)..." oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
-            <button type="submit" id="send-btn" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed self-end">
-                <i class="fas fa-paper-plane"></i>
+    <footer class="glass-panel p-4 pb-6 z-20">
+        <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative items-end">
+            <div class="flex-1 bg-gray-800/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500">
+                <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-5 py-4 focus:outline-none resize-none overflow-hidden max-h-40 text-sm leading-relaxed" placeholder="Deskripsikan script Lua yang ingin dibuat..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
+            </div>
+            <button type="submit" id="send-btn" class="bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white w-14 h-14 rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-purple-500/30 shrink-0">
+                <i class="fas fa-paper-plane text-xl"></i>
             </button>
         </form>
     </footer>
 
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
         <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative transform scale-95 transition-transform overflow-y-auto max-h-[90vh]" id="modal-content">
-            <button onclick="closeSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-            <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-2"><i class="fas fa-shield-alt text-green-400"></i> Pengaturan AI & API</h2>
+            <button onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-gray-800 p-2 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-3">
+                <div class="bg-green-500/20 p-2 rounded-lg text-green-400"><i class="fas fa-shield-alt"></i></div>
+                Konfigurasi API
+            </h2>
             
             <div class="space-y-5">
                 <!-- Provider Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Provider AI</label>
-                    <select id="ai-provider" onchange="onProviderChange()" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-semibold text-gray-300 mb-1.5">Provider AI</label>
+                    <select id="ai-provider" onchange="onProviderChange()" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all shadow-inner cursor-pointer">
                         <option value="gemini">Google Gemini AI</option>
                         <option value="openai">OpenAI (ChatGPT)</option>
                         <option value="claude">Anthropic Claude</option>
@@ -105,22 +146,25 @@
 
                 <!-- Model Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Model AI</label>
-                    <select id="ai-model" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-semibold text-gray-300 mb-1.5">Model AI</label>
+                    <select id="ai-model" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all shadow-inner cursor-pointer">
                         <!-- Populated dynamically by JS -->
                     </select>
                 </div>
 
                 <!-- API Key Input -->
                 <div>
-                    <label id="api-key-label" class="block text-sm font-medium text-gray-300 mb-1">API Key</label>
-                    <input type="password" id="api-key-input" class="allow-select w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="...">
-                    <p class="text-xs text-gray-500 mt-2"><i class="fas fa-lock"></i> API Key disimpan aman menggunakan enkripsi sesi lokal (hilang saat tab ditutup).</p>
+                    <label id="api-key-label" class="block text-sm font-semibold text-gray-300 mb-1.5">API Key</label>
+                    <input type="password" id="api-key-input" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all shadow-inner" placeholder="...">
+                    <p class="text-[11px] text-gray-500 mt-2 flex gap-1.5 items-start">
+                        <i class="fas fa-lock mt-0.5"></i> 
+                        API Key disimpan secara aman menggunakan enkripsi Base64 di Memory Sesi Lokal Anda. Kunci otomatis terhapus saat tab ditutup.
+                    </p>
                 </div>
                 
-                <div id="status-message" class="text-sm hidden rounded-lg p-3"></div>
+                <div id="status-message" class="text-sm hidden rounded-xl p-3.5 font-medium shadow-inner"></div>
 
-                <button id="save-btn" onclick="saveAndVerifyAPI()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                <button id="save-btn" onclick="saveAndVerifyAPI()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/25 mt-2">
                     <i class="fas fa-save"></i> Simpan & Verifikasi API Key
                 </button>
             </div>
@@ -131,9 +175,8 @@
         /* =========================================
            SECURITY MEASURES (Anti-Theft)
            ========================================= */
-        document.addEventListener('contextmenu', event => event.preventDefault()); // Disable Right Click
+        document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
-            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, Ctrl+S
             if (e.keyCode === 123 || 
                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
@@ -141,7 +184,7 @@
                 return false;
             }
         });
-        document.addEventListener('dragstart', event => event.preventDefault()); // Disable dragging
+        document.addEventListener('dragstart', event => event.preventDefault());
         
         /* =========================================
            DATA DOKUMEN GTPS API (SYSTEM PROMPT)
@@ -149,7 +192,6 @@
         const GTPS_DOCS = `
 Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud.
 Tugasmu adalah membuat script berdasarkan dokumentasi resmi GTPS.cloud Lua API.
-Berikan kodenya secara langsung di dalam block markdown Lua, berikan sedikit penjelasan jika perlu.
 
 REFERENSI GTPS API:
 - **Player Class**: getName(), enterWorld(), getPosX(), getPosY(), getNetID(), hasMod(modID), hasRole(roleID), addMod(), getItemAmount(itemID), getXP(), setXP(), getLevel(), getGems(), addGems(), removeGems(), playAudio(), sendVariant(variantList), sendRawPacket(data), disconnect(), ban(), setRoleQuestLevel(), getInventoryItems(), doAction(str), getFriends(), getGrowpassPoints(), earnAchievement(), getOverlappingTiles().
@@ -158,24 +200,21 @@ REFERENSI GTPS API:
 - **Item Class**: getName(), getID(), getPrice(), getCategoryType(), getTexture(), setFarmability().
 - **Guild Class**: getTitle(), getLevel(), getPoints(), addXP().
 - **Global Functions**: registerLuaPlaymod(config), registerLuaCommand(config), registerLuaEvent(config), registerLuaItem(config), getItem(itemID), getServerPlayers(), getServerWorlds(), getPlayer(userID), getPlayerByName(playerName), savePlayer(), print(...), getTodaysDate(), formatTime(), addCombinerRecipe().
-- **Callbacks Penting**: 
-  - onPlayerChatCallback(world, player, message)
-  - onPlayerCommandCallback(world, player, command)
-  - onPlayerLoginCallback(player)
-  - onPlayerDeathCallback(world, player, spikeKill)
-  - onPlayerActionCallback(world, player, action)
-  - onTileBreakCallback(world, player, tile)
-  - onTilePunchCallback(world, player, tile)
-  - onPlayerPunchPlayerCallback(world, player, targetPlayer)
-  - onTick()
-  - onWorldTick(world)
-  - onPlayerVariantCallback(player, variant, delay, netID)
+- **Callbacks Penting**: onPlayerChatCallback, onPlayerCommandCallback, onPlayerLoginCallback, onPlayerActionCallback, dll.
 - **Utilities**: timer.setTimeout, timer.setInterval, http.get, http.post, file.read, db.open.
 
-ATURAN SCRIPT:
-1. Pastikan selalu menggunakan fungsi yang terdaftar di atas. 
-2. Script harus optimal dan menggunakan event callback yang tepat jika diminta membuat fitur interaktif (seperti command, dll).
-3. Jika menggunakan timer, pastikan menyimpan timerID jika butuh di-clear.
+ATURAN SCRIPT & PERILAKU PENTING (WAJIB DIIKUTI):
+1. Pastikan selalu menggunakan fungsi yang terdaftar di atas.
+2. THINKING PROCESS: JABARKAN PROSES BERPIKIRMU terlebih dahulu sebelum memberikan kode. Gunakan format blockquote markdown dengan awalan "Log Proses:" atau "Thinking Process:", contoh:
+   > **Thinking Process:**
+   > - Creating a script...
+   > - Menganalisis parameter command user...
+   > - Checking for a Bug...
+   > - Memastikan fungsi callback yang tepat digunakan...
+   > - Fixing a Bug... (Jika ada konflik penamaan variabel)
+3. WAJIB KLARIFIKASI PARAMETER: Jika user meminta membuat fitur (misalnya command baru) namun TIDAK memberikan parameter penting (misalnya tidak memberitahu command tersebut butuh minimal Role ID berapa, durasi efek, dll), JANGAN buat script-nya dulu! Bertanyalah kepada user menggunakan format tag khusus ini:
+   <ASK>Command ini untuk Role ID berapa?</ASK>
+   (Hanya gunakan format tag <ASK>...</ASK> untuk pertanyaan klarifikasi yang mengharuskan user menginput jawaban, agar sistem UI kami menangkapnya).
 `;
 
         /* =========================================
@@ -183,29 +222,77 @@ ATURAN SCRIPT:
            ========================================= */
         const MODEL_OPTIONS = {
             gemini: [
-                { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Ultra Fast & Experimental)' },
+                { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash (Next-Gen Speculative)' },
+                { id: 'gemini-2.8-flash', name: 'Gemini 2.8 Flash (Ultra Fast & Experimental)' },
+                { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Advanced Experimental)' },
                 { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Fast & Next-Gen)' },
-                { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Standard Fast)' },
-                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Smart & Deep Reasoning)' },
-                { id: 'gemini-1.0-pro', name: 'Gemini 1.0 Pro (Legacy Stable)' }
+                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Deep Reasoning & Complex)' },
+                { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Standard Fast)' }
             ],
             openai: [
                 { id: 'gpt-6-astra', name: 'GPT-6 Astra (Experimental Next-Gen)' },
+                { id: 'gpt-5-omni', name: 'GPT-5 Omni (Advanced Deep Thinking)' },
                 { id: 'gpt-4o', name: 'GPT-4o (Omni High Intelligence)' },
                 { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Affordable)' },
-                { id: 'gpt-4-turbo', name: 'GPT-4 Turbo (Advanced Reasoning)' },
-                { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Classic Fast)' }
+                { id: 'gpt-4-turbo', name: 'GPT-4 Turbo (Advanced Reasoning)' }
             ],
             claude: [
-                { id: 'claude-fable-1.0', name: 'Claude Fable 1.0 (Next-Gen Speculative)' },
-                { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Best Coding Model)' },
-                { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Lightning Fast)' },
-                { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus (Deep Analysis)' }
+                { id: 'claude-4-opus-2025', name: 'Claude 4 Opus (Next-Gen Intelligence)' },
+                { id: 'claude-fable-1.0', name: 'Claude Fable 1.0 (Speculative Narrative)' },
+                { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Best for Coding)' },
+                { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Lightning Fast)' }
             ]
         };
 
         /* =========================================
-           STATE & LOGIC
+           MARKDOWN CONFIGURATION & COPY FEATURE
+           ========================================= */
+        const renderer = {
+            code(code, language) {
+                const escapedCode = code
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                const langDisplay = language ? language.toUpperCase() : 'LUA';
+                
+                return `
+                <div class="relative mt-4 mb-4 rounded-xl overflow-hidden bg-[#0d1117] border border-gray-700 shadow-xl w-full">
+                    <div class="flex justify-between items-center px-4 py-2.5 bg-[#161b22] border-b border-gray-700 text-xs text-gray-400">
+                        <span class="font-bold tracking-widest uppercase text-gray-300">${langDisplay}</span>
+                        <button onclick="copyToClipboard(this)" class="hover:text-white transition-colors flex items-center gap-1.5 focus:outline-none bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-md">
+                            <i class="fas fa-copy"></i> <span>Copy Code</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <pre class="p-4 text-[13px] text-[#56d364] font-mono whitespace-pre allow-select" style="margin:0; line-height: 1.5;"><code>${escapedCode}</code></pre>
+                    </div>
+                </div>`;
+            }
+        };
+        marked.use({ renderer });
+
+        window.copyToClipboard = function(btn) {
+            const container = btn.closest('.relative');
+            const codeText = container.querySelector('code').innerText;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                const span = btn.querySelector('span');
+                const icon = btn.querySelector('i');
+                const originalText = span.innerText;
+                const originalIcon = icon.className;
+                
+                span.innerText = 'Copied!';
+                icon.className = 'fas fa-check text-green-400';
+                
+                setTimeout(() => {
+                    span.innerText = originalText;
+                    icon.className = originalIcon;
+                }, 2000);
+            }).catch(err => console.error('Failed to copy', err));
+        };
+
+        /* =========================================
+           STATE & DOM ELEMENTS
            ========================================= */
         const chatContainer = document.getElementById('chat-container');
         const chatForm = document.getElementById('chat-form');
@@ -219,8 +306,8 @@ ATURAN SCRIPT:
         const apiKeyLabel = document.getElementById('api-key-label');
 
         let chatHistory = [];
+        let isWaitingForAnswer = false;
 
-        // Basic Security Obfuscation
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
 
@@ -248,7 +335,6 @@ ATURAN SCRIPT:
                 apiKeyLabel.textContent = 'Anthropic Claude API Key';
                 apiKeyInput.placeholder = 'sk-ant-api...';
             }
-
             const saved = sessionStorage.getItem(`_key_${provider}`);
             apiKeyInput.value = saved ? decKey(saved) : '';
         }
@@ -257,11 +343,9 @@ ATURAN SCRIPT:
             settingsModal.classList.remove('hidden');
             settingsModal.classList.add('flex');
             setTimeout(() => modalContent.classList.remove('scale-95'), 10);
-            
             const savedProvider = sessionStorage.getItem('_active_provider') || 'gemini';
             providerSelect.value = savedProvider;
             onProviderChange();
-
             const savedModel = sessionStorage.getItem('_active_model');
             if (savedModel) modelSelect.value = savedModel;
         }
@@ -291,64 +375,33 @@ ATURAN SCRIPT:
 
             try {
                 let success = false;
-                let errorMsg = '';
-
                 if (provider === 'gemini') {
-                    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                    const res = await fetch(testUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: "Ping" }] }] })
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "Ping" }] }] })
                     });
                     if (res.ok) success = true;
-                    else {
-                        const err = await res.json();
-                        errorMsg = err.error?.message || 'API Key Gemini Invalid';
-                    }
                 } else if (provider === 'openai') {
-                    const testUrl = 'https://api.openai.com/v1/models';
-                    const res = await fetch(testUrl, {
-                        headers: { 'Authorization': `Bearer ${apiKey}` }
-                    });
+                    const res = await fetch('https://api.openai.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
                     if (res.ok) success = true;
-                    else {
-                        const err = await res.json();
-                        errorMsg = err.error?.message || 'API Key OpenAI Invalid';
-                    }
                 } else if (provider === 'claude') {
-                    const testUrl = 'https://api.anthropic.com/v1/messages';
-                    const res = await fetch(testUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-api-key': apiKey,
-                            'anthropic-version': '2023-06-01',
-                            'anthropic-dangerous-direct-browser-access': 'true'
-                        },
-                        body: JSON.stringify({
-                            model: model,
-                            max_tokens: 1,
-                            messages: [{ role: 'user', content: 'Ping' }]
-                        })
+                    const res = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+                        body: JSON.stringify({ model: model, max_tokens: 1, messages: [{ role: 'user', content: 'Ping' }] })
                     });
-                    if (res.ok || res.status === 400) success = true; // 400 ok for auth validation
-                    else {
-                        const err = await res.json();
-                        errorMsg = err.error?.message || 'API Key Claude Invalid';
-                    }
+                    if (res.ok || res.status === 400) success = true; 
                 }
 
                 if (success) {
                     sessionStorage.setItem(`_key_${provider}`, encKey(apiKey));
                     sessionStorage.setItem('_active_provider', provider);
                     sessionStorage.setItem('_active_model', model);
-                    showStatus(statusDiv, `Verifikasi Berhasil! API Key ${provider.toUpperCase()} disimpan.`, 'success');
+                    showStatus(statusDiv, `Verifikasi Sukses! Config ${provider.toUpperCase()} tersimpan.`, 'success');
                     setTimeout(() => closeSettings(), 1200);
                 } else {
-                    showStatus(statusDiv, `Gagal: ${errorMsg}`, 'error');
+                    showStatus(statusDiv, `Gagal: API Key Invalid`, 'error');
                 }
             } catch (error) {
-                showStatus(statusDiv, 'Error koneksi saat memverifikasi API Key.', 'error');
+                showStatus(statusDiv, 'Terjadi error jaringan saat memverifikasi API Key.', 'error');
             } finally {
                 saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan & Verifikasi API Key';
                 saveBtn.disabled = false;
@@ -356,22 +409,22 @@ ATURAN SCRIPT:
         }
 
         function showStatus(element, text, type) {
-            element.className = `text-sm rounded-lg p-3 block ${type === 'error' ? 'bg-red-900/50 text-red-300 border border-red-700' : 'bg-green-900/50 text-green-300 border border-green-700'}`;
+            element.className = `text-sm rounded-xl p-3.5 block shadow-inner mt-2 ${type === 'error' ? 'bg-red-900/40 text-red-300 border border-red-700/50' : 'bg-green-900/40 text-green-300 border border-green-700/50'}`;
             element.innerHTML = text;
         }
 
         function appendMessage(sender, text) {
             const wrapper = document.createElement('div');
-            wrapper.className = `flex items-start gap-4 ${sender === 'user' ? 'flex-row-reverse' : ''}`;
+            wrapper.className = `flex items-start gap-3 md:gap-4 w-full ${sender === 'user' ? 'flex-row-reverse' : ''}`;
             
             const icon = sender === 'user' 
-                ? `<div class="bg-purple-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0"><i class="fas fa-user text-white"></i></div>`
-                : `<div class="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0"><i class="fas fa-robot text-white"></i></div>`;
+                ? `<div class="bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-user text-white"></i></div>`
+                : `<div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>`;
             
             const bubble = document.createElement('div');
             bubble.className = sender === 'user'
-                ? `bg-purple-600 text-white rounded-2xl rounded-tr-none p-4 max-w-[80%] shadow-lg allow-select`
-                : `bg-gray-800 text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-lg border border-gray-700 chat-message allow-select`;
+                ? `bubble-user text-white rounded-2xl rounded-tr-none p-4 max-w-[90%] md:max-w-[85%] shadow-lg allow-select text-sm leading-relaxed`
+                : `bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[90%] md:max-w-[85%] shadow-xl border border-gray-700/50 chat-message allow-select text-sm leading-relaxed overflow-hidden`;
             
             if(sender === 'ai') {
                 bubble.innerHTML = marked.parse(text);
@@ -385,13 +438,57 @@ ATURAN SCRIPT:
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
 
+        function appendAskMessage(question) {
+            const index = chatHistory.length;
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex items-start gap-3 md:gap-4 w-full`;
+            wrapper.innerHTML = `
+                <div class="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg">
+                    <i class="fas fa-question text-white font-bold"></i>
+                </div>
+                <div class="bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[85%] shadow-xl border border-yellow-600/50 chat-message overflow-hidden">
+                    <p class="font-bold text-yellow-400 mb-2.5 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Parameter Dibutuhkan</p>
+                    <p class="mb-4 text-sm">${question}</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="ask-input-${index}" class="allow-select flex-1 bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-yellow-500 transition-colors shadow-inner" placeholder="Answer here...">
+                        <button onclick="submitAnswer(${index}, '${question.replace(/'/g, "\\'")}')" class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shrink-0">Kirim <i class="fas fa-check ml-1"></i></button>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            
+            setTimeout(() => {
+                const inp = document.getElementById(`ask-input-${index}`);
+                if(inp) inp.focus();
+            }, 100);
+        }
+
+        window.submitAnswer = function(index, question) {
+            const inputEl = document.getElementById(`ask-input-${index}`);
+            const answer = inputEl.value.trim();
+            if(!answer) return;
+
+            inputEl.disabled = true;
+            inputEl.nextElementSibling.disabled = true;
+            inputEl.nextElementSibling.innerHTML = '<i class="fas fa-check"></i>';
+            inputEl.classList.add('opacity-50');
+
+            isWaitingForAnswer = false;
+            
+            // Format context so AI knows it's answering the previous ask
+            const fullAnswer = `Jawaban untuk "${question}": ${answer}`;
+            appendMessage('user', answer);
+            processAIRequest(fullAnswer);
+        };
+
         function showTyping() {
             const wrapper = document.createElement('div');
             wrapper.id = 'typing-indicator';
-            wrapper.className = `flex items-start gap-4`;
+            wrapper.className = `flex items-start gap-4 w-full`;
             wrapper.innerHTML = `
-                <div class="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0"><i class="fas fa-robot text-white"></i></div>
-                <div class="bg-gray-800 rounded-2xl rounded-tl-none p-5 shadow-lg border border-gray-700 typing-indicator">
+                <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>
+                <div class="bubble-ai rounded-2xl rounded-tl-none p-5 shadow-xl border border-gray-700/50 typing-indicator">
                     <span></span><span></span><span></span>
                 </div>
             `;
@@ -409,9 +506,20 @@ ATURAN SCRIPT:
            ========================================= */
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (isWaitingForAnswer) {
+                showStatus(document.getElementById('status-message'), 'Harap jawab pertanyaan AI yang sedang aktif.', 'error');
+                return;
+            }
             const text = userInput.value.trim();
             if (!text) return;
-            
+
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            appendMessage('user', text);
+            processAIRequest(text);
+        });
+
+        async function processAIRequest(userText) {
             const provider = sessionStorage.getItem('_active_provider') || 'gemini';
             const model = sessionStorage.getItem('_active_model') || 'gemini-1.5-flash';
             const encApiKey = sessionStorage.getItem(`_key_${provider}`);
@@ -423,11 +531,6 @@ ATURAN SCRIPT:
             }
 
             const apiKey = decKey(encApiKey);
-
-            // UI Updates
-            userInput.value = '';
-            userInput.style.height = 'auto';
-            appendMessage('user', text);
             sendBtn.disabled = true;
             showTyping();
 
@@ -435,24 +538,47 @@ ATURAN SCRIPT:
                 let aiReply = '';
 
                 if (provider === 'gemini') {
-                    aiReply = await callGeminiAPI(apiKey, model, text);
+                    aiReply = await callGeminiAPI(apiKey, model, userText);
                 } else if (provider === 'openai') {
-                    aiReply = await callOpenAIAPI(apiKey, model, text);
+                    aiReply = await callOpenAIAPI(apiKey, model, userText);
                 } else if (provider === 'claude') {
-                    aiReply = await callClaudeAPI(apiKey, model, text);
+                    aiReply = await callClaudeAPI(apiKey, model, userText);
                 }
 
                 removeTyping();
-                appendMessage('ai', aiReply);
+
+                // Deteksi tag <ASK>...</ASK>
+                const askMatch = aiReply.match(/<ASK>(.*?)<\/ASK>/i);
+                if (askMatch) {
+                    isWaitingForAnswer = true;
+                    const question = askMatch[1].trim();
+                    
+                    // Render jika ada log/text reasoning sebelum pertanyaan ASK
+                    const contextText = aiReply.replace(/<ASK>.*?<\/ASK>/ig, '').trim();
+                    if (contextText.length > 0) {
+                        appendMessage('ai', contextText);
+                    }
+                    
+                    // Render UI Pertanyaan Interaktif
+                    appendAskMessage(question);
+
+                    // Push history context (tapi hapus tag agar tidak loop ke depan)
+                    chatHistory.push({ role: 'user', content: userText });
+                    chatHistory.push({ role: 'assistant', content: aiReply.replace(/<ASK>/ig, '[MEMINTA_KLARIFIKASI: ').replace(/<\/ASK>/ig, ']') });
+                } else {
+                    appendMessage('ai', aiReply);
+                    chatHistory.push({ role: 'user', content: userText });
+                    chatHistory.push({ role: 'assistant', content: aiReply });
+                }
 
             } catch (error) {
                 removeTyping();
-                appendMessage('ai', `**Error:** Gagal memproses permintaan. \n\nPesan Error: \`${error.message}\``);
+                appendMessage('ai', `**Error System:** Gagal memproses data AI. \n\nPesan: \`${error.message}\``);
             } finally {
                 sendBtn.disabled = false;
-                userInput.focus();
+                if(!isWaitingForAnswer) userInput.focus();
             }
-        });
+        }
 
         /* --- Gemini API Handler --- */
         async function callGeminiAPI(apiKey, model, userText) {
@@ -461,7 +587,6 @@ ATURAN SCRIPT:
                 role: h.role === 'assistant' ? 'model' : h.role,
                 parts: [{ text: h.content }]
             }));
-            
             history.push({ role: 'user', parts: [{ text: userText }] });
 
             const payload = {
@@ -470,95 +595,29 @@ ATURAN SCRIPT:
                 generationConfig: { temperature: 0.2 }
             };
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error?.message || 'Error dari Gemini API');
-            }
-
-            const data = await response.json();
-            const reply = data.candidates[0].content.parts[0].text;
-            chatHistory.push({ role: 'user', content: userText });
-            chatHistory.push({ role: 'assistant', content: reply });
-            return reply;
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error((await response.json()).error?.message || 'Error Google Gemini API');
+            return (await response.json()).candidates[0].content.parts[0].text;
         }
 
         /* --- OpenAI API Handler --- */
         async function callOpenAIAPI(apiKey, model, userText) {
             const url = 'https://api.openai.com/v1/chat/completions';
-            const messages = [
-                { role: 'system', content: GTPS_DOCS },
-                ...chatHistory,
-                { role: 'user', content: userText }
-            ];
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: model,
-                    messages: messages,
-                    temperature: 0.2
-                })
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error?.message || 'Error dari OpenAI API');
-            }
-
-            const data = await response.json();
-            const reply = data.choices[0].message.content;
-            chatHistory.push({ role: 'user', content: userText });
-            chatHistory.push({ role: 'assistant', content: reply });
-            return reply;
+            const messages = [{ role: 'system', content: GTPS_DOCS }, ...chatHistory, { role: 'user', content: userText }];
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages: messages, temperature: 0.2 }) });
+            if (!response.ok) throw new Error((await response.json()).error?.message || 'Error OpenAI API');
+            return (await response.json()).choices[0].message.content;
         }
 
         /* --- Anthropic Claude API Handler --- */
         async function callClaudeAPI(apiKey, model, userText) {
             const url = 'https://api.anthropic.com/v1/messages';
-            const messages = [
-                ...chatHistory,
-                { role: 'user', content: userText }
-            ];
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': apiKey,
-                    'anthropic-version': '2023-06-01',
-                    'anthropic-dangerous-direct-browser-access': 'true'
-                },
-                body: JSON.stringify({
-                    model: model,
-                    max_tokens: 4096,
-                    system: GTPS_DOCS,
-                    messages: messages
-                })
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error?.message || 'Error dari Claude API');
-            }
-
-            const data = await response.json();
-            const reply = data.content[0].text;
-            chatHistory.push({ role: 'user', content: userText });
-            chatHistory.push({ role: 'assistant', content: reply });
-            return reply;
+            const messages = [...chatHistory, { role: 'user', content: userText }];
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: model, max_tokens: 4096, system: GTPS_DOCS, messages: messages, temperature: 0.2 }) });
+            if (!response.ok) throw new Error((await response.json()).error?.message || 'Error Anthropic Claude API');
+            return (await response.json()).content[0].text;
         }
 
-        // Keydown Enter Handler
         userInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -566,7 +625,6 @@ ATURAN SCRIPT:
             }
         });
 
-        // Initialize default UI settings
         populateModels('gemini');
     </script>
 </body>
