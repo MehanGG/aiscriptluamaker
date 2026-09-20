@@ -84,7 +84,7 @@
             <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
                 <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di AI Studio! ✨</h3>
                 <p class="text-gray-300 leading-relaxed text-sm">
-                    Saya adalah Asisten AI yang dilatih khusus menggunakan dokumentasi dan contoh script <strong>GTPS.cloud Lua API</strong>. Anda dapat melampirkan file script (.lua.txt) atau gambar UI dialog game untuk dianalisis.
+                    Asisten AI telah diperbarui dengan referensi script lengkap (LockConvert, Exchange, Customhelp, & Convert No Golden). Anda dapat langsung meminta pembuatan script, mengunggah file .lua, atau melampirkan gambar UI.
                 </p>
                 <div class="mt-3 bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
                     <i class="fas fa-info-circle text-blue-400 mr-1"></i> Pastikan atur <strong>API Key</strong> Anda di menu Setelan terlebih dahulu!
@@ -191,14 +191,22 @@
            DATA DOKUMEN GTPS API & REFERENSI SCRIPT
            ========================================= */
         const GTPS_DOCS = `
-Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud.
-Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan dokumentasi resmi GTPS.cloud Lua API dan referensi script Lock/Exchange yang disertakan.
+Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud / GTPS10.
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan dokumentasi resmi GTPS.cloud Lua API serta pola referensi script berikut:
 
-PENTING - ATURAN BERPIKIR DAN MENJAWAB:
-1. THINKING PROCESS INTERNAL: Lakukan proses analisis, pengecekan bug, dan validasi kode secara internal di balik layar. Jangan tampilkan text pemikiran atau log proses ke dalam output chat user. Langsung berikan hasil akhir yang rapi dan profesional.
-2. Jika user melampirkan gambar UI atau file script, analisa secara cermat isi file/gambar tersebut untuk membuat atau memperbaiki script Lua yang diminta.
-3. Gunakan standar fungsi GTPS.cloud (seperti Player Class, World Class, SQLite, DiscordBot, dialog string builder, dll).
-4. Jika parameter penting tidak lengkap, tanyakan secara langsung kepada user.
+REFERENSI POLA SCRIPT UTAMA:
+1. **Lock Convert / Exchange Systems (e.g., LockConvert.lua & exchange.lua):**
+   - Menggunakan database SQLite (\`sqlite.open\`) atau file write (\`file.write\`, \`file.read\`) untuk menyimpan konfigurasi dan log transaksi.
+   - Menggunakan \`DiscordBot.messageCreate(channelID, ...)\` untuk mengirimkan log aktivitas staff / player ke Discord channel.
+   - Layout Dialog Parallel Row: Menggunakan \`add_button_with_icon|...|noflags|itemID|amount|left|\`, tombol panah \`11162\`, dan \`add_button_with_icon|...|staticYellowFrame|itemID|amount|left|\`.
+   - Validasi stack item (\`MAX_ITEM_STACK\`), pengecekan jumlah item player (\`player:getItemAmount\`), pengurangan/penambahan item (\`player:changeItem\`), efek item (\`world:useItemEffect\`), dan audio feedback (\`player:playAudio\`).
+
+2. **Custom Help / Role System (e.g., Customhelp.lua):**
+   - Mengambil role dengan \`getRoles()\`, menyusun struktur role berdasarkan prioritas (\`rolePriority\`) dan izin perintah (\`allowCommandsFromRoles\`), serta menampilkan daftar command dalam dialog terstruktur.
+
+3. **General Guidelines:**
+   - THINKING PROCESS INTERNAL: Seluruh proses analisis, pemikiran, dan pengecekan bug WAJIB dilakukan secara internal di balik layar. Jangan pernah menampilkan text pemikiran, log proses, atau tag thinking ke dalam output chat user. Langsung berikan hasil script Lua yang bersih, benar, dan profesional.
+   - Jika user melampirkan gambar UI atau file script, analisa secara cermat untuk menghasilkan kode yang presisi.
 `;
 
         /* =========================================
@@ -228,7 +236,7 @@ PENTING - ATURAN BERPIKIR DAN MENJAWAB:
         /* =========================================
            ATTACHMENT HANDLING (FILE & IMAGE)
            ========================================= */
-        let attachedFile = null; // { name, type, content (text or base64), mimeType }
+        let attachedFile = null;
         const fileInput = document.getElementById('file-input');
         const previewContainer = document.getElementById('attachment-preview-container');
         const previewFilename = document.getElementById('preview-filename');
