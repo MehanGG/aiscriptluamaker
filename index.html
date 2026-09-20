@@ -21,7 +21,7 @@
             -webkit-touch-callout: none;
         }
         
-        /* Mengizinkan seleksi hanya di dalam blok kode hasil AI */
+        /* Mengizinkan seleksi hanya di dalam blok kode hasil AI dan form input */
         .allow-select, .chat-message pre, .chat-message code {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
@@ -55,10 +55,10 @@
     <header class="glass-panel border-b border-gray-700 p-4 flex justify-between items-center z-10">
         <div class="flex items-center gap-3">
             <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-robot text-white"></i></div>
-            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">GTPS Script AI</h1>
+            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">GTPS Script AI Studio</h1>
         </div>
         <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all shadow border border-gray-600 flex items-center gap-2">
-            <i class="fas fa-cog"></i> Pengaturan API
+            <i class="fas fa-sliders"></i> Pengaturan AI & API
         </button>
     </header>
 
@@ -70,7 +70,8 @@
                 <i class="fas fa-robot text-white"></i>
             </div>
             <div class="bg-gray-800 rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-lg border border-gray-700">
-                <p>Halo! Saya adalah AI khusus pembuat Script Lua untuk <strong>GTPS.cloud</strong>. Silakan atur API Key Anda di Pengaturan terlebih dahulu, lalu beri tahu saya script apa yang ingin Anda buat.</p>
+                <p>Halo! Saya adalah AI Generator khusus Script Lua untuk <strong>GTPS.cloud</strong>.</p>
+                <p class="mt-2 text-sm text-gray-400">Pilih provider AI favoritmu (Gemini, OpenAI, atau Claude), masukkan API Key-mu di Pengaturan, dan beri tahu saya script apa yang ingin kamu buat!</p>
             </div>
         </div>
     </main>
@@ -78,7 +79,7 @@
     <!-- Input Area -->
     <footer class="glass-panel border-t border-gray-700 p-4 pb-6">
         <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative">
-            <textarea id="user-input" rows="1" class="allow-select flex-1 bg-gray-800 text-white border border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden" placeholder="Ketik perintah script (contoh: Buatkan script untuk auto-farm block)..." oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+            <textarea id="user-input" rows="1" class="allow-select flex-1 bg-gray-800 text-white border border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden" placeholder="Ketik perintah script (contoh: Buatkan script event custom command /givegems)..." oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
             <button type="submit" id="send-btn" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed self-end">
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -87,28 +88,40 @@
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
-        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md p-6 shadow-2xl relative transform scale-95 transition-transform" id="modal-content">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative transform scale-95 transition-transform overflow-y-auto max-h-[90vh]" id="modal-content">
             <button onclick="closeSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-            <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-2"><i class="fas fa-shield-alt text-green-400"></i> Pengaturan AI</h2>
+            <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-2"><i class="fas fa-shield-alt text-green-400"></i> Pengaturan AI & API</h2>
             
-            <div class="space-y-4">
+            <div class="space-y-5">
+                <!-- Provider Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Pilih Model AI</label>
-                    <select id="ai-model" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Cepat)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Lebih Pintar)</option>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Provider AI</label>
+                    <select id="ai-provider" onchange="onProviderChange()" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="gemini">Google Gemini AI</option>
+                        <option value="openai">OpenAI (ChatGPT)</option>
+                        <option value="claude">Anthropic Claude</option>
                     </select>
                 </div>
+
+                <!-- Model Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Google Gemini API Key</label>
-                    <input type="password" id="api-key-input" class="allow-select w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="AIzaSy...">
-                    <p class="text-xs text-gray-500 mt-2"><i class="fas fa-lock"></i> API Key disimpan aman menggunakan Session Enkripsi sementara.</p>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Model AI</label>
+                    <select id="ai-model" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <!-- Populated dynamically by JS -->
+                    </select>
+                </div>
+
+                <!-- API Key Input -->
+                <div>
+                    <label id="api-key-label" class="block text-sm font-medium text-gray-300 mb-1">API Key</label>
+                    <input type="password" id="api-key-input" class="allow-select w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="...">
+                    <p class="text-xs text-gray-500 mt-2"><i class="fas fa-lock"></i> API Key disimpan aman menggunakan enkripsi sesi lokal (hilang saat tab ditutup).</p>
                 </div>
                 
                 <div id="status-message" class="text-sm hidden rounded-lg p-3"></div>
 
                 <button id="save-btn" onclick="saveAndVerifyAPI()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
-                    <i class="fas fa-save"></i> Simpan & Verifikasi
+                    <i class="fas fa-save"></i> Simpan & Verifikasi API Key
                 </button>
             </div>
         </div>
@@ -120,7 +133,7 @@
            ========================================= */
         document.addEventListener('contextmenu', event => event.preventDefault()); // Disable Right Click
         document.addEventListener('keydown', function(e) {
-            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, Ctrl+S
             if (e.keyCode === 123 || 
                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
@@ -133,7 +146,6 @@
         /* =========================================
            DATA DOKUMEN GTPS API (SYSTEM PROMPT)
            ========================================= */
-        // Diambil dan dirangkum dari Dokumen Lengkap GTPS.Cloud Lua API
         const GTPS_DOCS = `
 Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud.
 Tugasmu adalah membuat script berdasarkan dokumentasi resmi GTPS.cloud Lua API.
@@ -167,6 +179,32 @@ ATURAN SCRIPT:
 `;
 
         /* =========================================
+           MODEL DEFINITIONS
+           ========================================= */
+        const MODEL_OPTIONS = {
+            gemini: [
+                { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Ultra Fast & Experimental)' },
+                { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Fast & Next-Gen)' },
+                { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Standard Fast)' },
+                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Smart & Deep Reasoning)' },
+                { id: 'gemini-1.0-pro', name: 'Gemini 1.0 Pro (Legacy Stable)' }
+            ],
+            openai: [
+                { id: 'gpt-6-astra', name: 'GPT-6 Astra (Experimental Next-Gen)' },
+                { id: 'gpt-4o', name: 'GPT-4o (Omni High Intelligence)' },
+                { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Affordable)' },
+                { id: 'gpt-4-turbo', name: 'GPT-4 Turbo (Advanced Reasoning)' },
+                { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Classic Fast)' }
+            ],
+            claude: [
+                { id: 'claude-fable-1.0', name: 'Claude Fable 1.0 (Next-Gen Speculative)' },
+                { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Best Coding Model)' },
+                { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Lightning Fast)' },
+                { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus (Deep Analysis)' }
+            ]
+        };
+
+        /* =========================================
            STATE & LOGIC
            ========================================= */
         const chatContainer = document.getElementById('chat-container');
@@ -175,23 +213,57 @@ ATURAN SCRIPT:
         const sendBtn = document.getElementById('send-btn');
         const settingsModal = document.getElementById('settings-modal');
         const modalContent = document.getElementById('modal-content');
-        
-        let chatHistory = [
-            { role: "user", parts: [{ text: "System prompt instructions injected." }]},
-            { role: "model", parts: [{ text: "Understood." }]}
-        ];
+        const providerSelect = document.getElementById('ai-provider');
+        const modelSelect = document.getElementById('ai-model');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const apiKeyLabel = document.getElementById('api-key-label');
 
-        // Basic Security Obfuscation for storing API Key in Session Storage
+        let chatHistory = [];
+
+        // Basic Security Obfuscation
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
+
+        function populateModels(provider) {
+            modelSelect.innerHTML = '';
+            MODEL_OPTIONS[provider].forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.name;
+                modelSelect.appendChild(opt);
+            });
+        }
+
+        function onProviderChange() {
+            const provider = providerSelect.value;
+            populateModels(provider);
+            
+            if (provider === 'gemini') {
+                apiKeyLabel.textContent = 'Google Gemini API Key';
+                apiKeyInput.placeholder = 'AIzaSy...';
+            } else if (provider === 'openai') {
+                apiKeyLabel.textContent = 'OpenAI API Key';
+                apiKeyInput.placeholder = 'sk-proj-...';
+            } else if (provider === 'claude') {
+                apiKeyLabel.textContent = 'Anthropic Claude API Key';
+                apiKeyInput.placeholder = 'sk-ant-api...';
+            }
+
+            const saved = sessionStorage.getItem(`_key_${provider}`);
+            apiKeyInput.value = saved ? decKey(saved) : '';
+        }
 
         function openSettings() {
             settingsModal.classList.remove('hidden');
             settingsModal.classList.add('flex');
             setTimeout(() => modalContent.classList.remove('scale-95'), 10);
             
-            const saved = sessionStorage.getItem('_gta');
-            if(saved) document.getElementById('api-key-input').value = decKey(saved);
+            const savedProvider = sessionStorage.getItem('_active_provider') || 'gemini';
+            providerSelect.value = savedProvider;
+            onProviderChange();
+
+            const savedModel = sessionStorage.getItem('_active_model');
+            if (savedModel) modelSelect.value = savedModel;
         }
 
         function closeSettings() {
@@ -203,8 +275,9 @@ ATURAN SCRIPT:
         }
 
         async function saveAndVerifyAPI() {
-            const apiKey = document.getElementById('api-key-input').value.trim();
-            const model = document.getElementById('ai-model').value;
+            const provider = providerSelect.value;
+            const model = modelSelect.value;
+            const apiKey = apiKeyInput.value.trim();
             const statusDiv = document.getElementById('status-message');
             const saveBtn = document.getElementById('save-btn');
 
@@ -217,29 +290,67 @@ ATURAN SCRIPT:
             saveBtn.disabled = true;
 
             try {
-                // Minimal Request to Verify Key
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Ping" }] }]
-                    })
-                });
+                let success = false;
+                let errorMsg = '';
 
-                if (response.ok) {
-                    sessionStorage.setItem('_gta', encKey(apiKey));
-                    sessionStorage.setItem('_mdl', model);
-                    showStatus(statusDiv, 'Verifikasi Berhasil! API Key tersimpan.', 'success');
-                    setTimeout(() => closeSettings(), 1500);
+                if (provider === 'gemini') {
+                    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                    const res = await fetch(testUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: "Ping" }] }] })
+                    });
+                    if (res.ok) success = true;
+                    else {
+                        const err = await res.json();
+                        errorMsg = err.error?.message || 'API Key Gemini Invalid';
+                    }
+                } else if (provider === 'openai') {
+                    const testUrl = 'https://api.openai.com/v1/models';
+                    const res = await fetch(testUrl, {
+                        headers: { 'Authorization': `Bearer ${apiKey}` }
+                    });
+                    if (res.ok) success = true;
+                    else {
+                        const err = await res.json();
+                        errorMsg = err.error?.message || 'API Key OpenAI Invalid';
+                    }
+                } else if (provider === 'claude') {
+                    const testUrl = 'https://api.anthropic.com/v1/messages';
+                    const res = await fetch(testUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey,
+                            'anthropic-version': '2023-06-01',
+                            'anthropic-dangerous-direct-browser-access': 'true'
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            max_tokens: 1,
+                            messages: [{ role: 'user', content: 'Ping' }]
+                        })
+                    });
+                    if (res.ok || res.status === 400) success = true; // 400 ok for auth validation
+                    else {
+                        const err = await res.json();
+                        errorMsg = err.error?.message || 'API Key Claude Invalid';
+                    }
+                }
+
+                if (success) {
+                    sessionStorage.setItem(`_key_${provider}`, encKey(apiKey));
+                    sessionStorage.setItem('_active_provider', provider);
+                    sessionStorage.setItem('_active_model', model);
+                    showStatus(statusDiv, `Verifikasi Berhasil! API Key ${provider.toUpperCase()} disimpan.`, 'success');
+                    setTimeout(() => closeSettings(), 1200);
                 } else {
-                    const err = await response.json();
-                    showStatus(statusDiv, `Gagal: ${err.error.message || 'API Key Invalid'}`, 'error');
+                    showStatus(statusDiv, `Gagal: ${errorMsg}`, 'error');
                 }
             } catch (error) {
-                showStatus(statusDiv, 'Koneksi error saat memverifikasi API Key.', 'error');
+                showStatus(statusDiv, 'Error koneksi saat memverifikasi API Key.', 'error');
             } finally {
-                saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan & Verifikasi';
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan & Verifikasi API Key';
                 saveBtn.disabled = false;
             }
         }
@@ -263,7 +374,7 @@ ATURAN SCRIPT:
                 : `bg-gray-800 text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-lg border border-gray-700 chat-message allow-select`;
             
             if(sender === 'ai') {
-                bubble.innerHTML = marked.parse(text); // Render Markdown
+                bubble.innerHTML = marked.parse(text);
             } else {
                 bubble.textContent = text;
             }
@@ -293,17 +404,25 @@ ATURAN SCRIPT:
             if(el) el.remove();
         }
 
+        /* =========================================
+           API EXECUTION DISPATCHER
+           ========================================= */
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = userInput.value.trim();
             if (!text) return;
             
-            const encApiKey = sessionStorage.getItem('_gta');
+            const provider = sessionStorage.getItem('_active_provider') || 'gemini';
+            const model = sessionStorage.getItem('_active_model') || 'gemini-1.5-flash';
+            const encApiKey = sessionStorage.getItem(`_key_${provider}`);
+
             if (!encApiKey) {
                 openSettings();
-                showStatus(document.getElementById('status-message'), 'Harap masukkan API Key terlebih dahulu!', 'error');
+                showStatus(document.getElementById('status-message'), `Harap masukkan API Key ${provider.toUpperCase()} terlebih dahulu!`, 'error');
                 return;
             }
+
+            const apiKey = decKey(encApiKey);
 
             // UI Updates
             userInput.value = '';
@@ -312,57 +431,143 @@ ATURAN SCRIPT:
             sendBtn.disabled = true;
             showTyping();
 
-            const apiKey = decKey(encApiKey);
-            const model = sessionStorage.getItem('_mdl') || 'gemini-1.5-flash';
-            
-            // Push user prompt to history
-            chatHistory.push({ role: "user", parts: [{ text: text }]});
-
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                
-                // Add System Instruction wrapper securely on request time
-                const payload = {
-                    system_instruction: { parts: [{ text: GTPS_DOCS }] },
-                    contents: chatHistory,
-                    generationConfig: { temperature: 0.2 }
-                };
+                let aiReply = '';
 
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                if (provider === 'gemini') {
+                    aiReply = await callGeminiAPI(apiKey, model, text);
+                } else if (provider === 'openai') {
+                    aiReply = await callOpenAIAPI(apiKey, model, text);
+                } else if (provider === 'claude') {
+                    aiReply = await callClaudeAPI(apiKey, model, text);
+                }
 
                 removeTyping();
+                appendMessage('ai', aiReply);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    const reply = data.candidates[0].content.parts[0].text;
-                    appendMessage('ai', reply);
-                    chatHistory.push({ role: "model", parts: [{ text: reply }]});
-                } else {
-                    const err = await response.json();
-                    appendMessage('ai', `**Error:** Terjadi kesalahan dari API. Pesan: \`${err.error.message}\``);
-                    chatHistory.pop(); // Remove failed prompt
-                }
             } catch (error) {
                 removeTyping();
-                appendMessage('ai', `**Error:** Koneksi terputus atau gagal menghubungi API.`);
-                chatHistory.pop();
+                appendMessage('ai', `**Error:** Gagal memproses permintaan. \n\nPesan Error: \`${error.message}\``);
             } finally {
                 sendBtn.disabled = false;
                 userInput.focus();
             }
         });
 
-        // Submit via enter but allow Shift+Enter for new line
+        /* --- Gemini API Handler --- */
+        async function callGeminiAPI(apiKey, model, userText) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const history = chatHistory.map(h => ({
+                role: h.role === 'assistant' ? 'model' : h.role,
+                parts: [{ text: h.content }]
+            }));
+            
+            history.push({ role: 'user', parts: [{ text: userText }] });
+
+            const payload = {
+                system_instruction: { parts: [{ text: GTPS_DOCS }] },
+                contents: history,
+                generationConfig: { temperature: 0.2 }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error?.message || 'Error dari Gemini API');
+            }
+
+            const data = await response.json();
+            const reply = data.candidates[0].content.parts[0].text;
+            chatHistory.push({ role: 'user', content: userText });
+            chatHistory.push({ role: 'assistant', content: reply });
+            return reply;
+        }
+
+        /* --- OpenAI API Handler --- */
+        async function callOpenAIAPI(apiKey, model, userText) {
+            const url = 'https://api.openai.com/v1/chat/completions';
+            const messages = [
+                { role: 'system', content: GTPS_DOCS },
+                ...chatHistory,
+                { role: 'user', content: userText }
+            ];
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: messages,
+                    temperature: 0.2
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error?.message || 'Error dari OpenAI API');
+            }
+
+            const data = await response.json();
+            const reply = data.choices[0].message.content;
+            chatHistory.push({ role: 'user', content: userText });
+            chatHistory.push({ role: 'assistant', content: reply });
+            return reply;
+        }
+
+        /* --- Anthropic Claude API Handler --- */
+        async function callClaudeAPI(apiKey, model, userText) {
+            const url = 'https://api.anthropic.com/v1/messages';
+            const messages = [
+                ...chatHistory,
+                { role: 'user', content: userText }
+            ];
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    max_tokens: 4096,
+                    system: GTPS_DOCS,
+                    messages: messages
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error?.message || 'Error dari Claude API');
+            }
+
+            const data = await response.json();
+            const reply = data.content[0].text;
+            chatHistory.push({ role: 'user', content: userText });
+            chatHistory.push({ role: 'assistant', content: reply });
+            return reply;
+        }
+
+        // Keydown Enter Handler
         userInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 chatForm.dispatchEvent(new Event('submit'));
             }
         });
+
+        // Initialize default UI settings
+        populateModels('gemini');
     </script>
 </body>
 </html>
