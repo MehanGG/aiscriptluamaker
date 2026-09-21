@@ -12,13 +12,23 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* Security: Mencegah text-selection, highlight, dan hold/tap di mobile */
+        /* Security & Anti-Highlight */
         body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
         
+        /* HILANGKAN SEMUA GARIS BIRU / FOCUS RING KECUALI DI INPUT CHAT KITA */
+        * { -webkit-tap-highlight-color: transparent !important; outline: none !important; }
+        *:focus { outline: none !important; box-shadow: none !important; }
+        
+        /* Kembalikan ring HANYA untuk wrapper input chat */
+        .chat-input-wrapper:focus-within { box-shadow: 0 0 0 1px #10b981 !important; border-color: #10b981 !important; }
+
         /* Mengizinkan seleksi HANYA di dalam blok kode hasil AI, form input, dan detail thinking */
         .allow-select, .chat-message pre, .chat-message code, details {
             -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important;
         }
+
+        /* Styling Gambar Hasil AI agar Rapi & Mendukung Transparan */
+        .chat-message img { max-width: 100%; height: auto; border-radius: 12px; margin-top: 10px; background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAACVJREFUKFNjZCASMDKgAhhwgokMUMX///+Di8P45OhAF6CqAAB0JgYv48X1YgAAAABJRU5ErkJggg=='); /* Pola catur untuk background transparan */ }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -30,7 +40,7 @@
         .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.05); }
         .glass-header { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .bubble-ai { background: rgba(31, 41, 55, 0.85); backdrop-filter: blur(8px); }
-        .bubble-user { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .bubble-user { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); cursor: pointer; }
         .chat-message { word-wrap: break-word; overflow: hidden; }
 
         .typing-indicator span {
@@ -39,7 +49,15 @@
         }
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        @keyframes fade-in-down { 0% { opacity: 0; transform: translate(-50%, -20px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
+        @keyframes fade-out-up { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -20px); } }
+        @keyframes pop-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .animate-fade-in-down { animation: fade-in-down 0.3s ease-out forwards; }
+        .animate-fade-out-up { animation: fade-out-up 0.3s ease-in forwards; }
+        .animate-pop-in { animation: pop-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
         /* Thinking box styles */
         details.think-box summary::-webkit-details-marker { display: none; }
@@ -76,9 +94,11 @@
                 <p class="text-gray-300 leading-relaxed text-sm mb-3">
                     Pembaruan terbaru telah diaktifkan:
                 </p>
-                <ul class="text-xs text-gray-400 space-y-1 mb-4 list-disc list-inside">
-                    <li><strong class="text-gray-200">Ganti Mode (Spesialisasi):</strong> AI benar-benar merubah fokusnya lewat tombol <b>⋮</b>.</li>
-                    <li><strong class="text-gray-200">Scroll Chat Input:</strong> Area ketik kini mendukung scroll untuk teks panjang.</li>
+                <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
+                    <li><strong class="text-gray-200">Anti Garis Biru:</strong> Layar bersih, fokus murni di input.</li>
+                    <li><strong class="text-gray-200">Tahan untuk Copy:</strong> Tahan / Hold bubble chat Anda untuk memunculkan tombol copy prompt.</li>
+                    <li><strong class="text-gray-200">Regenerate AI:</strong> Tombol restart tersedia di pesan balasan AI yang paling terakhir.</li>
+                    <li><strong class="text-gray-200">Direct PNG Image:</strong> Mode gambar kini langsung merender PNG transparan, bukan kode HTML/SVG.</li>
                     <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
                 </ul>
                 <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
@@ -93,7 +113,7 @@
         <div class="max-w-5xl mx-auto bg-gray-800/90 border border-gray-700 p-3 rounded-xl shadow-lg">
             <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
                 <span class="text-xs font-bold text-gray-300"><i class="fas fa-paperclip"></i> Lampiran (<span id="file-count">0</span>/10)</span>
-                <button onclick="clearAllAttachments()" class="text-[11px] text-red-400 hover:text-red-300 font-semibold bg-red-900/30 px-2 py-1 rounded">Hapus Semua</button>
+                <button onclick="clearAllAttachments()" class="text-[11px] text-red-400 hover:text-red-300 font-semibold bg-red-900/30 px-2 py-1 rounded transition-colors">Hapus Semua</button>
             </div>
             <div id="file-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar">
                 <!-- File chips will be added here -->
@@ -107,7 +127,8 @@
             <!-- Hidden File Input -->
             <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.lua" multiple>
 
-            <div class="flex-1 bg-gray-900/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 flex items-end pl-1 pr-2 pb-1">
+            <!-- Menambahkan class chat-input-wrapper untuk CSS khusus Outline -->
+            <div class="chat-input-wrapper flex-1 bg-gray-900/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all flex items-end pl-1 pr-2 pb-1">
                 
                 <!-- Mode Badge Indicator -->
                 <div id="mode-badge" class="absolute -top-3 left-4 bg-gray-800 border border-gray-600 text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 z-10 select-none">
@@ -123,12 +144,11 @@
                     <div id="special-menu" class="hidden absolute bottom-full left-0 mb-3 w-64 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
                         <a href="#" onclick="setMode('gtps', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-code text-gray-400 w-4 text-center"></i> Mode Script GTPS (Default)</a>
                         <a href="#" onclick="setMode('music', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Mode Bikin Musik</a>
-                        <a href="#" onclick="openImageModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-image text-emerald-400 w-4 text-center"></i> Mode Bikin Gambar</a>
+                        <a href="#" onclick="openImageModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-image text-emerald-400 w-4 text-center"></i> Mode Gambar (Direct PNG)</a>
                         <a href="#" onclick="setMode('html', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-globe text-purple-400 w-4 text-center"></i> Mode Website HTML</a>
                     </div>
                 </div>
 
-                <!-- OVERFLOW-Y-AUTO Added Here to fix Scroll issue -->
                 <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-3 py-4 focus:outline-none resize-none overflow-y-auto custom-scrollbar max-h-40 text-sm leading-relaxed mb-0.5" placeholder="Ketik prompt atau tema yang diinginkan..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
                 
                 <button type="button" onclick="document.getElementById('file-input').click()" class="text-gray-400 hover:text-emerald-400 p-2.5 mb-1.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Lampirkan File (Maks 10)">
@@ -186,20 +206,20 @@
     <!-- Image Canvas Size Modal -->
     <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[60] backdrop-blur-sm transition-opacity">
         <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-crop-alt text-emerald-400"></i> Set Ukuran Gambar Canvas</h3>
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-image text-emerald-400"></i> Resolusi Gambar (PNG)</h3>
             <div class="flex gap-4 mb-5">
                 <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-400 mb-1.5">Lebar (Width) px</label>
-                    <input type="number" id="img-width" value="800" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5">Lebar (px)</label>
+                    <input type="number" id="img-width" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
                 </div>
                 <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-400 mb-1.5">Tinggi (Height) px</label>
-                    <input type="number" id="img-height" value="600" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5">Tinggi (px)</label>
+                    <input type="number" id="img-height" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
                 </div>
             </div>
             <div class="flex gap-3">
                 <button onclick="closeImageModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Batal</button>
-                <button onclick="confirmImagePrompt()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg">Terapkan & Ganti Mode</button>
+                <button onclick="confirmImagePrompt()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg">Terapkan Mode</button>
             </div>
         </div>
     </div>
@@ -220,11 +240,25 @@
         document.addEventListener('dragstart', event => event.preventDefault());
         
         /* =========================================
+           TOAST NOTIFICATIONS
+           ========================================= */
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-10 left-1/2 bg-emerald-600 border border-emerald-500 text-white px-5 py-2.5 rounded-xl shadow-2xl z-[100] text-sm animate-fade-in-down font-bold flex items-center gap-2';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('animate-fade-in-down', 'animate-fade-out-up');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        /* =========================================
            MODE & SYSTEM PROMPTS MANAGEMENT
            ========================================= */
         let currentAIMode = 'gtps';
-        let canvasW = 800;
-        let canvasH = 600;
+        let canvasW = 1024;
+        let canvasH = 1024;
 
         const GTPS_DOCS = `Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud / GTPS10.
 Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan dokumentasi resmi GTPS.cloud Lua API.
@@ -247,7 +281,7 @@ REFERENSI POLA SCRIPT & DATABASE:
    - Dialog events ditangkap via \`onPlayerDialogCallback(function(world, player, data) ... end)\``;
 
         function getActiveSystemPrompt() {
-            const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran/analisa mendalam terlebih dahulu dengan menggunakan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan kode disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
+            const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran mendalam terlebih dahulu dengan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
 
             if (currentAIMode === 'gtps') return GTPS_DOCS;
             
@@ -258,7 +292,20 @@ REFERENSI POLA SCRIPT & DATABASE:
                 return `Kamu adalah Senior Full-Stack Web Developer. Tugasmu adalah membuat kode Full HTML tunggal (CSS & JS wajib ditulis langsung di dalam file HTML yang sama) untuk membuat website interaktif sesuai tema yang diminta user. Buatlah desain yang modern, estetis, responsif, dan fungsional.` + thinkInstruction;
             }
             if (currentAIMode === 'image') {
-                return `Kamu adalah ahli desainer komputasional SVG dan HTML5 Canvas. Tugasmu adalah membuat kode Full HTML tunggal yang menggunakan murni SVG atau HTML5 Canvas untuk menggambar ilustrasi berukuran tepat ${canvasW}x${canvasH} pixel sesuai tema dari user. Jangan gunakan tag <img> eksternal, gambar murni menggunakan path/vektor/canvas API yang mendetail dan keren.` + thinkInstruction;
+                // FIXED: Explicit prompt for direct image generation rendering
+                return `Kamu adalah AI Pembuat Gambar / Fotografer Visual. Tugasmu adalah membaca dan menerjemahkan permintaan visual dari user ke dalam prompt bahasa Inggris yang sangat spesifik, detail, dan fotorealistik (Maksimal 60 kata).
+
+INSTRUKSI PROSES BERPIKIR (THINKING):
+Gunakan tag <think> untuk menganalisis dan merancang prompt visual bahasa inggris terbaik.
+
+PENTING:
+Setelah selesai berpikir di </think>, kamu WAJIB menjawab HANYA dengan kode Markdown Image URL ini:
+![Hasil Gambar](https://image.pollinations.ai/prompt/{PROMPT_INGGRIS_DISINI}?width=${canvasW}&height=${canvasH}&transparent=true&nologo=true)
+
+ATURAN WAJIB:
+1. Ganti semua spasi di dalam url {PROMPT_INGGRIS_DISINI} dengan "%20".
+2. Sisipkan teks "transparent%20background" di akhir prompt bahasa Inggrismu agar gambarnya berformat PNG/Transparan.
+3. JANGAN berikan kalimat/penjelasan tambahan apapun di luar tag markdown gambar tersebut.`;
             }
             return GTPS_DOCS;
         }
@@ -289,7 +336,7 @@ REFERENSI POLA SCRIPT & DATABASE:
             let icon = 'fa-code', color = 'text-gray-400', text = 'Mode GTPS';
             if(mode === 'music') { icon = 'fa-music'; color = 'text-blue-400'; text = 'Mode Musik'; }
             if(mode === 'html') { icon = 'fa-globe'; color = 'text-purple-400'; text = 'Mode Website HTML'; }
-            if(mode === 'image') { icon = 'fa-image'; color = 'text-emerald-400'; text = `Mode Gambar (${canvasW}x${canvasH})`; }
+            if(mode === 'image') { icon = 'fa-image'; color = 'text-emerald-400'; text = `Gambar (${canvasW}x${canvasH})`; }
             
             badge.innerHTML = `<i class="fas ${icon} ${color}"></i> ${text}`;
             document.getElementById('user-input').focus();
@@ -308,10 +355,10 @@ REFERENSI POLA SCRIPT & DATABASE:
         }
 
         function confirmImagePrompt() {
-            canvasW = document.getElementById('img-width').value || 800;
-            canvasH = document.getElementById('img-height').value || 600;
+            canvasW = document.getElementById('img-width').value || 1024;
+            canvasH = document.getElementById('img-height').value || 1024;
             closeImageModal();
-            setMode('image'); // Apply image mode
+            setMode('image'); 
         }
 
         /* =========================================
@@ -375,7 +422,7 @@ REFERENSI POLA SCRIPT & DATABASE:
                         <span class="text-[10px] font-semibold text-white max-w-[100px] truncate" title="${f.name}">${f.name}</span>
                         <span class="text-[9px] text-gray-500">${f.size}</span>
                     </div>
-                    <button type="button" onclick="removeFile('${f.id}')" class="text-gray-500 hover:text-red-400 ml-1"><i class="fas fa-times text-[10px]"></i></button>
+                    <button type="button" onclick="removeFile('${f.id}')" class="text-gray-500 hover:text-red-400 ml-1 outline-none"><i class="fas fa-times text-[10px]"></i></button>
                 `;
                 fileListContainer.appendChild(div);
             });
@@ -405,7 +452,7 @@ REFERENSI POLA SCRIPT & DATABASE:
                 <div class="relative mt-4 mb-4 rounded-xl overflow-hidden bg-[#0d1117] border border-gray-700 shadow-xl w-full">
                     <div class="flex justify-between items-center px-4 py-2.5 bg-[#161b22] border-b border-gray-700 text-xs text-gray-400">
                         <span class="font-bold tracking-widest uppercase text-gray-300">${langDisplay}</span>
-                        <button onclick="copyToClipboard(this)" class="hover:text-white transition-colors flex items-center gap-1.5 focus:outline-none bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-md">
+                        <button onclick="copyToClipboard(this)" class="hover:text-white transition-colors flex items-center gap-1.5 outline-none bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-md">
                             <i class="fas fa-copy"></i> <span>Copy Code</span>
                         </button>
                     </div>
@@ -432,6 +479,67 @@ REFERENSI POLA SCRIPT & DATABASE:
         };
 
         /* =========================================
+           HOLD TO COPY LOGIC (USER BUBBLE)
+           ========================================= */
+        function attachHoldEvent(element, textToCopy) {
+            let pressTimer;
+            
+            const start = (e) => {
+                if (e.type === 'mousedown' && e.button !== 0) return; // Hanya left click
+                pressTimer = setTimeout(() => {
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    showCopyPopup(e, textToCopy);
+                }, 500); // Tahan 500ms
+            };
+            
+            const cancel = () => { clearTimeout(pressTimer); };
+
+            element.addEventListener('mousedown', start);
+            element.addEventListener('touchstart', start, {passive: true});
+            element.addEventListener('mouseup', cancel);
+            element.addEventListener('mouseleave', cancel);
+            element.addEventListener('touchend', cancel);
+            element.addEventListener('touchmove', cancel, {passive: true});
+        }
+
+        function showCopyPopup(e, text) {
+            document.querySelectorAll('.copy-popup').forEach(el => el.remove()); // Hapus yg lama
+
+            const btn = document.createElement('button');
+            btn.className = 'copy-popup fixed bg-blue-600 hover:bg-blue-500 border border-blue-400 text-white px-4 py-2 rounded-xl shadow-2xl z-[100] flex items-center gap-2 font-bold text-sm animate-pop-in outline-none';
+            btn.innerHTML = '<i class="fas fa-copy"></i> Copy Prompt';
+
+            // Dapatkan koordinat sentuhan/mouse
+            let x = e.clientX || (e.touches && e.touches[0].clientX);
+            let y = e.clientY || (e.touches && e.touches[0].clientY);
+
+            btn.style.left = Math.max(10, x - 60) + 'px';
+            btn.style.top = Math.max(10, y - 60) + 'px';
+
+            btn.onclick = (ev) => {
+                ev.stopPropagation();
+                navigator.clipboard.writeText(text);
+                btn.remove();
+                showToast("Prompt berhasil disalin!");
+            };
+
+            document.body.appendChild(btn);
+
+            // Auto-hide popup jika klik di tempat lain
+            setTimeout(() => {
+                const hide = (ev) => {
+                    if (!btn.contains(ev.target)) {
+                        btn.remove();
+                        document.removeEventListener('mousedown', hide);
+                        document.removeEventListener('touchstart', hide);
+                    }
+                };
+                document.addEventListener('mousedown', hide);
+                document.addEventListener('touchstart', hide);
+            }, 100);
+        }
+
+        /* =========================================
            STATE & DOM ELEMENTS
            ========================================= */
         const chatContainer = document.getElementById('chat-container');
@@ -447,10 +555,11 @@ REFERENSI POLA SCRIPT & DATABASE:
         const modelSection = document.getElementById('model-section');
 
         let chatHistory = [];
+        window.lastUserReq = null; // Menyimpan prompt terakhir untuk fitur regenerate
+        
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
 
-        /* Static Fallback for Claude */
         const CLAUDE_MODELS = [
             { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
             { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
@@ -583,7 +692,7 @@ REFERENSI POLA SCRIPT & DATABASE:
         }
 
         /* =========================================
-           CHAT UI RENDERING (WITH THINKING PARSER)
+           CHAT UI RENDERING (WITH THINKING & REGENERATE PARSER)
            ========================================= */
         function appendMessage(sender, text, files = [], metadata = null) {
             const wrapper = document.createElement('div');
@@ -595,17 +704,17 @@ REFERENSI POLA SCRIPT & DATABASE:
             
             const bubble = document.createElement('div');
             bubble.className = sender === 'user'
-                ? `bubble-user text-white rounded-2xl rounded-tr-none p-4 max-w-[90%] md:max-w-[85%] shadow-lg allow-select text-sm leading-relaxed`
-                : `bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[90%] md:max-w-[85%] shadow-xl border border-gray-700/50 chat-message allow-select text-sm leading-relaxed overflow-hidden flex flex-col w-full`;
+                ? `bubble-user text-white rounded-2xl rounded-tr-none p-4 max-w-[90%] md:max-w-[85%] shadow-lg allow-select text-sm leading-relaxed relative`
+                : `bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[90%] md:max-w-[85%] shadow-xl border border-gray-700/50 chat-message allow-select text-sm leading-relaxed overflow-hidden flex flex-col w-full relative`;
             
             let contentHTML = '';
 
-            // Handle Attachments Display
+            // Render Lampiran
             if (files && files.length > 0) {
                 contentHTML += `<div class="flex flex-wrap gap-2 mb-3">`;
                 files.forEach(f => {
                     if (f.type === 'image') {
-                        contentHTML += `<div class="rounded-lg overflow-hidden border border-white/20 w-24 h-24 shrink-0"><img src="data:${f.mimeType};base64,${f.content}" class="w-full h-full object-cover"></div>`;
+                        contentHTML += `<div class="rounded-lg overflow-hidden border border-white/20 w-24 h-24 shrink-0"><img src="data:${f.mimeType};base64,${f.content}" class="w-full h-full object-cover !m-0 !rounded-none"></div>`;
                     } else {
                         contentHTML += `<div class="bg-black/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2 text-[11px] font-mono text-gray-300"><i class="fas fa-file-code text-blue-400"></i> <span class="truncate max-w-[120px]">${f.name}</span></div>`;
                     }
@@ -634,20 +743,35 @@ REFERENSI POLA SCRIPT & DATABASE:
                     contentHTML += marked.parse(text);
                 }
 
-                // Add Metadata Footer (Tokens & Time)
+                // Hapus tombol regenerate lama dari chat sebelumnya
+                document.querySelectorAll('.regen-btn').forEach(btn => btn.remove());
+
+                // Tambahkan Metadata Footer + Tombol Regenerate BARU
                 if (metadata) {
                     contentHTML += `
-                        <div class="mt-4 pt-3 border-t border-gray-700/50 flex flex-wrap gap-4 text-[11px] font-medium text-gray-500">
-                            <div class="flex items-center gap-1.5"><i class="fas fa-stopwatch text-teal-500"></i> ${metadata.time}s</div>
-                            <div class="flex items-center gap-1.5" title="Prompt + Completion"><i class="fas fa-coins text-yellow-500"></i> Tokens: ${metadata.prompt} In / ${metadata.comp} Out (Total:${metadata.total})</div>
+                        <div class="mt-4 pt-3 border-t border-gray-700/50 flex flex-wrap items-center justify-between gap-4 text-[11px] font-medium text-gray-500">
+                            <div class="flex gap-4">
+                                <div class="flex items-center gap-1.5"><i class="fas fa-stopwatch text-teal-500"></i> ${metadata.time}s</div>
+                                <div class="flex items-center gap-1.5" title="Prompt + Completion"><i class="fas fa-coins text-yellow-500"></i> Tokens: ${metadata.total}</div>
+                            </div>
+                            <button onclick="regenerateLast()" class="regen-btn bg-gray-800 hover:bg-gray-700 hover:text-white text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-2 outline-none shadow-sm">
+                                <i class="fas fa-sync-alt"></i> Restart
+                            </button>
                         </div>
                     `;
                 }
             } else {
+                // Untuk User
                 contentHTML += `<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;
             }
 
             bubble.innerHTML = contentHTML;
+            
+            // Tambahkan event Hold-to-Copy KHUSUS untuk balasan User
+            if(sender === 'user') {
+                attachHoldEvent(bubble, text);
+            }
+
             wrapper.innerHTML = icon;
             wrapper.appendChild(bubble);
             chatContainer.appendChild(wrapper);
@@ -667,10 +791,11 @@ REFERENSI POLA SCRIPT & DATABASE:
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
+        
         function removeTyping() { const el = document.getElementById('typing-indicator'); if(el) el.remove(); }
 
         /* =========================================
-           API EXECUTION DISPATCHER
+           API EXECUTION DISPATCHER & REGENERATE
            ========================================= */
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -678,6 +803,10 @@ REFERENSI POLA SCRIPT & DATABASE:
             if (!text && attachedFiles.length === 0) return;
 
             const currentAttachments = [...attachedFiles];
+            
+            // Simpan riwayat input untuk fungsi REGENERATE
+            window.lastUserReq = { text: text, attachments: currentAttachments };
+
             userInput.value = '';
             userInput.style.height = 'auto';
             clearAllAttachments();
@@ -685,6 +814,29 @@ REFERENSI POLA SCRIPT & DATABASE:
             appendMessage('user', text || '[Melampirkan File]', currentAttachments);
             processAIRequest(text, currentAttachments);
         });
+
+        // FUNGSI REGENERATE JAWABAN TERAKHIR
+        function regenerateLast() {
+            if(!window.lastUserReq) return;
+            
+            // Hapus Bubble AI Terakhir di layar
+            const allAiBubbles = document.querySelectorAll('#chat-container > .flex.items-start');
+            if (allAiBubbles.length > 0) {
+                const lastBubbleWrapper = allAiBubbles[allAiBubbles.length - 1];
+                if(lastBubbleWrapper.innerHTML.includes('fa-robot')) {
+                    lastBubbleWrapper.remove();
+                }
+            }
+            
+            // Hapus log AI dan log User terakhir dari Array chatHistory
+            if(chatHistory.length > 0 && chatHistory[chatHistory.length-1].role === 'assistant') {
+                chatHistory.pop(); // Hapus AI
+                chatHistory.pop(); // Hapus User
+            }
+
+            // Eksekusi ulang API secara diam-diam menggunakan memori lastUserReq
+            processAIRequest(window.lastUserReq.text, window.lastUserReq.attachments);
+        }
 
         async function processAIRequest(userText, attachments) {
             const provider = sessionStorage.getItem('_active_provider');
@@ -699,7 +851,7 @@ REFERENSI POLA SCRIPT & DATABASE:
             }
 
             const apiKey = decKey(encApiKey);
-            const activeSystemPrompt = getActiveSystemPrompt(); // Mengambil Prioritas AI berdasarkan Mode
+            const activeSystemPrompt = getActiveSystemPrompt(); 
 
             sendBtn.disabled = true;
             showTyping();
@@ -709,7 +861,6 @@ REFERENSI POLA SCRIPT & DATABASE:
             try {
                 let aiResult = null;
                 
-                // Format multi-file prompt for Text/Lua files
                 let textFilesContext = "";
                 const textFiles = attachments.filter(a => a.type === 'text');
                 if (textFiles.length > 0) {
@@ -753,7 +904,7 @@ REFERENSI POLA SCRIPT & DATABASE:
             }
         }
 
-        /* --- Gemini API Handler --- */
+        /* --- API Handlers (Sama seperti sebelumnya, mengoper System Prompt aktif) --- */
         async function callGeminiAPI(apiKey, model, userText, attachments, sysPrompt) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const history = chatHistory.map(h => ({ role: h.role === 'assistant' ? 'model' : h.role, parts: [{ text: h.content }] }));
@@ -784,7 +935,6 @@ REFERENSI POLA SCRIPT & DATABASE:
             };
         }
 
-        /* --- OpenAI-Compatible API Handler (OpenAI, DeepSeek, Kimi) --- */
         async function callOpenAIAPI(apiKey, model, userText, endpoint, attachments, sysPrompt) {
             let messageContent = userText;
             const images = attachments.filter(a => a.type === 'image');
@@ -815,10 +965,8 @@ REFERENSI POLA SCRIPT & DATABASE:
             };
         }
 
-        /* --- Anthropic Claude API Handler --- */
         async function callClaudeAPI(apiKey, model, userText, attachments, sysPrompt) {
             const url = 'https://api.anthropic.com/v1/messages';
-            
             let messageContent = userText;
             const images = attachments.filter(a => a.type === 'image');
             if (images.length > 0) {
