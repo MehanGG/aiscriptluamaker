@@ -73,11 +73,10 @@
                 <button type="button" onclick="toggleNavMenu(event)" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white p-2.5 rounded-xl transition-all border border-gray-600 flex items-center justify-center w-10 h-10 shadow-lg">
                     <i class="fas fa-ellipsis-v text-lg"></i>
                 </button>
-                <!-- Nav Dropdown Menu -->
+                <!-- Nav Dropdown Menu (Hanya Basic & Premium Lua Maker) -->
                 <div id="nav-dropdown" class="hidden absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
-                    <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> AI Script Maker</a>
-                    <a href="audiocv/index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Audio Converter</a>
-                    <a href="#" onclick="showComingSoon(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-400 flex items-center gap-3 transition-colors"><i class="fas fa-crown text-yellow-400 w-4 text-center"></i> Premium AI <span class="ml-auto text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded font-bold">SOON</span></a>
+                    <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> Basic Lua Maker</a>
+                    <a href="#" onclick="showPremiumModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-crown text-yellow-400 w-4 text-center"></i> Premium Lua Maker</a>
                 </div>
             </div>
 
@@ -104,10 +103,10 @@
             <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
                 <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di Studio Ultimate! ✨</h3>
                 <p class="text-gray-300 leading-relaxed text-sm mb-3">
-                    Pembaruan navigasi & fitur baru telah diaktifkan:
+                    Navigasi telah diperbarui:
                 </p>
                 <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
-                    <li><strong class="text-gray-200">Menu Navigasi (Pojok Kiri Atas):</strong> Titik tiga di header untuk akses <strong>AI Script Maker</strong>, <strong>Audio Converter</strong>, & <strong>Premium AI</strong>.</li>
+                    <li><strong class="text-gray-200">Menu Navigasi (Pojok Kiri Atas):</strong> Akses cepat ke <strong>Basic Lua Maker</strong> dan <strong>Premium Lua Maker</strong>.</li>
                     <li><strong class="text-gray-200">Hold untuk Copy:</strong> Tahan bubble chat user untuk menyalin prompt.</li>
                     <li><strong class="text-gray-200">Regenerate AI:</strong> Tombol restart tersedia di pesan balasan AI terakhir.</li>
                     <li><strong class="text-gray-200">Direct PNG Image:</strong> Mode gambar langsung merender PNG transparan.</li>
@@ -253,10 +252,10 @@
             menu.classList.toggle('hidden');
         }
 
-        function showComingSoon(e) {
+        function showPremiumModal(e) {
             e.preventDefault();
             document.getElementById('nav-dropdown').classList.add('hidden');
-            showToast("Fitur Premium AI akan segera hadir!");
+            showToast("Fitur Premium Lua Maker akan segera hadir!");
         }
 
         document.addEventListener('click', function(event) {
