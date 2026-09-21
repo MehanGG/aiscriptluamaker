@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio & Media Downloader - Studio</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
@@ -33,12 +31,10 @@
     <!-- Header -->
     <header class="glass-header p-4 flex justify-between items-center z-30 shadow-md">
         <div class="flex items-center gap-3">
-            <!-- Top-Left 3-Dot Navigation Menu -->
             <div class="relative">
                 <button type="button" onclick="toggleNavMenu(event)" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white p-2.5 rounded-xl transition-all border border-gray-600 flex items-center justify-center w-10 h-10 shadow-lg">
                     <i class="fas fa-ellipsis-v text-lg"></i>
                 </button>
-                <!-- Nav Dropdown Menu -->
                 <div id="nav-dropdown" class="hidden absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
                     <a href="../index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> AI Script Maker</a>
                     <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Audio Converter</a>
@@ -51,7 +47,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Media Downloader</h1>
-                <p class="text-[11px] text-gray-400 font-medium">YouTube • TikTok • Instagram (RapidAPI)</p>
+                <p class="text-[11px] text-gray-400 font-medium">YouTube • TikTok • Instagram (PHP Proxy)</p>
             </div>
         </div>
     </header>
@@ -59,7 +55,6 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6 justify-center">
         
-        <!-- Platform Selection Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <button onclick="selectPlatform('youtube')" id="btn-youtube" class="platform-tab bg-gray-800 border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all shadow-lg group">
                 <i class="fab fa-youtube text-red-500 text-3xl group-hover:scale-110 transition-transform"></i>
@@ -74,12 +69,11 @@
                 <span class="text-xs font-bold text-gray-300">Instagram</span>
             </button>
             <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 text-center">
-                <i class="fas fa-key text-emerald-400 text-xl"></i>
-                <span class="text-[10px] text-gray-400 font-semibold">RapidAPI Connected</span>
+                <i class="fas fa-shield-alt text-emerald-400 text-xl"></i>
+                <span class="text-[10px] text-gray-400 font-semibold">Secure PHP Proxy</span>
             </div>
         </div>
 
-        <!-- Converter Panel -->
         <div class="glass-panel p-6 md:p-8 rounded-3xl shadow-2xl flex flex-col gap-6">
             <div class="flex flex-col gap-2">
                 <label id="url-label" class="text-sm font-semibold text-gray-300 flex items-center gap-2">
@@ -93,12 +87,11 @@
                 </div>
             </div>
 
-            <!-- Format Output -->
             <div>
                 <label class="block text-xs font-semibold text-gray-400 mb-2">Format Output</label>
                 <div class="grid grid-cols-2 gap-2">
                     <button type="button" onclick="setFormat('mp4')" id="format-mp4" class="bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all">
-                        <i class="fas fa-video"></i> MP4 (Video / Best)
+                        <i class="fas fa-video"></i> MP4 (Video)
                     </button>
                     <button type="button" onclick="setFormat('mp3')" id="format-mp3" class="bg-gray-800 text-gray-400 font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all hover:bg-gray-700">
                         <i class="fas fa-music"></i> MP3 (Audio)
@@ -106,13 +99,11 @@
                 </div>
             </div>
 
-            <!-- Submit Button -->
             <button onclick="processDownload()" id="convert-btn" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm">
                 <i class="fas fa-download"></i> Ambil Link & Download Sekarang
             </button>
         </div>
 
-        <!-- Result / Output Area -->
         <div id="result-container" class="hidden glass-panel p-6 rounded-3xl shadow-2xl flex flex-col gap-4 animate-fade-in border-emerald-500/30">
             <div class="flex items-center justify-between border-b border-gray-700/50 pb-4">
                 <div class="flex items-center gap-3">
@@ -120,8 +111,8 @@
                         <i class="fas fa-check"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-white text-sm" id="result-heading">Media Ditemukan!</h3>
-                        <p class="text-[11px] text-gray-400">File siap diunduh melalui server RapidAPI.</p>
+                        <h3 class="font-bold text-white text-sm">Media Ditemukan!</h3>
+                        <p class="text-[11px] text-gray-400">File siap diunduh.</p>
                     </div>
                 </div>
                 <span id="badge-type" class="bg-blue-500/20 text-blue-400 text-xs px-3 py-1 rounded-full font-bold">READY</span>
@@ -134,7 +125,7 @@
                     </div>
                     <div class="overflow-hidden">
                         <h4 id="result-title" class="text-xs font-bold text-white truncate max-w-xs">Media_File_Output</h4>
-                        <p class="text-[10px] text-gray-400">RapidAPI Fetcher Ready</p>
+                        <p class="text-[10px] text-gray-400">Proxy Connected</p>
                     </div>
                 </div>
                 <a id="download-link" href="#" target="_blank" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shrink-0">
@@ -225,7 +216,7 @@
             }
         }
 
-        // Integrasi RapidAPI Fetcher dengan parse data.download_url
+        // Memanggil proxy.php lokal untuk menghindari pembatasan CORS browser
         async function processDownload() {
             const url = document.getElementById('media-url').value.trim();
             if(!url) {
@@ -235,48 +226,30 @@
 
             const btn = document.getElementById('convert-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke RapidAPI...';
-
-            const apiHost = 'instagram-tiktok-youtube-downloader.p.rapidapi.com';
-            const apiKey = 'c2add32f3emsh16710cb3366f60cp1673cfjsnb077d89c650f';
-            const apiUrl = `https://${apiHost}/fetch?url=` + encodeURIComponent(url);
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke Server...';
 
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-rapidapi-host': apiHost,
-                        'x-rapidapi-key': apiKey
-                    }
-                });
-
+                const response = await fetch(`proxy.php?url=` + encodeURIComponent(url));
                 const data = await response.json();
                 
-                if (response.ok && data && data.ok) {
-                    // Mengambil langsung dari download_url sesuai struktur JSON respons API Anda
+                if (data && data.ok && data.download_url) {
                     const downloadUrl = data.download_url;
 
-                    if (downloadUrl) {
-                        const resultContainer = document.getElementById('result-container');
-                        resultContainer.classList.remove('hidden');
+                    const resultContainer = document.getElementById('result-container');
+                    resultContainer.classList.remove('hidden');
 
-                        document.getElementById('badge-type').textContent = (data.type || currentFormat).toUpperCase();
-                        document.getElementById('result-title').textContent = data.caption || `Media_${data.id || Date.now()}`;
-                        
-                        const downloadLink = document.getElementById('download-link');
-                        downloadLink.href = downloadUrl;
+                    document.getElementById('badge-type').textContent = (data.type || currentFormat).toUpperCase();
+                    document.getElementById('result-title').textContent = data.caption || `Media_${data.id || Date.now()}`;
+                    
+                    const downloadLink = document.getElementById('download-link');
+                    downloadLink.href = downloadUrl;
 
-                        showToast("Link unduh berhasil ditarik!");
-                        resultContainer.scrollIntoView({ behavior: 'smooth' });
+                    showToast("Link unduh berhasil ditarik!");
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
 
-                        // Membuka tautan unduhan secara otomatis di tab baru
-                        window.open(downloadUrl, '_blank');
-                    } else {
-                        throw new Error("Properti 'download_url' tidak ditemukan di dalam respons API.");
-                    }
+                    window.open(downloadUrl, '_blank');
                 } else {
-                    throw new Error(data.message || "Gagal mengambil data dari server RapidAPI.");
+                    throw new Error(data.message || "Gagal mengambil data dari API.");
                 }
             } catch (error) {
                 alert("Gagal mengunduh: " + error.message);
