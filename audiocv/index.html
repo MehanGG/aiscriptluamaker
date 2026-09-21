@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio & Media Converter - Studio</title>
+    <title>Audio & Media Downloader - Studio</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -75,7 +75,7 @@
             </button>
             <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 text-center">
                 <i class="fas fa-shield-alt text-emerald-400 text-xl"></i>
-                <span class="text-[10px] text-gray-400 font-semibold">Fast & Secure Server</span>
+                <span class="text-[10px] text-gray-400 font-semibold">Direct Download API</span>
             </div>
         </div>
 
@@ -109,20 +109,20 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-400 mb-2">Kualitas</label>
                     <select id="quality-select" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white text-xs outline-none cursor-pointer">
-                        <option value="highest">HD / Kualitas Tertinggi (Recommended)</option>
-                        <option value="medium">Standar (Medium Quality)</option>
-                        <option value="low">Hemat Kuota (Low Quality)</option>
+                        <option value="best">HD / Kualitas Terbaik (Recommended)</option>
+                        <option value="1080">1080p Full HD</option>
+                        <option value="720">720p HD</option>
                     </select>
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <button onclick="startConversion()" id="convert-btn" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm">
-                <i class="fas fa-download"></i> Proses Konversi & Download
+            <button onclick="processDownload()" id="convert-btn" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm">
+                <i class="fas fa-download"></i> Proses & Unduh File Langsung
             </button>
         </div>
 
-        <!-- Result / Output Area (Hidden Initially) -->
+        <!-- Result / Output Area -->
         <div id="result-container" class="hidden glass-panel p-6 rounded-3xl shadow-2xl flex flex-col gap-4 animate-fade-in border-emerald-500/30">
             <div class="flex items-center justify-between border-b border-gray-700/50 pb-4">
                 <div class="flex items-center gap-3">
@@ -130,26 +130,25 @@
                         <i class="fas fa-check"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-white text-sm">Konversi Berhasil!</h3>
-                        <p class="text-[11px] text-gray-400" id="result-info">File siap diunduh ke perangkat Anda.</p>
+                        <h3 class="font-bold text-white text-sm">Tautan Siap Diunduh!</h3>
+                        <p class="text-[11px] text-gray-400" id="result-info">Klik tombol download di bawah untuk mengunduh file secara instan.</p>
                     </div>
                 </div>
                 <span id="badge-type" class="bg-blue-500/20 text-blue-400 text-xs px-3 py-1 rounded-full font-bold">MP4</span>
             </div>
 
-            <!-- Progress simulation or Download Action -->
             <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-gray-950/60 p-4 rounded-2xl border border-gray-800">
                 <div class="flex items-center gap-3 w-full md:w-auto">
                     <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center text-gray-400 text-xl shrink-0">
                         <i id="result-icon" class="fas fa-file-video"></i>
                     </div>
                     <div class="overflow-hidden">
-                        <h4 id="result-title" class="text-xs font-bold text-white truncate max-w-xs">Media_File_Output_HD</h4>
-                        <p class="text-[10px] text-gray-400" id="result-size">Estimasi ukuran: ~12.4 MB</p>
+                        <h4 id="result-title" class="text-xs font-bold text-white truncate max-w-xs">Media_Output_Ready</h4>
+                        <p class="text-[10px] text-gray-400">Server API: Connected & Ready</p>
                     </div>
                 </div>
                 <a id="download-link" href="#" target="_blank" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shrink-0">
-                    <i class="fas fa-download"></i> Download File Sekarang
+                    <i class="fas fa-download"></i> Download Langsung
                 </a>
             </div>
         </div>
@@ -186,7 +185,6 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        /* Converter Logic State */
         let currentPlatform = 'youtube';
         let currentFormat = 'mp4';
 
@@ -231,13 +229,14 @@
             try {
                 const text = await navigator.clipboard.readText();
                 document.getElementById('media-url').value = text;
-                showToast("Link berhasil dipaste dari clipboard!");
+                showToast("Link berhasil dipaste!");
             } catch (err) {
                 alert("Gagal membaca clipboard. Silakan paste secara manual (Ctrl+V).");
             }
         }
 
-        function startConversion() {
+        // Menggunakan Cobalt API Publik untuk Mengambil Link Download Langsung
+        async function processDownload() {
             const url = document.getElementById('media-url').value.trim();
             if(!url) {
                 alert("Silakan masukkan URL media terlebih dahulu!");
@@ -246,27 +245,51 @@
 
             const btn = document.getElementById('convert-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sedang Menghubungkan ke Server Konversi...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke API Downloader...';
 
-            setTimeout(() => {
+            try {
+                const response = await fetch("https://co.wuk.sh/api/json", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        isAudioOnly: currentFormat === 'mp3',
+                        aFormat: currentFormat === 'mp3' ? 'mp3' : 'best'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'redirect' || data.status === 'stream' || data.status === 'picker') {
+                    const downloadUrl = data.url || (data.picker && data.picker[0].url);
+                    
+                    const resultContainer = document.getElementById('result-container');
+                    resultContainer.classList.remove('hidden');
+
+                    document.getElementById('badge-type').textContent = currentFormat.toUpperCase();
+                    document.getElementById('result-title').textContent = data.filename || `Downloaded_Media.${currentFormat}`;
+                    document.getElementById('result-icon').className = currentFormat === 'mp4' ? 'fas fa-file-video text-emerald-400' : 'fas fa-file-audio text-blue-400';
+                    
+                    const downloadLink = document.getElementById('download-link');
+                    downloadLink.href = downloadUrl;
+
+                    showToast("File siap diunduh!");
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
+
+                    // Otomatis trigger unduh di tab baru
+                    window.open(downloadUrl, '_blank');
+                } else {
+                    throw new Error(data.text || "Gagal memproses link melalui API.");
+                }
+            } catch (error) {
+                alert("Gagal mengunduh: " + error.message + "\nPastikan link publik dan valid.");
+            } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-download"></i> Proses Konversi & Download';
-
-                // Tampilkan hasil
-                const resultContainer = document.getElementById('result-container');
-                resultContainer.classList.remove('hidden');
-
-                document.getElementById('badge-type').textContent = currentFormat.toUpperCase();
-                document.getElementById('result-title').textContent = `${currentPlatform.toUpperCase()}_Media_${Date.now().toString().slice(-6)}.${currentFormat}`;
-                document.getElementById('result-icon').className = currentFormat === 'mp4' ? 'fas fa-file-video text-emerald-400' : 'fas fa-file-audio text-blue-400';
-                
-                // Set simulasi / download helper link
-                const downloadLink = document.getElementById('download-link');
-                downloadLink.href = url; // Atau arahkan ke backend downloader helper Anda
-                
-                showToast("Konversi berhasil diselesaikan!");
-                resultContainer.scrollIntoView({ behavior: 'smooth' });
-            }, 1500);
+                btn.innerHTML = '<i class="fas fa-download"></i> Proses & Unduh File Langsung';
+            }
         }
     </script>
 </body>
