@@ -3,764 +3,755 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTPS Cloud Script AI</title>
+    <title>GTPS Script AI Studio - Ultimate Edition</title>
+    <!-- Tailwind CSS for UI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Marked.js for Markdown parsing (Code blocks) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* Proteksi Source Code & UI UX */
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
-            background-color: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-        }
+        /* Security: Mencegah text-selection, highlight, dan hold/tap di mobile */
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
         
-        .allow-select {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
+        /* Mengizinkan seleksi HANYA di dalam blok kode hasil AI, form input, dan detail thinking */
+        .allow-select, .chat-message pre, .chat-message code, details {
+            -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important;
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        /* UI Effects */
+        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-header { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .bubble-ai { background: rgba(31, 41, 55, 0.85); backdrop-filter: blur(8px); }
+        .bubble-user { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .chat-message { word-wrap: break-word; overflow: hidden; }
 
-        .chat-container {
-            height: calc(100vh - 180px);
-            overflow-y: auto;
+        .typing-indicator span {
+            display: inline-block; width: 6px; height: 6px; background-color: #9ca3af;
+            border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both;
         }
-
-        .markdown-body pre {
-            background: #1e293b !important;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            position: relative;
-        }
-
-        .markdown-body code {
-            font-family: 'Courier New', Courier, monospace;
-            background: #1e293b;
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
-        }
-
-        .markdown-body pre code {
-            background: transparent;
-            padding: 0;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: #334155;
-            border: none;
-            color: #cbd5e1;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: all 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: #475569;
-            color: #fff;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .thinking-anim {
-            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        
+        /* Thinking box styles */
+        details.think-box summary::-webkit-details-marker { display: none; }
+        details.think-box summary { list-style: none; cursor: pointer; }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col" oncontextmenu="return false;">
+<body class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
 
-    <!-- Setup Overlay -->
-    <div id="setup-overlay" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md p-6 border border-slate-700">
-            <h2 class="text-2xl font-bold mb-2 text-white"><i class="fas fa-robot text-blue-500 mr-2"></i>GTPS AI Setup</h2>
-            <p class="text-slate-400 mb-6 text-sm">Hai Jovan! Silakan atur Provider AI dan API Key kamu. Data hanya disimpan sementara di sesi ini.</p>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Provider AI</label>
-                    <select id="provider-select" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500">
-                        <option value="gemini">Google Gemini</option>
-                        <option value="openai">OpenAI</option>
-                        <option value="deepseek">Deepseek</option>
-                        <option value="kimi">Kimi (Moonshot)</option>
-                        <option value="anthropic">Anthropic (Claude)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">API Key</label>
-                    <input type="password" id="api-key-input" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 placeholder-slate-500" placeholder="Masukkan API Key...">
-                </div>
-
-                <button id="test-api-btn" onclick="testAPI()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors">
-                    <i class="fas fa-plug mr-2"></i>Tes Koneksi & Ambil Model
-                </button>
-
-                <div id="model-selection-container" class="hidden mt-4 pt-4 border-t border-slate-700">
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Pilih Model</label>
-                    <select id="model-select" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500 mb-4">
-                    </select>
-                    <button onclick="startChat()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition-colors">
-                        <i class="fas fa-play mr-2"></i>Mulai Chatting
-                    </button>
-                </div>
-
-                <div id="setup-status" class="text-sm mt-2 hidden"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Generation Modal -->
-    <div id="image-modal" class="fixed inset-0 bg-slate-900/80 z-40 hidden items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-sm p-6 border border-slate-700">
-            <h3 class="text-xl font-bold mb-4 text-white"><i class="fas fa-image text-purple-500 mr-2"></i>Buat Gambar</h3>
-            <div class="space-y-4">
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="block text-sm font-medium text-slate-300 mb-1">Lebar (px)</label>
-                        <input type="number" id="img-width" value="1024" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white">
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-sm font-medium text-slate-300 mb-1">Tinggi (px)</label>
-                        <input type="number" id="img-height" value="1024" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Deskripsi Gambar</label>
-                    <textarea id="img-prompt" rows="3" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white placeholder-slate-500" placeholder="Deskripsikan gambar yang diinginkan..."></textarea>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="closeImageModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg">Batal</button>
-                    <button onclick="generateImage()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg">Buat Gambar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main UI -->
-    <header class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center shadow-md z-10">
+    <!-- Header -->
+    <header class="glass-header p-4 flex justify-between items-center z-20 shadow-md">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-900/50">
-                <i class="fas fa-code"></i>
+            <div class="bg-gradient-to-br from-blue-500 to-emerald-500 p-2.5 rounded-xl shadow-lg">
+                <i class="fas fa-microchip text-white text-lg"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white">GTPS Cloud Script AI</h1>
-                <p class="text-xs text-slate-400" id="header-status">Menunggu koneksi...</p>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-emerald-400 to-teal-400">GTPS Script Studio</h1>
+                <p class="text-[11px] text-gray-400 font-medium">Ultimate AI • Thinking • Multi-File</p>
             </div>
         </div>
-        <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 p-2 rounded-lg transition-colors" title="Ganti API/Provider">
-            <i class="fas fa-sign-out-alt"></i> Reset
+        <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-gray-600 flex items-center gap-2 text-sm font-semibold hover:shadow-emerald-500/20">
+            <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Setelan AI</span>
         </button>
     </header>
 
-    <main class="flex-1 bg-slate-900 relative">
-        <div id="chat-container" class="chat-container p-4 pb-32 max-w-5xl mx-auto allow-select space-y-6">
-            <!-- Greetings -->
-            <div class="flex gap-4">
-                <div class="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white text-sm"><i class="fas fa-robot"></i></div>
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none px-5 py-4 max-w-[85%] text-slate-200">
-                    <p>Halo Jovan! Aku adalah AI asisten GTPS Cloud. Aku sudah dilengkapi dengan dokumentasi lengkap Lua API GTPS Cloud.</p>
-                    <p class="mt-2">Ada skrip yang ingin kamu buat hari ini?</p>
-                </div>
+    <!-- Chat Container -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 flex flex-col scroll-smooth z-10">
+        <!-- Welcome Message -->
+        <div class="flex items-start gap-4 w-full">
+            <div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg">
+                <i class="fas fa-robot text-white"></i>
             </div>
-        </div>
-
-        <!-- Input Area -->
-        <div class="absolute bottom-0 w-full bg-slate-800 border-t border-slate-700 p-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.3)]">
-            <div class="max-w-5xl mx-auto">
-                <div id="file-preview-container" class="flex flex-wrap gap-2 mb-2 hidden"></div>
-                
-                <div class="relative flex items-end gap-2 bg-slate-900 border border-slate-600 rounded-xl p-2 focus-within:border-blue-500 transition-colors shadow-inner">
-                    <input type="file" id="file-input" multiple class="hidden" onchange="handleFiles(this.files)">
-                    
-                    <button onclick="document.getElementById('file-input').click()" class="p-3 text-slate-400 hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-800 flex-shrink-0" title="Lampirkan File (Maks 10)">
-                        <i class="fas fa-paperclip text-lg"></i>
-                    </button>
-
-                    <button onclick="openImageModal()" class="p-3 text-slate-400 hover:text-purple-400 transition-colors rounded-lg hover:bg-slate-800 flex-shrink-0" title="Buat Gambar">
-                        <i class="fas fa-image text-lg"></i>
-                    </button>
-
-                    <textarea id="prompt-input" rows="1" class="w-full bg-transparent text-white resize-none outline-none py-3 px-2 max-h-40 allow-select placeholder-slate-500" placeholder="Ketik perintah untuk membuat skrip GTPS..." oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
-
-                    <button id="send-btn" onclick="sendMessage()" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex-shrink-0 mb-0.5 shadow-lg shadow-blue-900/20">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-                <div class="text-xs text-slate-500 text-center mt-2">
-                    Shift + Enter untuk baris baru. Source code terlindungi. Data API di-reset saat refresh.
+            <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
+                <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di Studio Ultimate! ✨</h3>
+                <p class="text-gray-300 leading-relaxed text-sm mb-3">
+                    Pembaruan terbaru telah diaktifkan:
+                </p>
+                <ul class="text-xs text-gray-400 space-y-1 mb-3 list-disc list-inside">
+                    <li><strong class="text-gray-200">Auto-Fetch Models:</strong> Model otomatis menyesuaikan dengan API Key.</li>
+                    <li><strong class="text-gray-200">Thinking AI:</strong> AI akan berpikir sebelum menjawab.</li>
+                    <li><strong class="text-gray-200">Multi-File:</strong> Dukungan hingga 10 file / gambar.</li>
+                    <li><strong class="text-gray-200">Token Tracking:</strong> Menampilkan Waktu & Penggunaan Token.</li>
+                </ul>
+                <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> Buka <strong>Setelan</strong>, masukkan API Key dan klik "Verifikasi" untuk memuat daftar model yang tersedia!
                 </div>
             </div>
         </div>
     </main>
 
-<script>
-// ================= PROTEKSI SOURCE CODE =================
-document.addEventListener('contextmenu', event => event.preventDefault());
-document.onkeydown = function(e) {
-    if (e.keyCode === 123 || 
-       (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
-       (e.ctrlKey && e.keyCode === 85)) {
-        return false;
-    }
-};
-document.addEventListener('dragstart', e => e.preventDefault());
-document.addEventListener('selectstart', e => {
-    if(!e.target.closest('.allow-select')) e.preventDefault();
-});
-
-// ================= STATE & VARIABLES =================
-let sessionData = {
-    provider: '',
-    apiKey: '',
-    model: '',
-    chatHistory: []
-};
-let attachedFiles = [];
-let thinkingTimer = null;
-let secondsThinking = 0;
-
-const SYSTEM_PROMPT = `Anda adalah Asisten AI ahli untuk pembuatan skrip Lua "GTPS Cloud" (Growtopia Private Server). Nama pengguna Anda adalah Jovan.
-PENTING: Gunakan dokumentasi API dan referensi skrip di bawah ini dengan tepat. Jangan mengarang fungsi yang tidak ada di dalam dokumentasi.
-
---- GTPS CLOUD LUA API DOCUMENTATION ---
-// Player Class
-Player:getName(), Player:getCleanName(), Player:getRealName(), Player:getRealCleanName(), Player:getTotalWorldLocks(), Player:getUserID()
-Player:getPosX(), Player:getPosY(), Player:getNetID(), Player:hasMod(modID), Player:hasRole(roleID), Player:setRole(roleID)
-Player:changeItem(itemID, itemCount, addBackpack), Player:getItemAmount(itemID), Player:getXP(), Player:setXP(xp), Player:getLevel()
-Player:getGems(), Player:addGems(gems, instantSet, progressQuests), Player:removeGems(gems, instantSet)
-Player:onConsoleMessage(message, delay), Player:playAudio(message), Player:onDialogRequest(message, delay, callback)
-Player:onTalkBubble(netID, message, persistMessage, delay), Player:onTextOverlay(message, delay)
-Player:getCoins(), Player:getWorldName(), Player:getWorld()
-Player:sendVariant(variantList, delay, netID), Player:sendAction(action_str), Player:sendRawPacket(data)
-
-// World Class
-World:getName(), World:getOwner(), World:setOwner(user_id)
-World:getTile(x, y), World:spawnItem(x, y, itemID, itemCount, center_item), World:spawnGems(x, y, gemsCount, player)
-World:useItemEffect(netID, itemID, secondNetID, effectDelay), World:getPlayers(), World:getPlayersCount(show_all)
-World:onCreateChatBubble(posX, posY, message, persistMessage), World:onCreateExplosion(posX, posY, radius, power)
-World:getWorldSizeX(), World:getWorldSizeY(), World:getWorldType()
-World:punchTile(tile, player), World:placeTile(tile, id, player)
-
-// Tile Class
-Tile:getTileID(), Tile:getPosX(), Tile:getPosY(), Tile:getFlags(), Tile:setFlags(flags)
-
-// Global Functions
-registerLuaCommand(config) -- { command = "str", roleRequired = 0, description = "str" }
-getItem(itemID), getServerPlayers(), getServerWorlds(), getPlayer(userID), getPlayerByName(playerName)
-print(...), getServerName(), formatNumber(amount)
-
-// Callbacks (Handlers)
-onPlayerCommandCallback(function(world, player, fullCommand) ... end)
-onPlayerDialogCallback(function(world, player, data) ... end)
-onPlayerChatCallback(function(world, player, message) ... end)
-onPlayerJoinCallback, onPlayerLeaveWorldCallback, onPlayerDeathCallback
-
---- STRUKTUR DIALOG (UI) ---
-Dialog dibuat dengan string dan tag tertentu yang digabungkan:
-"set_bg_color|R,G,B,A|\n"
-"add_label_with_icon|big|Teks|left|ItemID|\n"
-"add_button_with_icon|ButtonName|Teks|staticYellowFrame|ItemID|0|left|\n"
-"add_text_input|InputName|Label:|Default|Panjang|\n"
-"add_item_picker|ButtonName|Label|Desc|\n"
-"end_dialog|DialogName|CancelText|OkText|\n"
-
-Tugas Anda: Buatkan skrip GTPS Cloud Lua sesuai dengan permintaan pengguna menggunakan API yang valid di atas. Kode harus dibungkus dengan markdown.`;
-
-// ================= API TEST & MODELS =================
-const API_ENDPOINTS = {
-    gemini: {
-        test: "https://generativelanguage.googleapis.com/v1beta/models?key=",
-        chat: (model, key) => \`https://generativelanguage.googleapis.com/v1beta/models/\${model}:generateContent?key=\${key}\`
-    },
-    openai: {
-        test: "https://api.openai.com/v1/models",
-        chat: "https://api.openai.com/v1/chat/completions"
-    },
-    deepseek: {
-        test: "https://api.deepseek.com/models",
-        chat: "https://api.deepseek.com/chat/completions"
-    },
-    kimi: {
-        test: "https://api.moonshot.cn/v1/models",
-        chat: "https://api.moonshot.cn/v1/chat/completions"
-    },
-    anthropic: { // Note: Anthropic often blocks CORS. Fallback mapping provided.
-        test: "https://api.anthropic.com/v1/models",
-        chat: "https://api.anthropic.com/v1/messages"
-    }
-};
-
-async function testAPI() {
-    const provider = document.getElementById('provider-select').value;
-    const apiKey = document.getElementById('api-key-input').value.trim();
-    const statusDiv = document.getElementById('setup-status');
-    const modelSelect = document.getElementById('model-select');
-    const modelContainer = document.getElementById('model-selection-container');
-    const testBtn = document.getElementById('test-api-btn');
-
-    if(!apiKey) {
-        showStatus(statusDiv, 'Harap masukkan API Key!', 'text-red-500');
-        return;
-    }
-
-    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengetes...';
-    testBtn.disabled = true;
-    showStatus(statusDiv, 'Menghubungkan ke API...', 'text-blue-400');
-    modelContainer.classList.add('hidden');
-    modelSelect.innerHTML = '';
-
-    try {
-        let models = [];
-        
-        if(provider === 'gemini') {
-            const res = await fetch(API_ENDPOINTS.gemini.test + apiKey);
-            if(!res.ok) throw new Error('API Key Gemini tidak valid atau Limit.');
-            const data = await res.json();
-            models = data.models.filter(m => m.name.includes('gemini') && m.supportedGenerationMethods.includes('generateContent')).map(m => m.name.replace('models/',''));
-        } 
-        else if (provider === 'openai' || provider === 'deepseek' || provider === 'kimi') {
-            const res = await fetch(API_ENDPOINTS[provider].test, {
-                headers: { 'Authorization': \`Bearer \${apiKey}\` }
-            });
-            if(!res.ok) throw new Error('API Key tidak valid atau CORS terblokir.');
-            const data = await res.json();
-            models = data.data.map(m => m.id);
-        }
-        else {
-            // Fallback for Anthropic or unknown due to CORS
-            models = ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'];
-        }
-
-        if(models.length === 0) throw new Error('Tidak ada model yang ditemukan.');
-
-        models.forEach(model => {
-            const opt = document.createElement('option');
-            opt.value = model;
-            opt.textContent = model;
-            modelSelect.appendChild(opt);
-        });
-
-        sessionData.provider = provider;
-        sessionData.apiKey = apiKey;
-        
-        showStatus(statusDiv, 'Berhasil terhubung!', 'text-emerald-500');
-        modelContainer.classList.remove('hidden');
-
-    } catch (err) {
-        showStatus(statusDiv, err.message, 'text-red-500');
-    } finally {
-        testBtn.innerHTML = '<i class="fas fa-plug mr-2"></i>Tes Koneksi & Ambil Model';
-        testBtn.disabled = false;
-    }
-}
-
-function showStatus(elem, text, colorClass) {
-    elem.className = \`text-sm mt-2 \${colorClass}\`;
-    elem.innerText = text;
-    elem.classList.remove('hidden');
-}
-
-function startChat() {
-    sessionData.model = document.getElementById('model-select').value;
-    document.getElementById('setup-overlay').classList.add('hidden');
-    document.getElementById('header-status').innerHTML = \`<span class="text-emerald-400"><i class="fas fa-circle text-[10px] mr-1"></i>\${sessionData.provider.toUpperCase()} (\${sessionData.model})</span>\`;
-    
-    // Init History with System Prompt
-    sessionData.chatHistory = [
-        { role: 'system', content: SYSTEM_PROMPT }
-    ];
-}
-
-// ================= UI INTERACTIONS =================
-function autoResize(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-}
-
-function handleEnter(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-    }
-}
-
-async function handleFiles(files) {
-    if (attachedFiles.length + files.length > 10) {
-        alert("Maksimal 10 file!");
-        return;
-    }
-    
-    const previewContainer = document.getElementById('file-preview-container');
-    previewContainer.classList.remove('hidden');
-
-    for (let file of files) {
-        const fileObj = {
-            name: file.name,
-            type: file.type,
-            content: null
-        };
-        
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                fileObj.content = e.target.result; // base64
-                attachedFiles.push(fileObj);
-                renderFilePill(fileObj);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                fileObj.content = e.target.result; // text
-                attachedFiles.push(fileObj);
-                renderFilePill(fileObj);
-            };
-            reader.readAsText(file);
-        }
-    }
-    document.getElementById('file-input').value = ''; // reset
-}
-
-function renderFilePill(fileObj) {
-    const previewContainer = document.getElementById('file-preview-container');
-    const isImage = fileObj.type.startsWith('image/');
-    
-    const pill = document.createElement('div');
-    pill.className = "flex items-center gap-2 bg-slate-700 text-xs text-white px-2 py-1 rounded border border-slate-600";
-    pill.innerHTML = \`
-        <i class="fas \${isImage ? 'fa-image' : 'fa-file-alt'} text-slate-400"></i>
-        <span class="max-w-[100px] truncate">\${fileObj.name}</span>
-        <button onclick="removeFile(this, '\${fileObj.name}')" class="text-red-400 hover:text-red-300 ml-1"><i class="fas fa-times"></i></button>
-    \`;
-    previewContainer.appendChild(pill);
-}
-
-function removeFile(btn, filename) {
-    attachedFiles = attachedFiles.filter(f => f.name !== filename);
-    btn.parentElement.remove();
-    if(attachedFiles.length === 0) {
-        document.getElementById('file-preview-container').classList.add('hidden');
-    }
-}
-
-// ================= IMAGE GENERATION =================
-function openImageModal() {
-    document.getElementById('image-modal').classList.remove('hidden');
-    document.getElementById('image-modal').classList.add('flex');
-}
-function closeImageModal() {
-    document.getElementById('image-modal').classList.add('hidden');
-    document.getElementById('image-modal').classList.remove('flex');
-}
-
-function generateImage() {
-    const w = document.getElementById('img-width').value || 1024;
-    const h = document.getElementById('img-height').value || 1024;
-    const prompt = document.getElementById('img-prompt').value.trim();
-    
-    if(!prompt) return alert("Deskripsi tidak boleh kosong!");
-    closeImageModal();
-    document.getElementById('img-prompt').value = '';
-
-    appendMessage('user', \`Buatkan gambar dengan ukuran \${w}x\${h}px: \${prompt}\`);
-    const chatContainer = document.getElementById('chat-container');
-    
-    const loadingId = 'img-' + Date.now();
-    const botHtml = \`
-        <div class="flex gap-4" id="\${loadingId}">
-            <div class="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white text-sm"><i class="fas fa-palette"></i></div>
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none px-5 py-4 max-w-[85%] text-slate-200">
-                <p class="thinking-anim text-sm text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i>Menggambar...</p>
+    <!-- Attachment Preview Container -->
+    <div id="attachment-preview-container" class="px-6 hidden mb-2">
+        <div class="max-w-5xl mx-auto bg-gray-800/90 border border-gray-700 p-3 rounded-xl shadow-lg">
+            <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
+                <span class="text-xs font-bold text-gray-300"><i class="fas fa-paperclip"></i> Lampiran (<span id="file-count">0</span>/10)</span>
+                <button onclick="clearAllAttachments()" class="text-[11px] text-red-400 hover:text-red-300 font-semibold bg-red-900/30 px-2 py-1 rounded">Hapus Semua</button>
+            </div>
+            <div id="file-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar">
+                <!-- File chips will be added here -->
             </div>
         </div>
-    \`;
-    chatContainer.insertAdjacentHTML('beforeend', botHtml);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    </div>
 
-    // Simulate AI reasoning and fetch pollinations free API for universal image gen
-    setTimeout(() => {
-        const encPrompt = encodeURIComponent(prompt);
-        const imgUrl = \`https://image.pollinations.ai/prompt/\${encPrompt}?width=\${w}&height=\${h}&nologo=true\`;
-        
-        document.getElementById(loadingId).innerHTML = \`
-            <div class="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white text-sm"><i class="fas fa-image"></i></div>
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none px-5 py-4 max-w-[85%] text-slate-200">
-                <p class="text-sm mb-2 text-slate-400">Gambar berhasil dibuat (Resolusi: \${w}x\${h}):</p>
-                <img src="\${imgUrl}" alt="\${prompt}" class="rounded-lg max-w-full border border-slate-700" onload="scrollChat()">
-            </div>
-        \`;
-    }, 1500);
-}
+    <!-- Input Area -->
+    <footer class="glass-panel p-4 pb-6 z-20">
+        <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative items-end">
+            <!-- Hidden File Input -->
+            <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.lua" multiple>
 
-// ================= CHAT LOGIC =================
-function scrollChat() {
-    const container = document.getElementById('chat-container');
-    container.scrollTop = container.scrollHeight;
-}
-
-function appendMessage(role, content, files = [], msgId = null) {
-    const chatContainer = document.getElementById('chat-container');
-    const isUser = role === 'user';
-    const currentId = msgId || 'msg-' + Date.now();
-    
-    let filesHtml = '';
-    if (files.length > 0) {
-        filesHtml = '<div class="flex flex-wrap gap-2 mb-2">';
-        files.forEach(f => {
-            filesHtml += \`<span class="bg-slate-700/50 text-xs px-2 py-1 rounded border border-slate-600"><i class="fas \${f.type.startsWith('image') ? 'fa-image' : 'fa-file-alt'} mr-1"></i>\${f.name}</span>\`;
-        });
-        filesHtml += '</div>';
-    }
-
-    const html = \`
-        <div class="flex gap-4 \${isUser ? 'flex-row-reverse' : ''}" id="\${currentId}">
-            <div class="w-8 h-8 rounded-full \${isUser ? 'bg-indigo-600' : 'bg-blue-600'} flex-shrink-0 flex items-center justify-center text-white text-sm">
-                <i class="fas \${isUser ? 'fa-user' : 'fa-robot'}"></i>
-            </div>
-            <div class="\${isUser ? 'bg-indigo-900/50 border-indigo-700/50 rounded-tr-none' : 'bg-slate-800 border-slate-700 rounded-tl-none'} border rounded-2xl px-5 py-4 max-w-[85%] text-slate-200 allow-select relative group">
-                \${filesHtml}
-                <div class="\${isUser ? 'whitespace-pre-wrap' : 'markdown-body'}">\${isUser ? escapeHtml(content) : content}</div>
+            <div class="flex-1 bg-gray-900/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 flex items-center pr-2">
+                <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-5 py-4 focus:outline-none resize-none overflow-hidden max-h-40 text-sm leading-relaxed" placeholder="Ketik perintah atau lampirkan file (Maks 10)..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
                 
-                \${isUser ? \`
-                <div class="absolute -left-12 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
-                    <button onclick="editMessage('\${currentId}', \`\${encodeURIComponent(content)}\`)" class="p-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 text-xs"><i class="fas fa-edit"></i></button>
-                    <button onclick="copyText(this, \`\${encodeURIComponent(content)}\`)" class="p-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 text-xs"><i class="fas fa-copy"></i></button>
+                <button type="button" onclick="document.getElementById('file-input').click()" class="text-gray-400 hover:text-emerald-400 p-2.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Lampirkan File (Maks 10)">
+                    <i class="fas fa-plus-circle text-lg"></i>
+                </button>
+            </div>
+
+            <button type="submit" id="send-btn" class="bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white w-14 h-14 rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/30 shrink-0">
+                <i class="fas fa-paper-plane text-xl"></i>
+            </button>
+        </form>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative transform scale-95 transition-transform overflow-y-auto max-h-[90vh]" id="modal-content">
+            <button onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-gray-800 p-2 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-3">
+                <div class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400"><i class="fas fa-satellite-dish"></i></div>
+                Jaringan API & Model
+            </h2>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-1.5">Provider AI</label>
+                    <select id="ai-provider" onchange="onProviderChange()" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-inner cursor-pointer">
+                        <option value="gemini">Google Gemini AI</option>
+                        <option value="openai">OpenAI (ChatGPT)</option>
+                        <option value="claude">Anthropic Claude</option>
+                        <option value="deepseek">DeepSeek AI</option>
+                        <option value="kimi">Kimi (Moonshot AI)</option>
+                    </select>
                 </div>
-                \` : \`
-                <div class="absolute -right-12 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="copyText(this, null, '\${currentId}')" class="p-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 text-xs"><i class="fas fa-copy"></i></button>
+
+                <div>
+                    <label id="api-key-label" class="block text-sm font-semibold text-gray-300 mb-1.5">API Key</label>
+                    <input type="password" id="api-key-input" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-inner" placeholder="Masukkan API Key untuk mengambil model otomatis...">
                 </div>
-                \`}
+
+                <button id="save-btn" onclick="saveAndFetchModels()" class="w-full bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fas fa-sync-alt"></i> Verifikasi Key & Tarik Model
+                </button>
+
+                <div id="model-section" class="hidden">
+                    <label class="block text-sm font-semibold text-gray-300 mb-1.5">Pilih Model <span class="text-[10px] text-emerald-400 font-normal ml-1">(Ditarik Otomatis)</span></label>
+                    <select id="ai-model" onchange="saveActiveModel()" class="w-full bg-gray-950 border border-emerald-500/50 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-inner cursor-pointer">
+                    </select>
+                </div>
+                
+                <div id="status-message" class="text-sm hidden rounded-xl p-3.5 font-medium shadow-inner"></div>
             </div>
         </div>
-    \`;
-    
-    chatContainer.insertAdjacentHTML('beforeend', html);
-    scrollChat();
-    return currentId;
-}
+    </div>
 
-function escapeHtml(unsafe) {
-    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function copyText(btn, encodedText, elementId = null) {
-    let textToCopy = "";
-    if (encodedText) {
-        textToCopy = decodeURIComponent(encodedText);
-    } else if (elementId) {
-        textToCopy = document.querySelector(\`#\${elementId} .markdown-body\`).innerText;
-    }
-    
-    navigator.clipboard.writeText(textToCopy);
-    const icon = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check text-green-400"></i>';
-    setTimeout(() => { btn.innerHTML = icon; }, 2000);
-}
-
-function editMessage(msgId, encodedContent) {
-    const content = decodeURIComponent(encodedContent);
-    document.getElementById('prompt-input').value = content;
-    autoResize(document.getElementById('prompt-input'));
-    document.getElementById('prompt-input').focus();
-    // Normally you'd truncate history here, but to keep simple we just let them copy-edit to input.
-}
-
-async function sendMessage() {
-    const input = document.getElementById('prompt-input');
-    const text = input.value.trim();
-    if (!text && attachedFiles.length === 0) return;
-
-    input.value = '';
-    input.style.height = 'auto';
-    document.getElementById('file-preview-container').innerHTML = '';
-    document.getElementById('file-preview-container').classList.add('hidden');
-    
-    const currentFiles = [...attachedFiles];
-    attachedFiles = [];
-
-    // Compile content for AI
-    let userPromptContent = text;
-    if (currentFiles.length > 0) {
-        userPromptContent += "\n\n[Lampiran File]:\n";
-        currentFiles.forEach(f => {
-            if(!f.type.startsWith('image/')) {
-                userPromptContent += \`--- Mulai \${f.name} ---\n\${f.content}\n--- Selesai \${f.name} ---\n\`;
-            } else {
-                userPromptContent += \`(File gambar terlampir: \${f.name})\n\`;
+    <script>
+        /* =========================================
+           SECURITY MEASURES (Anti-Theft)
+           ========================================= */
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === 123 || 
+               (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+               (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+                e.preventDefault();
+                return false;
             }
         });
-    }
-
-    sessionData.chatHistory.push({ role: 'user', content: userPromptContent });
-    appendMessage('user', text || "Mengirim file...", currentFiles);
-
-    const botMsgId = 'bot-' + Date.now();
-    const loadingHtml = \`
-        <div class="flex gap-4" id="\${botMsgId}">
-            <div class="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white text-sm"><i class="fas fa-robot"></i></div>
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none px-5 py-4 min-w-[200px] text-slate-200">
-                <div id="think-\${botMsgId}" class="text-sm text-slate-400 mb-2 pb-2 border-b border-slate-700/50 font-mono hidden"></div>
-                <div id="content-\${botMsgId}" class="markdown-body thinking-anim"><i class="fas fa-circle-notch fa-spin mr-2"></i>Menghasilkan kode...</div>
-                <div id="footer-\${botMsgId}" class="mt-3 pt-2 border-t border-slate-700/50 flex justify-between items-center text-[10px] text-slate-500 hidden">
-                    <span class="think-time"></span>
-                    <span class="token-usage"></span>
-                </div>
-            </div>
-        </div>
-    \`;
-    document.getElementById('chat-container').insertAdjacentHTML('beforeend', loadingHtml);
-    scrollChat();
-
-    // Start Thinking Timer
-    secondsThinking = 0;
-    document.getElementById(\`think-\${botMsgId}\`).classList.remove('hidden');
-    thinkingTimer = setInterval(() => {
-        secondsThinking++;
-        document.getElementById(\`think-\${botMsgId}\`).innerText = \`Thinking... (\${secondsThinking}s)\`;
-    }, 1000);
-
-    try {
-        let aiResponseText = "";
-        let tokens = 0;
-        let reasoning = "";
-
-        if (sessionData.provider === 'gemini') {
-            const payload = {
-                contents: sessionData.chatHistory.filter(m => m.role !== 'system').map(m => ({
-                    role: m.role === 'user' ? 'user' : 'model',
-                    parts: [{text: m.content}]
-                })),
-                systemInstruction: { parts: [{text: SYSTEM_PROMPT}] }
-            };
-            
-            const res = await fetch(API_ENDPOINTS.gemini.chat(sessionData.model, sessionData.apiKey), {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if(!res.ok) throw new Error(data.error?.message || "Gemini Error");
-            
-            aiResponseText = data.candidates[0].content.parts[0].text;
-            tokens = data.usageMetadata?.totalTokenCount || 0;
-        } 
-        else {
-            // OpenAI Format (OpenAI, Deepseek, Kimi)
-            const payload = {
-                model: sessionData.model,
-                messages: sessionData.chatHistory
-            };
-
-            const res = await fetch(API_ENDPOINTS[sessionData.provider].chat, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': \`Bearer \${sessionData.apiKey}\`
-                },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if(!res.ok) throw new Error(data.error?.message || "API Error");
-
-            aiResponseText = data.choices[0].message.content;
-            reasoning = data.choices[0].message.reasoning_content || "";
-            tokens = data.usage?.total_tokens || 0;
-        }
-
-        clearInterval(thinkingTimer);
-        document.getElementById(\`content-\${botMsgId}\`).classList.remove('thinking-anim');
+        document.addEventListener('dragstart', event => event.preventDefault());
         
-        // Update Think Box
-        const thinkBox = document.getElementById(\`think-\${botMsgId}\`);
-        if(reasoning) {
-            thinkBox.innerHTML = \`
-                <details class="cursor-pointer">
-                    <summary class="hover:text-slate-300 transition-colors">Thought Process (\${secondsThinking}s)</summary>
-                    <div class="mt-2 text-xs text-slate-500 whitespace-pre-wrap pl-4 border-l-2 border-slate-600">\${escapeHtml(reasoning)}</div>
-                </details>
-            \`;
-        } else {
-            thinkBox.innerHTML = \`<span class="text-xs">Waktu berpikir: \${secondsThinking}s</span>\`;
-        }
+        /* =========================================
+           DATA DOKUMEN GTPS API & REFERENSI SCRIPT (SUPER LENGKAP)
+           ========================================= */
+        const GTPS_DOCS = `
+Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud / GTPS10.
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan dokumentasi resmi GTPS.cloud Lua API.
 
-        // Render Markdown & Code Blocks
-        document.getElementById(\`content-\${botMsgId}\`).innerHTML = marked.parse(aiResponseText);
-        
-        // Apply syntax highlighting & Copy Button to code blocks
-        document.querySelectorAll(\`#content-\${botMsgId} pre code\`).forEach((block) => {
-            hljs.highlightElement(block);
-            const pre = block.parentElement;
-            if(pre.style.position !== 'relative') {
-                pre.style.position = 'relative';
-                const btn = document.createElement('button');
-                btn.className = 'copy-btn';
-                btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                btn.onclick = () => {
-                    navigator.clipboard.writeText(block.innerText);
-                    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> Copy', 2000);
+INSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):
+Setiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran/analisa mendalam terlebih dahulu dengan menggunakan tag <think>.
+Format respons kamu harus SELALU seperti ini:
+<think>
+[Tuliskan analisa logis, pengecekan error, perencanaan struktur kode, dan pemahaman terkait referensi database/API disini]
+</think>
+[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]
+
+REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
+1. **Sistem Exchange/Convert:**
+   - Gunakan SQLite (\`sqlite.open\`) atau file log (\`file.write\`).
+   - Logging selalu dikirim ke Discord: \`DiscordBot.messageCreate(channelID, ...)\`.
+   - Layout UI Parallel Row yang WAJIB dipakai (Contoh):
+     \`add_button_with_icon|trade_req_1|Blue Gem Lock|noflags|7188|1|left|\`
+     \`add_button_with_icon|click_none||noflags|11162||\`
+     \`add_button_with_icon|trade_give_1|Black Gem Lock|staticYellowFrame|20628|1|left|\`
+   - Validasi inventory, jumlah barang (player:getItemAmount), limit Max Inventory (biasanya 200/250 stack).
+   - Selalu berikan audio \`player:playAudio("keypad_hit.wav")\` atau bleep_fail jika gagal.
+2. **Custom Help / Roles:**
+   - Ambil role via \`getRoles()\`.
+   - Filter akses admin biasanya dengan \`player:hasRole(51)\` (Developer) atau 100 (Master).
+3. **Dokumentasi Global GTPS Cloud Lua API (Rangkuman API Valid):**
+   - \`player:getNetID()\`, \`player:getName()\`, \`player:getItemAmount(id)\`, \`player:changeItem(id, count, 0)\`
+   - \`player:onConsoleMessage(msg)\`, \`player:onTalkBubble(netID, msg, 0)\`, \`player:onDialogRequest(dialog)\`
+   - \`world:useItemEffect(netID, id, 0, 100)\`, \`world:onCreateChatBubble(x, y, msg, netID)\`
+   - \`registerLuaCommand({command="cmd", roleRequired=0, description=""})\`
+   - Dialog events ditangkap via \`onPlayerDialogCallback(function(world, player, data) ... end)\`
+   - Command events ditangkap via \`onPlayerCommandCallback(function(world, player, msg) ... end)\`
+`;
+
+        /* =========================================
+           ATTACHMENT HANDLING (MAX 10 FILES)
+           ========================================= */
+        let attachedFiles = [];
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('attachment-preview-container');
+        const fileListContainer = document.getElementById('file-list');
+        const fileCountSpan = document.getElementById('file-count');
+
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            if (attachedFiles.length + files.length > 10) {
+                alert("Maksimal hanya 10 file yang dapat dilampirkan sekaligus.");
+                return;
+            }
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                const isImage = file.type.startsWith('image/');
+
+                reader.onload = function(uploadEvent) {
+                    const data = uploadEvent.target.result;
+                    const fileObj = {
+                        id: Date.now() + Math.random().toString(36).substring(7),
+                        name: file.name,
+                        type: isImage ? 'image' : 'text',
+                        mimeType: file.type || 'text/plain',
+                        size: (file.size / 1024).toFixed(1) + ' KB',
+                        content: isImage ? data.split(',')[1] : data
+                    };
+                    attachedFiles.push(fileObj);
+                    updateAttachmentUI();
                 };
-                pre.appendChild(btn);
-            }
+
+                if (isImage) reader.readAsDataURL(file);
+                else reader.readAsText(file);
+            });
+            fileInput.value = ''; // reset
         });
 
-        // Footer Usage
-        const footer = document.getElementById(\`footer-\${botMsgId}\`);
-        footer.classList.remove('hidden');
-        footer.querySelector('.token-usage').innerHTML = \`<i class="fas fa-coins mr-1"></i>\${tokens} Tokens\`;
+        function updateAttachmentUI() {
+            if (attachedFiles.length === 0) {
+                previewContainer.classList.add('hidden');
+                return;
+            }
+            previewContainer.classList.remove('hidden');
+            fileCountSpan.textContent = attachedFiles.length;
+            
+            fileListContainer.innerHTML = '';
+            attachedFiles.forEach(f => {
+                const icon = f.type === 'image' ? 'fa-image text-green-400' : 'fa-file-code text-blue-400';
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2 bg-gray-900 border border-gray-700 px-2 py-1.5 rounded-lg shrink-0";
+                div.innerHTML = `
+                    <i class="fas ${icon} text-[11px]"></i>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-semibold text-white max-w-[100px] truncate" title="${f.name}">${f.name}</span>
+                        <span class="text-[9px] text-gray-500">${f.size}</span>
+                    </div>
+                    <button onclick="removeFile('${f.id}')" class="text-gray-500 hover:text-red-400 ml-1"><i class="fas fa-times text-[10px]"></i></button>
+                `;
+                fileListContainer.appendChild(div);
+            });
+        }
 
-        // Save history
-        sessionData.chatHistory.push({ role: 'assistant', content: aiResponseText });
+        window.removeFile = function(id) {
+            attachedFiles = attachedFiles.filter(f => f.id !== id);
+            updateAttachmentUI();
+        };
 
-    } catch (err) {
-        clearInterval(thinkingTimer);
-        document.getElementById(\`content-\${botMsgId}\`).classList.remove('thinking-anim');
-        document.getElementById(\`content-\${botMsgId}\`).innerHTML = \`<div class="text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Terjadi kesalahan: \${err.message}</div>\`;
-    }
-    scrollChat();
-}
+        window.clearAllAttachments = function() {
+            attachedFiles = [];
+            updateAttachmentUI();
+        };
 
-// Config Marked.js
-marked.setOptions({
-    breaks: true,
-    gfm: true
-});
-</script>
+        /* =========================================
+           MARKDOWN CONFIGURATION & COPY FEATURE
+           ========================================= */
+        const renderer = {
+            code(token) {
+                const codeText = typeof token === 'object' ? token.text : token;
+                const language = typeof token === 'object' ? token.lang : arguments[1];
+                const escapedCode = String(codeText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const langDisplay = language ? language.toUpperCase() : 'LUA';
+                
+                return `
+                <div class="relative mt-4 mb-4 rounded-xl overflow-hidden bg-[#0d1117] border border-gray-700 shadow-xl w-full">
+                    <div class="flex justify-between items-center px-4 py-2.5 bg-[#161b22] border-b border-gray-700 text-xs text-gray-400">
+                        <span class="font-bold tracking-widest uppercase text-gray-300">${langDisplay}</span>
+                        <button onclick="copyToClipboard(this)" class="hover:text-white transition-colors flex items-center gap-1.5 focus:outline-none bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-md">
+                            <i class="fas fa-copy"></i> <span>Copy Code</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <pre class="p-4 text-[13px] text-[#56d364] font-mono whitespace-pre allow-select" style="margin:0; line-height: 1.5;"><code>${escapedCode}</code></pre>
+                    </div>
+                </div>`;
+            }
+        };
+        marked.use({ renderer });
 
+        window.copyToClipboard = function(btn) {
+            const container = btn.closest('.relative');
+            const codeText = container.querySelector('code').innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const span = btn.querySelector('span');
+                const icon = btn.querySelector('i');
+                const oText = span.innerText;
+                const oIcon = icon.className;
+                span.innerText = 'Copied!';
+                icon.className = 'fas fa-check text-emerald-400';
+                setTimeout(() => { span.innerText = oText; icon.className = oIcon; }, 2000);
+            });
+        };
+
+        /* =========================================
+           STATE & DOM ELEMENTS
+           ========================================= */
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const modalContent = document.getElementById('modal-content');
+        const providerSelect = document.getElementById('ai-provider');
+        const modelSelect = document.getElementById('ai-model');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const apiKeyLabel = document.getElementById('api-key-label');
+        const modelSection = document.getElementById('model-section');
+
+        let chatHistory = [];
+        const encKey = str => btoa(encodeURIComponent(str));
+        const decKey = str => decodeURIComponent(atob(str));
+
+        /* Static Fallback for Claude (Anthropic API lacks model list endpoint for normal keys) */
+        const CLAUDE_MODELS = [
+            { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
+            { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
+            { id: 'claude-4-opus-2025', name: 'Claude 4 Opus' }
+        ];
+
+        function onProviderChange() {
+            const provider = providerSelect.value;
+            apiKeyLabel.textContent = `${provider.toUpperCase()} API Key`;
+            const saved = sessionStorage.getItem(`_key_${provider}`);
+            apiKeyInput.value = saved ? decKey(saved) : '';
+            modelSection.classList.add('hidden');
+        }
+
+        function openSettings() {
+            settingsModal.classList.remove('hidden');
+            settingsModal.classList.add('flex');
+            setTimeout(() => modalContent.classList.remove('scale-95'), 10);
+            const savedProvider = sessionStorage.getItem('_active_provider') || 'gemini';
+            providerSelect.value = savedProvider;
+            onProviderChange();
+        }
+
+        function closeSettings() {
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                settingsModal.classList.add('hidden');
+                settingsModal.classList.remove('flex');
+            }, 200);
+        }
+
+        /* =========================================
+           DYNAMIC MODEL FETCHING
+           ========================================= */
+        async function saveAndFetchModels() {
+            const provider = providerSelect.value;
+            const apiKey = apiKeyInput.value.trim();
+            const statusDiv = document.getElementById('status-message');
+            const saveBtn = document.getElementById('save-btn');
+
+            if (!apiKey) {
+                showStatus(statusDiv, 'API Key tidak boleh kosong!', 'error');
+                return;
+            }
+
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menarik Model API...';
+            saveBtn.disabled = true;
+            modelSelect.innerHTML = '';
+            
+            try {
+                let models = [];
+                
+                if (provider === 'gemini') {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                    if (!res.ok) throw new Error('API Key Gemini Invalid');
+                    const data = await res.json();
+                    models = data.models
+                        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
+                        .map(m => ({ id: m.name.replace('models/', ''), name: m.displayName || m.name.replace('models/', '') }));
+                
+                } else if (provider === 'openai') {
+                    const res = await fetch('https://api.openai.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
+                    if (!res.ok) throw new Error('API Key OpenAI Invalid');
+                    const data = await res.json();
+                    models = data.data
+                        .filter(m => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3'))
+                        .map(m => ({ id: m.id, name: m.id }));
+                        
+                } else if (provider === 'deepseek') {
+                    const res = await fetch('https://api.deepseek.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
+                    if (!res.ok) throw new Error('API Key DeepSeek Invalid');
+                    const data = await res.json();
+                    models = data.data.map(m => ({ id: m.id, name: m.id }));
+                    
+                } else if (provider === 'kimi') {
+                    const res = await fetch('https://api.moonshot.cn/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
+                    if (!res.ok) throw new Error('API Key Kimi Invalid');
+                    const data = await res.json();
+                    models = data.data.map(m => ({ id: m.id, name: m.id }));
+                    
+                } else if (provider === 'claude') {
+                    // Claude uses static list due to API architecture
+                    const res = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+                        body: JSON.stringify({ model: 'claude-3-5-sonnet-20241022', max_tokens: 1, messages: [{ role: 'user', content: 'Ping' }] })
+                    });
+                    if (!res.ok && res.status !== 400) throw new Error('API Key Claude Invalid');
+                    models = CLAUDE_MODELS;
+                }
+
+                if (models.length > 0) {
+                    models.sort((a,b) => b.name.localeCompare(a.name)); // Sort descending for newer models usually
+                    models.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id; opt.textContent = m.name;
+                        modelSelect.appendChild(opt);
+                    });
+                    
+                    sessionStorage.setItem(`_key_${provider}`, encKey(apiKey));
+                    sessionStorage.setItem('_active_provider', provider);
+                    
+                    // Try to restore previous model if valid
+                    const prevModel = sessionStorage.getItem(`_model_${provider}`);
+                    if(prevModel && models.find(m => m.id === prevModel)) {
+                        modelSelect.value = prevModel;
+                    }
+                    saveActiveModel(); // save the selected one
+                    
+                    modelSection.classList.remove('hidden');
+                    showStatus(statusDiv, `<i class="fas fa-check-circle"></i> Berhasil! Ditemukan ${models.length} model.`, 'success');
+                } else {
+                    showStatus(statusDiv, `API Valid, tapi tidak ada model chat yang didukung.`, 'error');
+                }
+            } catch (error) {
+                showStatus(statusDiv, `<i class="fas fa-exclamation-triangle"></i> Gagal: ${error.message}`, 'error');
+            } finally {
+                saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Verifikasi Key & Tarik Model';
+                saveBtn.disabled = false;
+            }
+        }
+
+        function saveActiveModel() {
+            const provider = providerSelect.value;
+            const model = modelSelect.value;
+            sessionStorage.setItem('_active_provider', provider);
+            sessionStorage.setItem(`_model_${provider}`, model);
+        }
+
+        function showStatus(element, text, type) {
+            element.className = `text-sm rounded-xl p-3 block shadow-inner mt-2 ${type === 'error' ? 'bg-red-900/40 text-red-300 border border-red-700/50' : 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/50'}`;
+            element.innerHTML = text;
+        }
+
+        /* =========================================
+           CHAT UI RENDERING (WITH THINKING PARSER)
+           ========================================= */
+        function appendMessage(sender, text, files = [], metadata = null) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex items-start gap-3 md:gap-4 w-full ${sender === 'user' ? 'flex-row-reverse' : ''}`;
+            
+            const icon = sender === 'user' 
+                ? `<div class="bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-user text-white"></i></div>`
+                : `<div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = sender === 'user'
+                ? `bubble-user text-white rounded-2xl rounded-tr-none p-4 max-w-[90%] md:max-w-[85%] shadow-lg allow-select text-sm leading-relaxed`
+                : `bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[90%] md:max-w-[85%] shadow-xl border border-gray-700/50 chat-message allow-select text-sm leading-relaxed overflow-hidden flex flex-col w-full`;
+            
+            let contentHTML = '';
+
+            // Handle Attachments Display
+            if (files && files.length > 0) {
+                contentHTML += `<div class="flex flex-wrap gap-2 mb-3">`;
+                files.forEach(f => {
+                    if (f.type === 'image') {
+                        contentHTML += `<div class="rounded-lg overflow-hidden border border-white/20 w-24 h-24 shrink-0"><img src="data:${f.mimeType};base64,${f.content}" class="w-full h-full object-cover"></div>`;
+                    } else {
+                        contentHTML += `<div class="bg-black/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2 text-[11px] font-mono text-gray-300"><i class="fas fa-file-code text-blue-400"></i> <span class="truncate max-w-[120px]">${f.name}</span></div>`;
+                    }
+                });
+                contentHTML += `</div>`;
+            }
+
+            if(sender === 'ai') {
+                // Parse <think> blocks
+                let thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
+                if (thinkMatch) {
+                    const thinkContent = thinkMatch[1].trim();
+                    const mainContent = text.replace(/<think>([\s\S]*?)<\/think>/i, '').trim();
+                    
+                    contentHTML += `
+                        <details class="think-box mb-4 bg-gray-900/80 border border-gray-700 rounded-lg overflow-hidden">
+                            <summary class="px-4 py-2.5 bg-gray-800/80 hover:bg-gray-700/80 text-xs font-semibold text-gray-300 flex items-center gap-2 transition-colors">
+                                <i class="fas fa-brain text-emerald-500"></i> AI Processed Thoughts
+                                <i class="fas fa-chevron-down ml-auto text-[10px] opacity-50"></i>
+                            </summary>
+                            <div class="p-4 text-[12px] text-gray-400 font-mono whitespace-pre-wrap border-t border-gray-700 bg-gray-950">${escapeHTML(thinkContent)}</div>
+                        </details>
+                    `;
+                    contentHTML += marked.parse(mainContent);
+                } else {
+                    contentHTML += marked.parse(text);
+                }
+
+                // Add Metadata Footer (Tokens & Time)
+                if (metadata) {
+                    contentHTML += `
+                        <div class="mt-4 pt-3 border-t border-gray-700/50 flex flex-wrap gap-4 text-[11px] font-medium text-gray-500">
+                            <div class="flex items-center gap-1.5"><i class="fas fa-stopwatch text-teal-500"></i> ${metadata.time}s</div>
+                            <div class="flex items-center gap-1.5" title="Prompt + Completion"><i class="fas fa-coins text-yellow-500"></i> Tokens: ${metadata.prompt} In / ${metadata.comp} Out (Total:${metadata.total})</div>
+                        </div>
+                    `;
+                }
+            } else {
+                contentHTML += `<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;
+            }
+
+            bubble.innerHTML = contentHTML;
+            wrapper.innerHTML = icon;
+            wrapper.appendChild(bubble);
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+
+        function showTyping() {
+            const wrapper = document.createElement('div');
+            wrapper.id = 'typing-indicator';
+            wrapper.className = `flex items-start gap-4 w-full`;
+            wrapper.innerHTML = `<div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>
+                <div class="bubble-ai rounded-2xl rounded-tl-none p-5 shadow-xl border border-gray-700/50 typing-indicator flex items-center gap-2">
+                    <i class="fas fa-brain text-emerald-400 animate-pulse text-xs"></i><span></span><span></span><span></span>
+                </div>`;
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+        function removeTyping() { const el = document.getElementById('typing-indicator'); if(el) el.remove(); }
+
+        /* =========================================
+           API EXECUTION DISPATCHER
+           ========================================= */
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text && attachedFiles.length === 0) return;
+
+            const currentAttachments = [...attachedFiles];
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            clearAllAttachments();
+
+            appendMessage('user', text || '[Melampirkan File]', currentAttachments);
+            processAIRequest(text, currentAttachments);
+        });
+
+        async function processAIRequest(userText, attachments) {
+            const provider = sessionStorage.getItem('_active_provider');
+            if (!provider) { openSettings(); return; }
+            
+            const model = sessionStorage.getItem(`_model_${provider}`);
+            const encApiKey = sessionStorage.getItem(`_key_${provider}`);
+
+            if (!encApiKey || !model) {
+                openSettings();
+                return;
+            }
+
+            const apiKey = decKey(encApiKey);
+            sendBtn.disabled = true;
+            showTyping();
+            
+            let startTime = Date.now();
+
+            try {
+                let aiResult = null;
+                
+                // Format multi-file prompt for Text/Lua files
+                let textFilesContext = "";
+                const textFiles = attachments.filter(a => a.type === 'text');
+                if (textFiles.length > 0) {
+                    textFilesContext = "\n\n[FILE LAMPIRAN USER]:\n" + textFiles.map(f => `--- MULAI FILE: ${f.name} ---\n${f.content}\n--- AKHIR FILE:${f.name} ---`).join('\n\n');
+                }
+                
+                let finalUserPrompt = userText + textFilesContext;
+
+                if (provider === 'gemini') {
+                    aiResult = await callGeminiAPI(apiKey, model, finalUserPrompt, attachments);
+                } else if (provider === 'openai') {
+                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.openai.com/v1/chat/completions', attachments);
+                } else if (provider === 'claude') {
+                    aiResult = await callClaudeAPI(apiKey, model, finalUserPrompt, attachments);
+                } else if (provider === 'deepseek') {
+                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.deepseek.com/chat/completions', attachments);
+                } else if (provider === 'kimi') {
+                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.moonshot.cn/v1/chat/completions', attachments);
+                }
+
+                let endTime = Date.now();
+                let timeSeconds = ((endTime - startTime) / 1000).toFixed(2);
+
+                removeTyping();
+                appendMessage('ai', aiResult.text, [], {
+                    time: timeSeconds,
+                    prompt: aiResult.tokens.prompt,
+                    comp: aiResult.tokens.comp,
+                    total: aiResult.tokens.total
+                });
+
+                chatHistory.push({ role: 'user', content: finalUserPrompt });
+                chatHistory.push({ role: 'assistant', content: aiResult.text });
+
+            } catch (error) {
+                removeTyping();
+                appendMessage('ai', `**Error System:** Gagal memproses. \n\n\`${error.message}\``);
+            } finally {
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        /* --- Gemini API Handler --- */
+        async function callGeminiAPI(apiKey, model, userText, attachments) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const history = chatHistory.map(h => ({ role: h.role === 'assistant' ? 'model' : h.role, parts: [{ text: h.content }] }));
+
+            const currentParts = [{ text: userText }];
+            attachments.filter(a => a.type === 'image').forEach(a => {
+                currentParts.push({ inline_data: { mime_type: a.mimeType, data: a.content } });
+            });
+            history.push({ role: 'user', parts: currentParts });
+
+            const payload = {
+                system_instruction: { parts: [{ text: GTPS_DOCS }] },
+                contents: history,
+                generationConfig: { temperature: 0.3 }
+            };
+
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const json = await response.json();
+            if (!response.ok) throw new Error(json.error?.message || 'Error API');
+            
+            return {
+                text: json.candidates[0].content.parts[0].text,
+                tokens: {
+                    prompt: json.usageMetadata?.promptTokenCount || 0,
+                    comp: json.usageMetadata?.candidatesTokenCount || 0,
+                    total: json.usageMetadata?.totalTokenCount || 0
+                }
+            };
+        }
+
+        /* --- OpenAI-Compatible API Handler (OpenAI, DeepSeek, Kimi) --- */
+        async function callOpenAIAPI(apiKey, model, userText, endpoint, attachments) {
+            let messageContent = userText;
+            const images = attachments.filter(a => a.type === 'image');
+            
+            if (images.length > 0) {
+                messageContent = [{ type: "text", text: userText }];
+                images.forEach(img => {
+                    messageContent.push({ type: "image_url", image_url: { url: `data:${img.mimeType};base64,${img.content}` } });
+                });
+            }
+
+            const messages = [{ role: 'system', content: GTPS_DOCS }, ...chatHistory, { role: 'user', content: messageContent }];
+            const response = await fetch(endpoint, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
+                body: JSON.stringify({ model: model, messages: messages, temperature: 0.3 }) 
+            });
+            const json = await response.json();
+            if (!response.ok) throw new Error(json.error?.message || 'Error API');
+            
+            return {
+                text: json.choices[0].message.content,
+                tokens: {
+                    prompt: json.usage?.prompt_tokens || 0,
+                    comp: json.usage?.completion_tokens || 0,
+                    total: json.usage?.total_tokens || 0
+                }
+            };
+        }
+
+        /* --- Anthropic Claude API Handler --- */
+        async function callClaudeAPI(apiKey, model, userText, attachments) {
+            const url = 'https://api.anthropic.com/v1/messages';
+            
+            let messageContent = userText;
+            const images = attachments.filter(a => a.type === 'image');
+            if (images.length > 0) {
+                messageContent = [{ type: "text", text: userText }];
+                images.forEach(img => {
+                    messageContent.push({ type: "image", source: { type: "base64", media_type: img.mimeType, data: img.content } });
+                });
+            }
+
+            const messages = [...chatHistory, { role: 'user', content: messageContent }];
+            const response = await fetch(url, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, 
+                body: JSON.stringify({ model: model, max_tokens: 4096, system: GTPS_DOCS, messages: messages, temperature: 0.3 }) 
+            });
+            const json = await response.json();
+            if (!response.ok) throw new Error(json.error?.message || 'Error API');
+            
+            return {
+                text: json.content[0].text,
+                tokens: {
+                    prompt: json.usage?.input_tokens || 0,
+                    comp: json.usage?.output_tokens || 0,
+                    total: (json.usage?.input_tokens || 0) + (json.usage?.output_tokens || 0)
+                }
+            };
+        }
+
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.dispatchEvent(new Event('submit')); }
+        });
+
+    </script>
 </body>
 </html>
