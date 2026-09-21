@@ -76,11 +76,10 @@
                 <p class="text-gray-300 leading-relaxed text-sm mb-3">
                     Pembaruan terbaru telah diaktifkan:
                 </p>
-                <ul class="text-xs text-gray-400 space-y-1 mb-3 list-disc list-inside">
-                    <li><strong class="text-gray-200">Auto-Fetch Models:</strong> Model otomatis menyesuaikan dengan API Key.</li>
-                    <li><strong class="text-gray-200">Thinking AI:</strong> AI akan berpikir sebelum menjawab.</li>
-                    <li><strong class="text-gray-200">Multi-File:</strong> Dukungan hingga 10 file / gambar.</li>
-                    <li><strong class="text-gray-200">Menu Ekstra (Baru!):</strong> Bikin Musik, Gambar, & Website via tombol <b>⋮</b> di kiri input.</li>
+                <ul class="text-xs text-gray-400 space-y-1 mb-4 list-disc list-inside">
+                    <li><strong class="text-gray-200">Ganti Mode (Spesialisasi):</strong> AI benar-benar merubah fokusnya lewat tombol <b>⋮</b>.</li>
+                    <li><strong class="text-gray-200">Scroll Chat Input:</strong> Area ketik kini mendukung scroll untuk teks panjang.</li>
+                    <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
                 </ul>
                 <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
                     <i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> Buka <strong>Setelan</strong>, masukkan API Key dan klik "Verifikasi" untuk memuat daftar model yang tersedia!
@@ -104,28 +103,35 @@
 
     <!-- Input Area -->
     <footer class="glass-panel p-4 pb-6 z-20">
-        <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative items-end">
+        <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative items-end pt-2">
             <!-- Hidden File Input -->
             <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.lua" multiple>
 
-            <div class="flex-1 bg-gray-900/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 flex items-center pl-1 pr-2">
+            <div class="flex-1 bg-gray-900/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 flex items-end pl-1 pr-2 pb-1">
                 
-                <!-- 3-Dot Special Menu Button -->
-                <div class="relative">
-                    <button type="button" id="special-menu-btn" onclick="toggleSpecialMenu(event)" class="text-gray-400 hover:text-emerald-400 p-2.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Fitur Tambahan (Musik, Gambar, Website)">
+                <!-- Mode Badge Indicator -->
+                <div id="mode-badge" class="absolute -top-3 left-4 bg-gray-800 border border-gray-600 text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 z-10 select-none">
+                    <i class="fas fa-code text-gray-400"></i> Mode GTPS
+                </div>
+
+                <!-- 3-Dot Mode Selector Menu Button -->
+                <div class="relative pb-1.5">
+                    <button type="button" id="special-menu-btn" onclick="toggleSpecialMenu(event)" class="text-gray-400 hover:text-emerald-400 p-2.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Ganti Mode / Spesialisasi AI">
                         <i class="fas fa-ellipsis-v text-lg px-2"></i>
                     </button>
                     <!-- Dropdown Menu -->
-                    <div id="special-menu" class="hidden absolute bottom-full left-0 mb-3 w-60 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
-                        <a href="#" onclick="insertPrompt('music', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Bikin Musik</a>
-                        <a href="#" onclick="openImageModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-image text-emerald-400 w-4 text-center"></i> Bikin Gambar</a>
-                        <a href="#" onclick="insertPrompt('html', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-globe text-purple-400 w-4 text-center"></i> Bikin Website HTML</a>
+                    <div id="special-menu" class="hidden absolute bottom-full left-0 mb-3 w-64 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
+                        <a href="#" onclick="setMode('gtps', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-code text-gray-400 w-4 text-center"></i> Mode Script GTPS (Default)</a>
+                        <a href="#" onclick="setMode('music', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Mode Bikin Musik</a>
+                        <a href="#" onclick="openImageModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-image text-emerald-400 w-4 text-center"></i> Mode Bikin Gambar</a>
+                        <a href="#" onclick="setMode('html', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-globe text-purple-400 w-4 text-center"></i> Mode Website HTML</a>
                     </div>
                 </div>
 
-                <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-3 py-4 focus:outline-none resize-none overflow-hidden max-h-40 text-sm leading-relaxed" placeholder="Ketik perintah atau lampirkan file (Maks 10)..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
+                <!-- OVERFLOW-Y-AUTO Added Here to fix Scroll issue -->
+                <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-3 py-4 focus:outline-none resize-none overflow-y-auto custom-scrollbar max-h-40 text-sm leading-relaxed mb-0.5" placeholder="Ketik prompt atau tema yang diinginkan..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
                 
-                <button type="button" onclick="document.getElementById('file-input').click()" class="text-gray-400 hover:text-emerald-400 p-2.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Lampirkan File (Maks 10)">
+                <button type="button" onclick="document.getElementById('file-input').click()" class="text-gray-400 hover:text-emerald-400 p-2.5 mb-1.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Lampirkan File (Maks 10)">
                     <i class="fas fa-plus-circle text-lg"></i>
                 </button>
             </div>
@@ -180,7 +186,7 @@
     <!-- Image Canvas Size Modal -->
     <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[60] backdrop-blur-sm transition-opacity">
         <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-crop-alt text-emerald-400"></i> Set Ukuran Gambar</h3>
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-crop-alt text-emerald-400"></i> Set Ukuran Gambar Canvas</h3>
             <div class="flex gap-4 mb-5">
                 <div class="flex-1">
                     <label class="block text-xs font-semibold text-gray-400 mb-1.5">Lebar (Width) px</label>
@@ -193,7 +199,7 @@
             </div>
             <div class="flex gap-3">
                 <button onclick="closeImageModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Batal</button>
-                <button onclick="confirmImagePrompt()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg">Lanjutkan</button>
+                <button onclick="confirmImagePrompt()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg">Terapkan & Ganti Mode</button>
             </div>
         </div>
     </div>
@@ -214,10 +220,13 @@
         document.addEventListener('dragstart', event => event.preventDefault());
         
         /* =========================================
-           DATA DOKUMEN GTPS API & REFERENSI SCRIPT (SUPER LENGKAP)
+           MODE & SYSTEM PROMPTS MANAGEMENT
            ========================================= */
-        const GTPS_DOCS = `
-Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud / GTPS10.
+        let currentAIMode = 'gtps';
+        let canvasW = 800;
+        let canvasH = 600;
+
+        const GTPS_DOCS = `Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud / GTPS10.
 Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan dokumentasi resmi GTPS.cloud Lua API.
 
 INSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):
@@ -228,30 +237,34 @@ Format respons kamu harus SELALU seperti ini:
 </think>
 [Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]
 
-REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
+REFERENSI POLA SCRIPT & DATABASE:
 1. **Sistem Exchange/Convert:**
    - Gunakan SQLite (\`sqlite.open\`) atau file log (\`file.write\`).
-   - Logging selalu dikirim ke Discord: \`DiscordBot.messageCreate(channelID, ...)\`.
    - Layout UI Parallel Row yang WAJIB dipakai (Contoh):
      \`add_button_with_icon|trade_req_1|Blue Gem Lock|noflags|7188|1|left|\`
-     \`add_button_with_icon|click_none||noflags|11162||\`
-     \`add_button_with_icon|trade_give_1|Black Gem Lock|staticYellowFrame|20628|1|left|\`
-   - Validasi inventory, jumlah barang (player:getItemAmount), limit Max Inventory (biasanya 200/250 stack).
-   - Selalu berikan audio \`player:playAudio("keypad_hit.wav")\` atau bleep_fail jika gagal.
-2. **Custom Help / Roles:**
-   - Ambil role via \`getRoles()\`.
-   - Filter akses admin biasanya dengan \`player:hasRole(51)\` (Developer) atau 100 (Master).
-3. **Dokumentasi Global GTPS Cloud Lua API (Rangkuman API Valid):**
+2. **Dokumentasi Global GTPS Cloud Lua API:**
    - \`player:getNetID()\`, \`player:getName()\`, \`player:getItemAmount(id)\`, \`player:changeItem(id, count, 0)\`
-   - \`player:onConsoleMessage(msg)\`, \`player:onTalkBubble(netID, msg, 0)\`, \`player:onDialogRequest(dialog)\`
-   - \`world:useItemEffect(netID, id, 0, 100)\`, \`world:onCreateChatBubble(x, y, msg, netID)\`
-   - \`registerLuaCommand({command="cmd", roleRequired=0, description=""})\`
-   - Dialog events ditangkap via \`onPlayerDialogCallback(function(world, player, data) ... end)\`
-   - Command events ditangkap via \`onPlayerCommandCallback(function(world, player, msg) ... end)\`
-`;
+   - Dialog events ditangkap via \`onPlayerDialogCallback(function(world, player, data) ... end)\``;
+
+        function getActiveSystemPrompt() {
+            const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran/analisa mendalam terlebih dahulu dengan menggunakan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan kode disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
+
+            if (currentAIMode === 'gtps') return GTPS_DOCS;
+            
+            if (currentAIMode === 'music') {
+                return `Kamu adalah ahli Web Audio API dan HTML5. Tugasmu adalah membuat kode Full HTML5 (didalamnya ada JS Web Audio API yang digabung) untuk membuat/memainkan instrumen atau musik sesuai tema yang diminta user. Kodenya harus interaktif, memiliki tombol Play/Stop yang jelas, dan siap dijalankan langsung di browser.` + thinkInstruction;
+            }
+            if (currentAIMode === 'html') {
+                return `Kamu adalah Senior Full-Stack Web Developer. Tugasmu adalah membuat kode Full HTML tunggal (CSS & JS wajib ditulis langsung di dalam file HTML yang sama) untuk membuat website interaktif sesuai tema yang diminta user. Buatlah desain yang modern, estetis, responsif, dan fungsional.` + thinkInstruction;
+            }
+            if (currentAIMode === 'image') {
+                return `Kamu adalah ahli desainer komputasional SVG dan HTML5 Canvas. Tugasmu adalah membuat kode Full HTML tunggal yang menggunakan murni SVG atau HTML5 Canvas untuk menggambar ilustrasi berukuran tepat ${canvasW}x${canvasH} pixel sesuai tema dari user. Jangan gunakan tag <img> eksternal, gambar murni menggunakan path/vektor/canvas API yang mendetail dan keren.` + thinkInstruction;
+            }
+            return GTPS_DOCS;
+        }
 
         /* =========================================
-           SPECIAL MENU FEATURES (MUSIC, IMAGE, HTML)
+           SPECIAL MENU FEATURES (UI LOGIC)
            ========================================= */
         function toggleSpecialMenu(e) {
             e.stopPropagation();
@@ -267,19 +280,19 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
             }
         });
 
-        function insertPrompt(type, e) {
-            e.preventDefault();
+        function setMode(mode, e) {
+            if (e) e.preventDefault();
+            currentAIMode = mode;
             document.getElementById('special-menu').classList.add('hidden');
-            const input = document.getElementById('user-input');
+            const badge = document.getElementById('mode-badge');
             
-            if (type === 'music') {
-                input.value = "Buatkan saya kode Full HTML5 (didalamnya ada JS Web Audio API) untuk membuat/memainkan musik dengan tema: [GANTI DENGAN TEMA MUSIK/GENRE]. Pastikan kodenya bisa langsung di copy-paste dan dijalankan di browser, memiliki tombol Play/Stop.";
-            } else if (type === 'html') {
-                input.value = "Buatkan saya kode Full HTML (CSS dan JS digabung di dalamnya) untuk sebuah website dengan tema: [GANTI DENGAN TEMA WEBSITE]. Buatlah desainnya modern, menarik, interaktif, dan responsif.";
-            }
+            let icon = 'fa-code', color = 'text-gray-400', text = 'Mode GTPS';
+            if(mode === 'music') { icon = 'fa-music'; color = 'text-blue-400'; text = 'Mode Musik'; }
+            if(mode === 'html') { icon = 'fa-globe'; color = 'text-purple-400'; text = 'Mode Website HTML'; }
+            if(mode === 'image') { icon = 'fa-image'; color = 'text-emerald-400'; text = `Mode Gambar (${canvasW}x${canvasH})`; }
             
-            input.focus();
-            input.dispatchEvent(new Event('input'));
+            badge.innerHTML = `<i class="fas ${icon} ${color}"></i> ${text}`;
+            document.getElementById('user-input').focus();
         }
 
         function openImageModal(e) {
@@ -295,13 +308,10 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
         }
 
         function confirmImagePrompt() {
-            const w = document.getElementById('img-width').value || 800;
-            const h = document.getElementById('img-height').value || 600;
+            canvasW = document.getElementById('img-width').value || 800;
+            canvasH = document.getElementById('img-height').value || 600;
             closeImageModal();
-            const input = document.getElementById('user-input');
-            input.value = `Buatkan saya kode Full HTML yang menggunakan teknologi murni SVG atau HTML5 Canvas untuk menggambar ilustrasi berukuran tepat ${w}x${h} pixel. Tema gambarnya adalah: [GANTI DENGAN DESKRIPSI GAMBAR]. Pastikan kodenya menghasilkan visual ilustrasi yang keren dan rapi saat dibuka di browser.`;
-            input.focus();
-            input.dispatchEvent(new Event('input'));
+            setMode('image'); // Apply image mode
         }
 
         /* =========================================
@@ -399,7 +409,7 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
                             <i class="fas fa-copy"></i> <span>Copy Code</span>
                         </button>
                     </div>
-                    <div class="overflow-x-auto w-full">
+                    <div class="overflow-x-auto w-full custom-scrollbar">
                         <pre class="p-4 text-[13px] text-[#56d364] font-mono whitespace-pre allow-select" style="margin:0; line-height: 1.5;"><code>${escapedCode}</code></pre>
                     </div>
                 </div>`;
@@ -689,6 +699,8 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
             }
 
             const apiKey = decKey(encApiKey);
+            const activeSystemPrompt = getActiveSystemPrompt(); // Mengambil Prioritas AI berdasarkan Mode
+
             sendBtn.disabled = true;
             showTyping();
             
@@ -707,15 +719,15 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
                 let finalUserPrompt = userText + textFilesContext;
 
                 if (provider === 'gemini') {
-                    aiResult = await callGeminiAPI(apiKey, model, finalUserPrompt, attachments);
+                    aiResult = await callGeminiAPI(apiKey, model, finalUserPrompt, attachments, activeSystemPrompt);
                 } else if (provider === 'openai') {
-                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.openai.com/v1/chat/completions', attachments);
+                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.openai.com/v1/chat/completions', attachments, activeSystemPrompt);
                 } else if (provider === 'claude') {
-                    aiResult = await callClaudeAPI(apiKey, model, finalUserPrompt, attachments);
+                    aiResult = await callClaudeAPI(apiKey, model, finalUserPrompt, attachments, activeSystemPrompt);
                 } else if (provider === 'deepseek') {
-                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.deepseek.com/chat/completions', attachments);
+                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.deepseek.com/chat/completions', attachments, activeSystemPrompt);
                 } else if (provider === 'kimi') {
-                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.moonshot.cn/v1/chat/completions', attachments);
+                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.moonshot.cn/v1/chat/completions', attachments, activeSystemPrompt);
                 }
 
                 let endTime = Date.now();
@@ -742,7 +754,7 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
         }
 
         /* --- Gemini API Handler --- */
-        async function callGeminiAPI(apiKey, model, userText, attachments) {
+        async function callGeminiAPI(apiKey, model, userText, attachments, sysPrompt) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const history = chatHistory.map(h => ({ role: h.role === 'assistant' ? 'model' : h.role, parts: [{ text: h.content }] }));
 
@@ -753,7 +765,7 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
             history.push({ role: 'user', parts: currentParts });
 
             const payload = {
-                system_instruction: { parts: [{ text: GTPS_DOCS }] },
+                system_instruction: { parts: [{ text: sysPrompt }] },
                 contents: history,
                 generationConfig: { temperature: 0.3 }
             };
@@ -773,7 +785,7 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
         }
 
         /* --- OpenAI-Compatible API Handler (OpenAI, DeepSeek, Kimi) --- */
-        async function callOpenAIAPI(apiKey, model, userText, endpoint, attachments) {
+        async function callOpenAIAPI(apiKey, model, userText, endpoint, attachments, sysPrompt) {
             let messageContent = userText;
             const images = attachments.filter(a => a.type === 'image');
             
@@ -784,7 +796,7 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
                 });
             }
 
-            const messages = [{ role: 'system', content: GTPS_DOCS }, ...chatHistory, { role: 'user', content: messageContent }];
+            const messages = [{ role: 'system', content: sysPrompt }, ...chatHistory, { role: 'user', content: messageContent }];
             const response = await fetch(endpoint, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
@@ -804,7 +816,7 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
         }
 
         /* --- Anthropic Claude API Handler --- */
-        async function callClaudeAPI(apiKey, model, userText, attachments) {
+        async function callClaudeAPI(apiKey, model, userText, attachments, sysPrompt) {
             const url = 'https://api.anthropic.com/v1/messages';
             
             let messageContent = userText;
@@ -820,7 +832,7 @@ REFERENSI POLA SCRIPT & DATABASE (Dari file LockConvert, Exchange, dll):
             const response = await fetch(url, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, 
-                body: JSON.stringify({ model: model, max_tokens: 4096, system: GTPS_DOCS, messages: messages, temperature: 0.3 }) 
+                body: JSON.stringify({ model: model, max_tokens: 4096, system: sysPrompt, messages: messages, temperature: 0.3 }) 
             });
             const json = await response.json();
             if (!response.ok) throw new Error(json.error?.message || 'Error API');
