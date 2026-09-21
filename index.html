@@ -28,7 +28,7 @@
         }
 
         /* Styling Gambar Hasil AI agar Rapi & Mendukung Transparan */
-        .chat-message img { max-width: 100%; height: auto; border-radius: 12px; margin-top: 10px; background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAACVJREFUKFNjZCASMDKgAhhwgokMUMX///+Di8P45OhAF6CqAAB0JgYv48X1YgAAAABJRU5ErkJggg=='); /* Pola catur untuk background transparan */ }
+        .chat-message img { max-width: 100%; height: auto; border-radius: 12px; margin-top: 10px; background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAACVJREFUKFNjZCASMDKgAhhwgokMUMX///+Di8P45OhAF6CqAAB0JgYv48X1YgAAAABJRU5ErkJggg=='); }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -59,7 +59,6 @@
         .animate-fade-out-up { animation: fade-out-up 0.3s ease-in forwards; }
         .animate-pop-in { animation: pop-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
-        /* Thinking box styles */
         details.think-box summary::-webkit-details-marker { display: none; }
         details.think-box summary { list-style: none; cursor: pointer; }
     </style>
@@ -67,8 +66,21 @@
 <body class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
 
     <!-- Header -->
-    <header class="glass-header p-4 flex justify-between items-center z-20 shadow-md">
+    <header class="glass-header p-4 flex justify-between items-center z-30 shadow-md">
         <div class="flex items-center gap-3">
+            <!-- Top-Left 3-Dot Navigation Menu -->
+            <div class="relative">
+                <button type="button" onclick="toggleNavMenu(event)" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white p-2.5 rounded-xl transition-all border border-gray-600 flex items-center justify-center w-10 h-10 shadow-lg">
+                    <i class="fas fa-ellipsis-v text-lg"></i>
+                </button>
+                <!-- Nav Dropdown Menu -->
+                <div id="nav-dropdown" class="hidden absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
+                    <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> AI Script Maker</a>
+                    <a href="audiocv/index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Audio Converter</a>
+                    <a href="#" onclick="showComingSoon(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-400 flex items-center gap-3 transition-colors"><i class="fas fa-crown text-yellow-400 w-4 text-center"></i> Premium AI <span class="ml-auto text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded font-bold">SOON</span></a>
+                </div>
+            </div>
+
             <div class="bg-gradient-to-br from-blue-500 to-emerald-500 p-2.5 rounded-xl shadow-lg">
                 <i class="fas fa-microchip text-white text-lg"></i>
             </div>
@@ -92,13 +104,13 @@
             <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
                 <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di Studio Ultimate! ✨</h3>
                 <p class="text-gray-300 leading-relaxed text-sm mb-3">
-                    Pembaruan terbaru telah diaktifkan:
+                    Pembaruan navigasi & fitur baru telah diaktifkan:
                 </p>
                 <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
-                    <li><strong class="text-gray-200">Anti Garis Biru:</strong> Layar bersih, fokus murni di input.</li>
-                    <li><strong class="text-gray-200">Tahan untuk Copy:</strong> Tahan / Hold bubble chat Anda untuk memunculkan tombol copy prompt.</li>
-                    <li><strong class="text-gray-200">Regenerate AI:</strong> Tombol restart tersedia di pesan balasan AI yang paling terakhir.</li>
-                    <li><strong class="text-gray-200">Direct PNG Image:</strong> Mode gambar kini langsung merender PNG transparan, bukan kode HTML/SVG.</li>
+                    <li><strong class="text-gray-200">Menu Navigasi (Pojok Kiri Atas):</strong> Titik tiga di header untuk akses <strong>AI Script Maker</strong>, <strong>Audio Converter</strong>, & <strong>Premium AI</strong>.</li>
+                    <li><strong class="text-gray-200">Hold untuk Copy:</strong> Tahan bubble chat user untuk menyalin prompt.</li>
+                    <li><strong class="text-gray-200">Regenerate AI:</strong> Tombol restart tersedia di pesan balasan AI terakhir.</li>
+                    <li><strong class="text-gray-200">Direct PNG Image:</strong> Mode gambar langsung merender PNG transparan.</li>
                     <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
                 </ul>
                 <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
@@ -115,19 +127,15 @@
                 <span class="text-xs font-bold text-gray-300"><i class="fas fa-paperclip"></i> Lampiran (<span id="file-count">0</span>/10)</span>
                 <button onclick="clearAllAttachments()" class="text-[11px] text-red-400 hover:text-red-300 font-semibold bg-red-900/30 px-2 py-1 rounded transition-colors">Hapus Semua</button>
             </div>
-            <div id="file-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar">
-                <!-- File chips will be added here -->
-            </div>
+            <div id="file-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar"></div>
         </div>
     </div>
 
     <!-- Input Area -->
     <footer class="glass-panel p-4 pb-6 z-20">
         <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative items-end pt-2">
-            <!-- Hidden File Input -->
             <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.lua" multiple>
 
-            <!-- Menambahkan class chat-input-wrapper untuk CSS khusus Outline -->
             <div class="chat-input-wrapper flex-1 bg-gray-900/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all flex items-end pl-1 pr-2 pb-1">
                 
                 <!-- Mode Badge Indicator -->
@@ -135,7 +143,7 @@
                     <i class="fas fa-code text-gray-400"></i> Mode GTPS
                 </div>
 
-                <!-- 3-Dot Mode Selector Menu Button -->
+                <!-- 3-Dot Mode Selector Menu Button (Bottom Input) -->
                 <div class="relative pb-1.5">
                     <button type="button" id="special-menu-btn" onclick="toggleSpecialMenu(event)" class="text-gray-400 hover:text-emerald-400 p-2.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Ganti Mode / Spesialisasi AI">
                         <i class="fas fa-ellipsis-v text-lg px-2"></i>
@@ -210,11 +218,11 @@
             <div class="flex gap-4 mb-5">
                 <div class="flex-1">
                     <label class="block text-xs font-semibold text-gray-400 mb-1.5">Lebar (px)</label>
-                    <input type="number" id="img-width" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                    <input type="number" id="img-width" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none">
                 </div>
                 <div class="flex-1">
                     <label class="block text-xs font-semibold text-gray-400 mb-1.5">Tinggi (px)</label>
-                    <input type="number" id="img-height" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                    <input type="number" id="img-height" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none">
                 </div>
             </div>
             <div class="flex gap-3">
@@ -226,7 +234,7 @@
 
     <script>
         /* =========================================
-           SECURITY MEASURES (Anti-Theft)
+           SECURITY & NAVIGATION MENU LOGIC
            ========================================= */
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
@@ -238,10 +246,26 @@
             }
         });
         document.addEventListener('dragstart', event => event.preventDefault());
+
+        function toggleNavMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('nav-dropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        function showComingSoon(e) {
+            e.preventDefault();
+            document.getElementById('nav-dropdown').classList.add('hidden');
+            showToast("Fitur Premium AI akan segera hadir!");
+        }
+
+        document.addEventListener('click', function(event) {
+            const navMenu = document.getElementById('nav-dropdown');
+            if (navMenu && !navMenu.contains(event.target) && !event.target.closest('button[onclick*="toggleNavMenu"]')) {
+                navMenu.classList.add('hidden');
+            }
+        });
         
-        /* =========================================
-           TOAST NOTIFICATIONS
-           ========================================= */
         function showToast(msg) {
             const toast = document.createElement('div');
             toast.className = 'fixed top-10 left-1/2 bg-emerald-600 border border-emerald-500 text-white px-5 py-2.5 rounded-xl shadow-2xl z-[100] text-sm animate-fade-in-down font-bold flex items-center gap-2';
@@ -269,43 +293,25 @@ Format respons kamu harus SELALU seperti ini:
 <think>
 [Tuliskan analisa logis, pengecekan error, perencanaan struktur kode, dan pemahaman terkait referensi database/API disini]
 </think>
-[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]
-
-REFERENSI POLA SCRIPT & DATABASE:
-1. **Sistem Exchange/Convert:**
-   - Gunakan SQLite (\`sqlite.open\`) atau file log (\`file.write\`).
-   - Layout UI Parallel Row yang WAJIB dipakai (Contoh):
-     \`add_button_with_icon|trade_req_1|Blue Gem Lock|noflags|7188|1|left|\`
-2. **Dokumentasi Global GTPS Cloud Lua API:**
-   - \`player:getNetID()\`, \`player:getName()\`, \`player:getItemAmount(id)\`, \`player:changeItem(id, count, 0)\`
-   - Dialog events ditangkap via \`onPlayerDialogCallback(function(world, player, data) ... end)\``;
+[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]`;
 
         function getActiveSystemPrompt() {
             const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran mendalam terlebih dahulu dengan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
 
             if (currentAIMode === 'gtps') return GTPS_DOCS;
-            
             if (currentAIMode === 'music') {
-                return `Kamu adalah ahli Web Audio API dan HTML5. Tugasmu adalah membuat kode Full HTML5 (didalamnya ada JS Web Audio API yang digabung) untuk membuat/memainkan instrumen atau musik sesuai tema yang diminta user. Kodenya harus interaktif, memiliki tombol Play/Stop yang jelas, dan siap dijalankan langsung di browser.` + thinkInstruction;
+                return `Kamu adalah ahli Web Audio API dan HTML5. Tugasmu adalah membuat kode Full HTML5 (didalamnya ada JS Web Audio API yang digabung) untuk membuat/memainkan instrumen atau musik sesuai tema yang diminta user.` + thinkInstruction;
             }
             if (currentAIMode === 'html') {
-                return `Kamu adalah Senior Full-Stack Web Developer. Tugasmu adalah membuat kode Full HTML tunggal (CSS & JS wajib ditulis langsung di dalam file HTML yang sama) untuk membuat website interaktif sesuai tema yang diminta user. Buatlah desain yang modern, estetis, responsif, dan fungsional.` + thinkInstruction;
+                return `Kamu adalah Senior Full-Stack Web Developer. Tugasmu adalah membuat kode Full HTML tunggal (CSS & JS wajib ditulis langsung di dalam file HTML yang sama) untuk membuat website interaktif sesuai tema yang diminta user.` + thinkInstruction;
             }
             if (currentAIMode === 'image') {
-                // FIXED: Explicit prompt for direct image generation rendering
-                return `Kamu adalah AI Pembuat Gambar / Fotografer Visual. Tugasmu adalah membaca dan menerjemahkan permintaan visual dari user ke dalam prompt bahasa Inggris yang sangat spesifik, detail, dan fotorealistik (Maksimal 60 kata).
+                return `Kamu adalah AI Pembuat Gambar / Fotografer Visual. Tugasmu adalah menerjemahkan permintaan visual dari user ke dalam prompt bahasa Inggris yang sangat spesifik dan fotorealistik (Maksimal 60 kata).
 
-INSTRUKSI PROSES BERPIKIR (THINKING):
-Gunakan tag <think> untuk menganalisis dan merancang prompt visual bahasa inggris terbaik.
-
-PENTING:
-Setelah selesai berpikir di </think>, kamu WAJIB menjawab HANYA dengan kode Markdown Image URL ini:
+Gunakan tag <think> untuk menganalisis prompt visual.
+Setelah </think>, jawab HANYA dengan Markdown Image URL ini:
 ![Hasil Gambar](https://image.pollinations.ai/prompt/{PROMPT_INGGRIS_DISINI}?width=${canvasW}&height=${canvasH}&transparent=true&nologo=true)
-
-ATURAN WAJIB:
-1. Ganti semua spasi di dalam url {PROMPT_INGGRIS_DISINI} dengan "%20".
-2. Sisipkan teks "transparent%20background" di akhir prompt bahasa Inggrismu agar gambarnya berformat PNG/Transparan.
-3. JANGAN berikan kalimat/penjelasan tambahan apapun di luar tag markdown gambar tersebut.`;
+Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background", dan jangan berikan teks lain di luar markdown gambar.`;
             }
             return GTPS_DOCS;
         }
@@ -400,7 +406,7 @@ ATURAN WAJIB:
                 if (isImage) reader.readAsDataURL(file);
                 else reader.readAsText(file);
             });
-            fileInput.value = ''; // reset
+            fileInput.value = '';
         });
 
         function updateAttachmentUI() {
@@ -483,15 +489,13 @@ ATURAN WAJIB:
            ========================================= */
         function attachHoldEvent(element, textToCopy) {
             let pressTimer;
-            
             const start = (e) => {
-                if (e.type === 'mousedown' && e.button !== 0) return; // Hanya left click
+                if (e.type === 'mousedown' && e.button !== 0) return;
                 pressTimer = setTimeout(() => {
                     if (navigator.vibrate) navigator.vibrate(50);
                     showCopyPopup(e, textToCopy);
-                }, 500); // Tahan 500ms
+                }, 500);
             };
-            
             const cancel = () => { clearTimeout(pressTimer); };
 
             element.addEventListener('mousedown', start);
@@ -503,13 +507,11 @@ ATURAN WAJIB:
         }
 
         function showCopyPopup(e, text) {
-            document.querySelectorAll('.copy-popup').forEach(el => el.remove()); // Hapus yg lama
-
+            document.querySelectorAll('.copy-popup').forEach(el => el.remove());
             const btn = document.createElement('button');
             btn.className = 'copy-popup fixed bg-blue-600 hover:bg-blue-500 border border-blue-400 text-white px-4 py-2 rounded-xl shadow-2xl z-[100] flex items-center gap-2 font-bold text-sm animate-pop-in outline-none';
             btn.innerHTML = '<i class="fas fa-copy"></i> Copy Prompt';
 
-            // Dapatkan koordinat sentuhan/mouse
             let x = e.clientX || (e.touches && e.touches[0].clientX);
             let y = e.clientY || (e.touches && e.touches[0].clientY);
 
@@ -525,7 +527,6 @@ ATURAN WAJIB:
 
             document.body.appendChild(btn);
 
-            // Auto-hide popup jika klik di tempat lain
             setTimeout(() => {
                 const hide = (ev) => {
                     if (!btn.contains(ev.target)) {
@@ -555,7 +556,7 @@ ATURAN WAJIB:
         const modelSection = document.getElementById('model-section');
 
         let chatHistory = [];
-        window.lastUserReq = null; // Menyimpan prompt terakhir untuk fitur regenerate
+        window.lastUserReq = null;
         
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
@@ -611,7 +612,6 @@ ATURAN WAJIB:
             
             try {
                 let models = [];
-                
                 if (provider === 'gemini') {
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
                     if (!res.ok) throw new Error('API Key Gemini Invalid');
@@ -619,27 +619,21 @@ ATURAN WAJIB:
                     models = data.models
                         .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
                         .map(m => ({ id: m.name.replace('models/', ''), name: m.displayName || m.name.replace('models/', '') }));
-                
                 } else if (provider === 'openai') {
                     const res = await fetch('https://api.openai.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
                     if (!res.ok) throw new Error('API Key OpenAI Invalid');
                     const data = await res.json();
-                    models = data.data
-                        .filter(m => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3'))
-                        .map(m => ({ id: m.id, name: m.id }));
-                        
+                    models = data.data.filter(m => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3')).map(m => ({ id: m.id, name: m.id }));
                 } else if (provider === 'deepseek') {
                     const res = await fetch('https://api.deepseek.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
                     if (!res.ok) throw new Error('API Key DeepSeek Invalid');
                     const data = await res.json();
                     models = data.data.map(m => ({ id: m.id, name: m.id }));
-                    
                 } else if (provider === 'kimi') {
                     const res = await fetch('https://api.moonshot.cn/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
                     if (!res.ok) throw new Error('API Key Kimi Invalid');
                     const data = await res.json();
                     models = data.data.map(m => ({ id: m.id, name: m.id }));
-                    
                 } else if (provider === 'claude') {
                     const res = await fetch('https://api.anthropic.com/v1/messages', {
                         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
@@ -665,7 +659,6 @@ ATURAN WAJIB:
                         modelSelect.value = prevModel;
                     }
                     saveActiveModel();
-                    
                     modelSection.classList.remove('hidden');
                     showStatus(statusDiv, `<i class="fas fa-check-circle"></i> Berhasil! Ditemukan ${models.length} model.`, 'success');
                 } else {
@@ -692,7 +685,7 @@ ATURAN WAJIB:
         }
 
         /* =========================================
-           CHAT UI RENDERING (WITH THINKING & REGENERATE PARSER)
+           CHAT UI RENDERING
            ========================================= */
         function appendMessage(sender, text, files = [], metadata = null) {
             const wrapper = document.createElement('div');
@@ -709,7 +702,6 @@ ATURAN WAJIB:
             
             let contentHTML = '';
 
-            // Render Lampiran
             if (files && files.length > 0) {
                 contentHTML += `<div class="flex flex-wrap gap-2 mb-3">`;
                 files.forEach(f => {
@@ -723,7 +715,6 @@ ATURAN WAJIB:
             }
 
             if(sender === 'ai') {
-                // Parse <think> blocks
                 let thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
                 if (thinkMatch) {
                     const thinkContent = thinkMatch[1].trim();
@@ -743,10 +734,8 @@ ATURAN WAJIB:
                     contentHTML += marked.parse(text);
                 }
 
-                // Hapus tombol regenerate lama dari chat sebelumnya
                 document.querySelectorAll('.regen-btn').forEach(btn => btn.remove());
 
-                // Tambahkan Metadata Footer + Tombol Regenerate BARU
                 if (metadata) {
                     contentHTML += `
                         <div class="mt-4 pt-3 border-t border-gray-700/50 flex flex-wrap items-center justify-between gap-4 text-[11px] font-medium text-gray-500">
@@ -761,13 +750,10 @@ ATURAN WAJIB:
                     `;
                 }
             } else {
-                // Untuk User
                 contentHTML += `<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;
             }
 
             bubble.innerHTML = contentHTML;
-            
-            // Tambahkan event Hold-to-Copy KHUSUS untuk balasan User
             if(sender === 'user') {
                 attachHoldEvent(bubble, text);
             }
@@ -795,7 +781,7 @@ ATURAN WAJIB:
         function removeTyping() { const el = document.getElementById('typing-indicator'); if(el) el.remove(); }
 
         /* =========================================
-           API EXECUTION DISPATCHER & REGENERATE
+           API EXECUTION DISPATCHER
            ========================================= */
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -803,8 +789,6 @@ ATURAN WAJIB:
             if (!text && attachedFiles.length === 0) return;
 
             const currentAttachments = [...attachedFiles];
-            
-            // Simpan riwayat input untuk fungsi REGENERATE
             window.lastUserReq = { text: text, attachments: currentAttachments };
 
             userInput.value = '';
@@ -815,11 +799,8 @@ ATURAN WAJIB:
             processAIRequest(text, currentAttachments);
         });
 
-        // FUNGSI REGENERATE JAWABAN TERAKHIR
         function regenerateLast() {
             if(!window.lastUserReq) return;
-            
-            // Hapus Bubble AI Terakhir di layar
             const allAiBubbles = document.querySelectorAll('#chat-container > .flex.items-start');
             if (allAiBubbles.length > 0) {
                 const lastBubbleWrapper = allAiBubbles[allAiBubbles.length - 1];
@@ -827,14 +808,10 @@ ATURAN WAJIB:
                     lastBubbleWrapper.remove();
                 }
             }
-            
-            // Hapus log AI dan log User terakhir dari Array chatHistory
             if(chatHistory.length > 0 && chatHistory[chatHistory.length-1].role === 'assistant') {
-                chatHistory.pop(); // Hapus AI
-                chatHistory.pop(); // Hapus User
+                chatHistory.pop();
+                chatHistory.pop();
             }
-
-            // Eksekusi ulang API secara diam-diam menggunakan memori lastUserReq
             processAIRequest(window.lastUserReq.text, window.lastUserReq.attachments);
         }
 
@@ -860,7 +837,6 @@ ATURAN WAJIB:
 
             try {
                 let aiResult = null;
-                
                 let textFilesContext = "";
                 const textFiles = attachments.filter(a => a.type === 'text');
                 if (textFiles.length > 0) {
@@ -904,7 +880,6 @@ ATURAN WAJIB:
             }
         }
 
-        /* --- API Handlers (Sama seperti sebelumnya, mengoper System Prompt aktif) --- */
         async function callGeminiAPI(apiKey, model, userText, attachments, sysPrompt) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const history = chatHistory.map(h => ({ role: h.role === 'assistant' ? 'model' : h.role, parts: [{ text: h.content }] }));
@@ -938,7 +913,6 @@ ATURAN WAJIB:
         async function callOpenAIAPI(apiKey, model, userText, endpoint, attachments, sysPrompt) {
             let messageContent = userText;
             const images = attachments.filter(a => a.type === 'image');
-            
             if (images.length > 0) {
                 messageContent = [{ type: "text", text: userText }];
                 images.forEach(img => {
