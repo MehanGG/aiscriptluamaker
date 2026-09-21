@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio & Media Converter - Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        * { -webkit-tap-highlight-color: transparent !important; outline: none !important; }
+        *:focus { outline: none !important; box-shadow: none !important; }
+        .input-focus:focus-within { box-shadow: 0 0 0 1px #10b981 !important; border-color: #10b981 !important; }
+        .allow-select { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        .glass-panel { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-header { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        @keyframes fade-in-down { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in-down 0.25s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black text-gray-200 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="glass-header p-4 flex justify-between items-center z-30 shadow-md">
+        <div class="flex items-center gap-3">
+            <!-- Top-Left 3-Dot Navigation Menu -->
+            <div class="relative">
+                <button type="button" onclick="toggleNavMenu(event)" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white p-2.5 rounded-xl transition-all border border-gray-600 flex items-center justify-center w-10 h-10 shadow-lg">
+                    <i class="fas fa-ellipsis-v text-lg"></i>
+                </button>
+                <!-- Nav Dropdown Menu -->
+                <div id="nav-dropdown" class="hidden absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
+                    <a href="../index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> AI Script Maker</a>
+                    <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Audio Converter</a>
+                    <a href="#" onclick="showComingSoon(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-400 flex items-center gap-3 transition-colors"><i class="fas fa-crown text-yellow-400 w-4 text-center"></i> Premium AI <span class="ml-auto text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded font-bold">SOON</span></a>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 rounded-xl shadow-lg">
+                <i class="fas fa-bolt text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Media Downloader</h1>
+                <p class="text-[11px] text-gray-400 font-medium">YouTube • TikTok • Instagram (MP4 / MP3)</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6 justify-center">
+        
+        <!-- Platform Selection Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button onclick="selectPlatform('youtube')" id="btn-youtube" class="platform-tab bg-gray-800 border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all shadow-lg group">
+                <i class="fab fa-youtube text-red-500 text-3xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-xs font-bold text-white">YouTube</span>
+            </button>
+            <button onclick="selectPlatform('tiktok')" id="btn-tiktok" class="platform-tab bg-gray-800/80 border-2 border-transparent p-4 rounded-2xl flex flex-col items-center gap-2 transition-all shadow-lg group hover:border-gray-600">
+                <i class="fab fa-tiktok text-white text-3xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-xs font-bold text-gray-300">TikTok</span>
+            </button>
+            <button onclick="selectPlatform('instagram')" id="btn-instagram" class="platform-tab bg-gray-800/80 border-2 border-transparent p-4 rounded-2xl flex flex-col items-center gap-2 transition-all shadow-lg group hover:border-gray-600">
+                <i class="fab fa-instagram text-pink-500 text-3xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-xs font-bold text-gray-300">Instagram</span>
+            </button>
+            <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 text-center">
+                <i class="fas fa-shield-alt text-emerald-400 text-xl"></i>
+                <span class="text-[10px] text-gray-400 font-semibold">Fast & Secure Server</span>
+            </div>
+        </div>
+
+        <!-- Converter Panel -->
+        <div class="glass-panel p-6 md:p-8 rounded-3xl shadow-2xl flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+                <label id="url-label" class="text-sm font-semibold text-gray-300 flex items-center gap-2">
+                    <i class="fab fa-youtube text-red-500"></i> Masukkan Link YouTube (URL)
+                </label>
+                <div class="input-focus flex bg-gray-950 border border-gray-700 rounded-2xl p-1.5 transition-all shadow-inner">
+                    <input type="url" id="media-url" class="allow-select w-full bg-transparent px-4 py-3 text-white text-sm focus:outline-none" placeholder="https://www.youtube.com/watch?v=...">
+                    <button type="button" onclick="pasteFromClipboard()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0">
+                        <i class="fas fa-paste"></i> Paste
+                    </button>
+                </div>
+            </div>
+
+            <!-- Format & Quality Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-2">Format Output</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="setFormat('mp4')" id="format-mp4" class="bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all">
+                            <i class="fas fa-video"></i> MP4 (Video)
+                        </button>
+                        <button type="button" onclick="setFormat('mp3')" id="format-mp3" class="bg-gray-800 text-gray-400 font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all hover:bg-gray-700">
+                            <i class="fas fa-music"></i> MP3 (Audio)
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-2">Kualitas</label>
+                    <select id="quality-select" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white text-xs outline-none cursor-pointer">
+                        <option value="highest">HD / Kualitas Tertinggi (Recommended)</option>
+                        <option value="medium">Standar (Medium Quality)</option>
+                        <option value="low">Hemat Kuota (Low Quality)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button onclick="startConversion()" id="convert-btn" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm">
+                <i class="fas fa-download"></i> Proses Konversi & Download
+            </button>
+        </div>
+
+        <!-- Result / Output Area (Hidden Initially) -->
+        <div id="result-container" class="hidden glass-panel p-6 rounded-3xl shadow-2xl flex flex-col gap-4 animate-fade-in border-emerald-500/30">
+            <div class="flex items-center justify-between border-b border-gray-700/50 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-sm">Konversi Berhasil!</h3>
+                        <p class="text-[11px] text-gray-400" id="result-info">File siap diunduh ke perangkat Anda.</p>
+                    </div>
+                </div>
+                <span id="badge-type" class="bg-blue-500/20 text-blue-400 text-xs px-3 py-1 rounded-full font-bold">MP4</span>
+            </div>
+
+            <!-- Progress simulation or Download Action -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-gray-950/60 p-4 rounded-2xl border border-gray-800">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center text-gray-400 text-xl shrink-0">
+                        <i id="result-icon" class="fas fa-file-video"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 id="result-title" class="text-xs font-bold text-white truncate max-w-xs">Media_File_Output_HD</h4>
+                        <p class="text-[10px] text-gray-400" id="result-size">Estimasi ukuran: ~12.4 MB</p>
+                    </div>
+                </div>
+                <a id="download-link" href="#" target="_blank" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shrink-0">
+                    <i class="fas fa-download"></i> Download File Sekarang
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        function toggleNavMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('nav-dropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        function showComingSoon(e) {
+            e.preventDefault();
+            document.getElementById('nav-dropdown').classList.add('hidden');
+            showToast("Fitur Premium AI akan segera hadir!");
+        }
+
+        document.addEventListener('click', function(event) {
+            const navMenu = document.getElementById('nav-dropdown');
+            if (navMenu && !navMenu.contains(event.target) && !event.target.closest('button[onclick*="toggleNavMenu"]')) {
+                navMenu.classList.add('hidden');
+            }
+        });
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-10 left-1/2 bg-emerald-600 border border-emerald-500 text-white px-5 py-2.5 rounded-xl shadow-2xl z-[100] text-sm font-bold flex items-center gap-2 animate-fade-in';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        /* Converter Logic State */
+        let currentPlatform = 'youtube';
+        let currentFormat = 'mp4';
+
+        function selectPlatform(platform) {
+            currentPlatform = platform;
+            document.querySelectorAll('.platform-tab').forEach(btn => {
+                btn.className = "platform-tab bg-gray-800/80 border-2 border-transparent p-4 rounded-2xl flex flex-col items-center gap-2 transition-all shadow-lg group hover:border-gray-600";
+            });
+            const activeBtn = document.getElementById(`btn-${platform}`);
+            activeBtn.className = "platform-tab bg-gray-800 border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all shadow-lg group";
+
+            const urlInput = document.getElementById('media-url');
+            const urlLabel = document.getElementById('url-label');
+            
+            if(platform === 'youtube') {
+                urlLabel.innerHTML = '<i class="fab fa-youtube text-red-500"></i> Masukkan Link YouTube (URL)';
+                urlInput.placeholder = 'https://www.youtube.com/watch?v=...';
+            } else if(platform === 'tiktok') {
+                urlLabel.innerHTML = '<i class="fab fa-tiktok text-white"></i> Masukkan Link TikTok (URL)';
+                urlInput.placeholder = 'https://www.tiktok.com/@user/video/...';
+            } else if(platform === 'instagram') {
+                urlLabel.innerHTML = '<i class="fab fa-instagram text-pink-500"></i> Masukkan Link Instagram Reel / Post (URL)';
+                urlInput.placeholder = 'https://www.instagram.com/reel/...';
+            }
+        }
+
+        function setFormat(fmt) {
+            currentFormat = fmt;
+            const btnMp4 = document.getElementById('format-mp4');
+            const btnMp3 = document.getElementById('format-mp3');
+            
+            if(fmt === 'mp4') {
+                btnMp4.className = "bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all";
+                btnMp3.className = "bg-gray-800 text-gray-400 font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all hover:bg-gray-700";
+            } else {
+                btnMp3.className = "bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all";
+                btnMp4.className = "bg-gray-800 text-gray-400 font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all hover:bg-gray-700";
+            }
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('media-url').value = text;
+                showToast("Link berhasil dipaste dari clipboard!");
+            } catch (err) {
+                alert("Gagal membaca clipboard. Silakan paste secara manual (Ctrl+V).");
+            }
+        }
+
+        function startConversion() {
+            const url = document.getElementById('media-url').value.trim();
+            if(!url) {
+                alert("Silakan masukkan URL media terlebih dahulu!");
+                return;
+            }
+
+            const btn = document.getElementById('convert-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sedang Menghubungkan ke Server Konversi...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-download"></i> Proses Konversi & Download';
+
+                // Tampilkan hasil
+                const resultContainer = document.getElementById('result-container');
+                resultContainer.classList.remove('hidden');
+
+                document.getElementById('badge-type').textContent = currentFormat.toUpperCase();
+                document.getElementById('result-title').textContent = `${currentPlatform.toUpperCase()}_Media_${Date.now().toString().slice(-6)}.${currentFormat}`;
+                document.getElementById('result-icon').className = currentFormat === 'mp4' ? 'fas fa-file-video text-emerald-400' : 'fas fa-file-audio text-blue-400';
+                
+                // Set simulasi / download helper link
+                const downloadLink = document.getElementById('download-link');
+                downloadLink.href = url; // Atau arahkan ke backend downloader helper Anda
+                
+                showToast("Konversi berhasil diselesaikan!");
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
