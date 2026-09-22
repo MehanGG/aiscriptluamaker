@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         /* Security & Anti-Highlight */
@@ -84,12 +86,20 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-emerald-400 to-teal-400">GTPS Script Studio</h1>
-                <p class="text-[11px] text-gray-400 font-medium">Ultimate AI • Thinking • Multi-File</p>
+                <p class="text-[11px] text-gray-400 font-medium" id="user-status-text">Cloud Sync Inactive</p>
             </div>
         </div>
-        <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-gray-600 flex items-center gap-2 text-sm font-semibold hover:shadow-emerald-500/20">
-            <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Setelan AI</span>
-        </button>
+        
+        <div class="flex gap-2">
+            <!-- Auth Button -->
+            <button id="auth-btn" onclick="openAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-indigo-500 flex items-center gap-2 text-sm font-semibold">
+                <i class="fas fa-user-circle"></i> <span class="hidden sm:inline" id="auth-btn-text">Login</span>
+            </button>
+            
+            <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-gray-600 flex items-center gap-2 text-sm font-semibold hover:shadow-emerald-500/20">
+                <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Setelan AI</span>
+            </button>
+        </div>
     </header>
 
     <!-- Chat Container -->
@@ -105,14 +115,11 @@
                     Pembaruan terbaru telah diaktifkan:
                 </p>
                 <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
-                    <li><strong class="text-gray-200">Live Timer & Token Berpikir:</strong> Indikator waktu (detik) dan token berjalan secara real-time saat AI memproses script.</li>
+                    <li><strong class="text-emerald-400">Cloud Sync (Supabase):</strong> Silakan login untuk menyimpan Chat History dan API Key secara otomatis ke database cloud!</li>
                     <li><strong class="text-gray-200">Referensi GTPS API Diperbarui:</strong> Script AI kini dilatih secara spesifik HANYA menggunakan referensi <em>Convert No Golden</em>, <em>Customhelp</em>, dan <em>Exchange</em>.</li>
-                    <li><strong class="text-gray-200">Navigasi:</strong> Menu pojok kiri atas kini berisi <b>Basic Lua Maker</b> dan <b>Premium Lua Maker</b>.</li>
+                    <li><strong class="text-gray-200">Live Timer & Token Berpikir:</strong> Indikator waktu dan token berjalan saat AI memproses script.</li>
                     <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
                 </ul>
-                <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
-                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> Buka <strong>Setelan</strong>, masukkan API Key dan klik "Verifikasi" untuk memuat daftar model yang tersedia!
-                </div>
             </div>
         </div>
     </main>
@@ -167,8 +174,35 @@
         </form>
     </footer>
 
+    <!-- Auth (Login/Register) Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-gray-800 p-1.5 rounded-full w-7 h-7 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            
+            <h2 class="text-xl font-bold mb-5 text-white flex items-center gap-2">
+                <i class="fas fa-cloud text-indigo-400"></i> Cloud Login
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Email</label>
+                    <input type="email" id="auth-email" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner" placeholder="Email Anda">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Password</label>
+                    <input type="password" id="auth-password" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner" placeholder="Minimal 6 karakter">
+                </div>
+                
+                <div class="flex gap-3 pt-2">
+                    <button onclick="handleLogin()" id="btn-login" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-lg text-sm">Login</button>
+                    <button onclick="handleRegister()" id="btn-register" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-2.5 rounded-xl transition-all text-sm">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[60] backdrop-blur-sm transition-opacity">
         <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative transform scale-95 transition-transform overflow-y-auto max-h-[90vh]" id="modal-content">
             <button onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-gray-800 p-2 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
             <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-3">
@@ -209,7 +243,7 @@
     </div>
 
     <!-- Image Canvas Size Modal -->
-    <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[60] backdrop-blur-sm transition-opacity">
+    <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[70] backdrop-blur-sm transition-opacity">
         <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
             <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-image text-emerald-400"></i> Resolusi Gambar (PNG)</h3>
             <div class="flex gap-4 mb-5">
@@ -230,6 +264,142 @@
     </div>
 
     <script>
+        /* =========================================
+           SUPABASE INITIALIZATION & AUTH LOGIC
+           ========================================= */
+        const SUPABASE_URL = 'https://ynqydnmpujjtebflfawo.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlucXlkbm1wdWpqdGViZmZsYXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNjMxODQsImV4cCI6MjEwNTYzOTE4NH0.hSOiRrlG1a4_GxyQumG4EATv3l20ZdP26-KeSKW-d4E'; 
+        
+        let supabase = null;
+        let currentUser = null;
+
+        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Listener status login
+            supabase.auth.onAuthStateChange(async (event, session) => {
+                if (session && session.user) {
+                    currentUser = session.user;
+                    document.getElementById('auth-btn-text').textContent = 'Logout';
+                    document.getElementById('user-status-text').innerHTML = `<span class="text-emerald-400"><i class="fas fa-cloud"></i> Cloud Sync Active</span>`;
+                    closeAuthModal();
+                    
+                    // Ambil chat & API Key dari DB saat login
+                    await loadApiKeysFromDB();
+                    await loadChatHistoryFromDB();
+                } else {
+                    currentUser = null;
+                    document.getElementById('auth-btn-text').textContent = 'Login';
+                    document.getElementById('user-status-text').textContent = 'Cloud Sync Inactive';
+                }
+            });
+        }
+
+        function openAuthModal() {
+            if (currentUser) {
+                // Logout jika sudah login
+                supabase.auth.signOut();
+                showToast("Berhasil Logout!");
+            } else {
+                if(SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+                    alert("Developer: Silakan isi SUPABASE_URL & ANON_KEY di dalam script HTML terlebih dahulu.");
+                    return;
+                }
+                document.getElementById('auth-modal').classList.remove('hidden');
+                document.getElementById('auth-modal').classList.add('flex');
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('flex');
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const btn = document.getElementById('btn-login');
+            
+            if(!email || !password) return alert("Isi email dan password!");
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            
+            btn.innerHTML = 'Login';
+            btn.disabled = false;
+            
+            if (error) alert("Error: " + error.message);
+            else showToast("Berhasil Login!");
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const btn = document.getElementById('btn-register');
+            
+            if(!email || !password) return alert("Isi email dan password!");
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            
+            btn.innerHTML = 'Register';
+            btn.disabled = false;
+            
+            if (error) alert("Error: " + error.message);
+            else alert("Pendaftaran berhasil! (Jika email confirmation aktif, silakan cek email). Anda bisa langsung login.");
+        }
+
+        /* DATABASE API KEY LOGIC */
+        async function loadApiKeysFromDB() {
+            if (!currentUser || !supabase) return;
+            const { data, error } = await supabase.from('api_settings').select('*').eq('user_id', currentUser.id);
+            if (data && data.length > 0) {
+                data.forEach(setting => {
+                    sessionStorage.setItem(`_key_${setting.provider}`, setting.api_key); // api_key dari db sudah di encode
+                });
+            }
+        }
+
+        async function saveApiKeyToDB(provider, encodedKey) {
+            if (!currentUser || !supabase) return;
+            await supabase.from('api_settings').upsert([
+                { user_id: currentUser.id, provider: provider, api_key: encodedKey }
+            ], { onConflict: 'user_id, provider' });
+        }
+
+        /* DATABASE CHAT LOGIC */
+        async function loadChatHistoryFromDB() {
+            if (!currentUser || !supabase) return;
+            const { data, error } = await supabase.from('chat_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
+            
+            if (data && data.length > 0) {
+                chatHistory = []; // Reset memori
+                // Kita tidak membersihkan welcome message UI, biarkan bersambung
+                data.forEach(chat => {
+                    // Masukkan ke memori AI
+                    chatHistory.push({ role: chat.role === 'ai' ? 'assistant' : 'user', content: chat.content });
+                    // Tampilkan ke UI (jangan simpan ulang ke DB)
+                    appendMessage(chat.role, chat.content, [], null, false); 
+                });
+                
+                // Scroll ke bawah
+                const chatBox = document.getElementById('chat-container');
+                setTimeout(() => chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' }), 300);
+            }
+        }
+
+        async function saveChatToDB(role, content) {
+            if (!currentUser || !supabase) return;
+            await supabase.from('chat_history').insert([
+                { user_id: currentUser.id, role: role, content: content }
+            ]);
+        }
+
+
         /* =========================================
            SECURITY & NAVIGATION MENU LOGIC
            ========================================= */
@@ -605,7 +775,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
         }
 
         /* =========================================
-           DYNAMIC MODEL FETCHING
+           DYNAMIC MODEL FETCHING & SAVING DB API KEY
            ========================================= */
         async function saveAndFetchModels() {
             const provider = providerSelect.value;
@@ -663,8 +833,12 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
                         modelSelect.appendChild(opt);
                     });
                     
-                    sessionStorage.setItem(`_key_${provider}`, encKey(apiKey));
+                    const encodedApiKey = encKey(apiKey);
+                    sessionStorage.setItem(`_key_${provider}`, encodedApiKey);
                     sessionStorage.setItem('_active_provider', provider);
+                    
+                    // SAVE TO SUPABASE DB IF LOGGED IN
+                    saveApiKeyToDB(provider, encodedApiKey);
                     
                     const prevModel = sessionStorage.getItem(`_model_${provider}`);
                     if(prevModel && models.find(m => m.id === prevModel)) {
@@ -697,9 +871,9 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
         }
 
         /* =========================================
-           CHAT UI RENDERING (WITH LIVE THINKING TIMER)
+           CHAT UI RENDERING & DATABASE SYNC
            ========================================= */
-        function appendMessage(sender, text, files = [], metadata = null) {
+        function appendMessage(sender, text, files = [], metadata = null, saveToDatabase = true) {
             const wrapper = document.createElement('div');
             wrapper.className = `flex items-start gap-3 md:gap-4 w-full ${sender === 'user' ? 'flex-row-reverse' : ''}`;
             
@@ -774,6 +948,11 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
             wrapper.appendChild(bubble);
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            
+            // Simpan Chat ke Supabase jika login
+            if (saveToDatabase) {
+                saveChatToDB(sender, text);
+            }
         }
 
         function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
@@ -826,7 +1005,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
             userInput.style.height = 'auto';
             clearAllAttachments();
 
-            appendMessage('user', text || '[Melampirkan File]', currentAttachments);
+            appendMessage('user', text || '[Melampirkan File]', currentAttachments, null, true);
             processAIRequest(text, currentAttachments);
         });
 
@@ -897,14 +1076,14 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
                     prompt: aiResult.tokens.prompt,
                     comp: aiResult.tokens.comp,
                     total: aiResult.tokens.total
-                });
+                }, true); // Save to DB
 
                 chatHistory.push({ role: 'user', content: finalUserPrompt });
                 chatHistory.push({ role: 'assistant', content: aiResult.text });
 
             } catch (error) {
                 removeTyping();
-                appendMessage('ai', `**Error System:** Gagal memproses. \n\n\`${error.message}\``);
+                appendMessage('ai', `**Error System:** Gagal memproses. \n\n\`${error.message}\``, [], null, false);
             } finally {
                 sendBtn.disabled = false;
                 userInput.focus();
