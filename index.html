@@ -12,7 +12,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* Security & Anti-Highlight */
         body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; background-color: #000000; }
         * { -webkit-tap-highlight-color: transparent !important; outline: none !important; }
         *:focus { outline: none !important; box-shadow: none !important; }
@@ -23,7 +22,6 @@
 
         img { max-width: 100%; height: auto; border-radius: 12px; margin-top: 10px; }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -87,9 +85,8 @@
                     <i class="fas fa-plus text-lg"></i>
                 </button>
                 
-                <textarea id="user-input" rows="1" class="allow-select flex-1 bg-transparent text-white py-3.5 px-1 resize-none focus:outline-none text-[15px] leading-relaxed max-h-32 overflow-y-auto" placeholder="Minta Gemini" oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 128) + 'px'"></textarea>
+                <textarea id="user-input" rows="1" class="allow-select flex-1 bg-transparent text-white py-3.5 px-1 resize-none focus:outline-none text-[15px] leading-relaxed max-h-32 overflow-y-auto" placeholder="Minta AI buatkan Script..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 128) + 'px'"></textarea>
                 
-                <!-- Ganti Icon Setting dengan Icon Gambar -->
                 <button type="button" onclick="openImageModal()" class="p-3 text-gray-400 hover:text-blue-400 rounded-full flex-shrink-0 transition-colors" title="Buat Gambar PNG">
                     <i class="fas fa-image text-lg"></i>
                 </button>
@@ -167,7 +164,7 @@
     </div>
 
     <script>
-        let chatHistory = []; // Hanya tersimpan selama sesi berjalan, tidak dilocalStorage
+        let chatHistory = []; 
         let timerInterval = null;
         let aiStartTime = 0;
         let currentGeneratedImgUrl = "";
@@ -286,7 +283,7 @@
         function updateModelDisplay() {
             const p = localStorage.getItem('_active_provider') || 'Belum Diatur';
             const m = localStorage.getItem(`_model_${p}`) || p;
-            let display = m.replace('gemini-2.5-', 'Gemini 2.5 ').replace('flash', 'Flash-Lite');
+            let display = m.replace('gemini-2.5-', 'Gemini 2.5 ').replace('flash', 'Flash');
             if (display.length > 25) display = display.substring(0, 25) + '...';
             document.getElementById('active-model-display').innerHTML = `${display} <i class="fas fa-chevron-down text-[10px] ml-1 opacity-70"></i>`;
         }
@@ -380,7 +377,8 @@
                 
                 const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
                 if (thinkMatch) {
-                    html += `<details class="think-box mb-4 bg-[#161618] border border-[#2a2a2c] rounded-2xl p-1" open>
+                    // THINKING PROCESS BISA DI HIDE (Menghilangkan atribut 'open')
+                    html += `<details class="think-box mb-4 bg-[#161618] border border-[#2a2a2c] rounded-2xl p-1">
                                 <summary class="px-3 py-2 text-xs font-semibold text-gray-400 flex items-center gap-2"><i class="fas fa-stopwatch text-yellow-500"></i> Thinking Process</summary>
                                 <div class="p-3 pt-1 text-[13px] text-gray-500 font-mono whitespace-pre-wrap">${escapeHTML(thinkMatch[1].trim())}</div>
                              </details>`;
@@ -389,7 +387,6 @@
                     html += marked.parse(text);
                 }
 
-                // Append Metadata (Waktu, Token, Restart)
                 if (metadata) {
                     html += `<div class="mt-4 pt-3 border-t border-[#2a2a2c] flex items-center gap-5 text-[12px] text-gray-500 font-mono">
                                 <span><i class="fas fa-clock text-blue-400"></i> ${metadata.time}s</span>
@@ -438,17 +435,143 @@
         }
 
         /* =========================================
-           API EXECUTION & SYSTEM PROMPT
+           API EXECUTION & SYSTEM PROMPT SUPER BESAR
            ========================================= */
-        const SYSTEM_PROMPT = `Kamu adalah AI ahli bahasa pemrograman Lua khusus untuk server GTPS Cloud (GTPS10).
-Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua.
+        const SYSTEM_PROMPT = \`Kamu adalah AI ahli bahasa pemrograman Lua KHUSUS untuk server GTPS Cloud (GTPS10).
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud.
 
 ATURAN FORMAT BALASAN:
 - SEBELUM menuliskan blok kode script (\`\`\`lua), kamu WAJIB memberikan JUDUL SCRIPT terlebih dahulu.
 - Tidak boleh ada block kode tanpa judul di atasnya.
-- SELALU gunakan tag <think>...</think> di awal responmu untuk menjelaskan pemikiran dan analisamu.
+- SELALU gunakan tag <think>...</think> di awal responmu untuk menjelaskan pemikiran dan analisamu secara mendalam.
 
-REFERENSI API LENGKAP: (Akses penuh GTPS Cloud Lua API - player, world, item, dll)`;
+--- CONTOH REFERENSI PENTING (COMMAND KHUSUS ROLE ID 51) ---
+\`\`\`lua
+-- COMMAND /GIVEGEMS KHUSUS ROLE ID 51 (SEBIA CORE)
+registerLuaCommand({ 
+    command = "givegems", 
+    roleRequired = 51, 
+    description = "Memberikan gems ke player (Khusus Role ID 51)" 
+})
+
+onPlayerCommandCallback(function(world, player, fullCommand)
+    if not world or not player or type(player.getName) ~= "function" then return false end
+    
+    local cmd, targetName, amountStr = string.match(fullCommand, "^/?(%S+)%s+(%S+)%s*(.*)$")
+    if not cmd then cmd = string.lower(string.match(fullCommand, "^/?(%S+)") or "") end
+    cmd = string.lower(cmd)
+
+    if cmd == "givegems" then
+        local hasRole51 = false
+        if type(player.hasRole) == "function" and player:hasRole(51) then
+            hasRole51 = true
+        elseif type(player.getRole) == "function" and player:getRole() == 51 then
+            hasRole51 = true
+        end
+
+        if not hasRole51 then
+            player:onConsoleMessage("\`4[Error] Kamu tidak memiliki izin (Role ID 51) untuk menggunakan command ini!")
+            return true
+        end
+
+        if not targetName or targetName == "" or not amountStr or amountStr == "" then
+            player:onConsoleMessage("\`4[Usage] /givegems [nama_player] [jumlah]")
+            return true
+        end
+
+        local amount = tonumber(amountStr)
+        if not amount or amount <= 0 then
+            player:onConsoleMessage("\`4[Error] Jumlah gems tidak valid!")
+            return true
+        end
+
+        local targetPlayer = nil
+        local allPlayers = getServerPlayers()
+        if type(allPlayers) == "table" then
+            for _, p in ipairs(allPlayers) do
+                if p and type(p.getName) == "function" then
+                    local pName = p:getName()
+                    local cleanName = type(p.getCleanName) == "function" and p:getCleanName() or pName
+                    if string.lower(pName) == string.lower(targetName) or string.lower(cleanName) == string.lower(targetName) then
+                        targetPlayer = p break
+                    end
+                end
+            end
+        end
+
+        if not targetPlayer then
+            player:onConsoleMessage("\`4[Error] Player dengan nama '" .. targetName .. "' tidak ditemukan atau sedang offline!")
+            return true
+        end
+
+        local success = false
+        if type(targetPlayer.addGems) == "function" then
+            targetPlayer:addGems(amount)
+            success = true
+        elseif type(targetPlayer.setGems) == "function" and type(targetPlayer.getGems) == "function" then
+            targetPlayer:setGems(targetPlayer:getGems() + amount)
+            success = true
+        end
+
+        if success then
+            player:onConsoleMessage(string.format("\`2[Success] Berhasil memberikan %d gems kepada %s!", amount, targetName))
+            targetPlayer:onConsoleMessage(string.format("\`2[Gems] Kamu telah menerima %d gems dari admin!", amount))
+            if type(targetPlayer.playAudio) == "function" then targetPlayer:playAudio("cash_register.wav") end
+        else
+            player:onConsoleMessage("\`4[Error] Fungsi penambahan gems tidak didukung oleh core server ini.")
+        end
+        return true
+    end
+    return false
+end)
+\`\`\`
+
+--- DOKUMENTASI LENGKAP GTPS CLOUD LUA API (WAJIB DIIKUTI) ---
+Global Functions: 
+- registerLuaCommand(config) -- {command, roleRequired, description}
+- getServerPlayers() -- Returns {Player}
+- getServerWorlds() -- Returns {World}
+- getItem(itemID) -- Returns Item
+- print(...) 
+- saveStringToServer(uniqueID, data), loadStringFromServer(uniqueID)
+- saveDataToServer(uniqueID, data), loadDataFromServer(uniqueID)
+- file.write(path, data), file.read(path), file.exists(path)
+- timer.setTimeout(seconds, callback), timer.setInterval(seconds, callback)
+
+Player Class:
+- player:getName(), player:getNetID(), player:getCleanName()
+- player:hasRole(roleID), player:getRole()
+- player:onConsoleMessage(message), player:onTalkBubble(netID, message, persistMessage)
+- player:onDialogRequest(message)
+- player:getGems(), player:addGems(amount), player:setGems(amount), player:removeGems(amount)
+- player:getItemAmount(itemID), player:changeItem(itemID, amount, addBackpack)
+- player:getPosX(), player:getPosY()
+- player:playAudio(fileName)
+- player:disconnect(), player:ban(duration, reason, punisher)
+- player:sendRawPacket(data)
+
+World Class:
+- world:getName()
+- world:getPlayers() -- Returns {Player}
+- world:getTile(x, y) -- Returns Tile
+- world:spawnItem(x, y, itemID, itemCount)
+- world:useItemEffect(netID, itemID, secondNetID, effectDelay)
+- world:onCreateChatBubble(posX, posY, message, persistMessage)
+- world:setWeather(weatherID)
+
+Tile Class:
+- tile:getTileID(), tile:getFlags(), tile:getPosX(), tile:getPosY()
+- tile:getTileData(data_type), tile:setTileData(data_type, data_value)
+
+Callbacks (Gunakan sesuai format API):
+- onPlayerCommandCallback(function(world, player, command) ... end)
+- onPlayerDialogCallback(function(world, player, data) ... end) -- data["dialog_name"] & data["buttonClicked"]
+- onPlayerChatCallback(function(world, player, message) ... end)
+- onPlayerJoinCallback(function(world, player) ... end)
+
+PENTING: JANGAN MENGGUNAKAN API ATAU FUNGSI LUA YANG TIDAK TERCANTUM DI GTPS CLOUD API DI ATAS. 
+Gunakan table iterators seperti 'for _, p in ipairs(getServerPlayers()) do' saat mencari player.
+\``;
 
         function handleFormSubmit(e) {
             e.preventDefault();
@@ -464,11 +587,8 @@ REFERENSI API LENGKAP: (Akses penuh GTPS Cloud Lua API - player, world, item, dl
         }
 
         window.restartGeneration = function(btn) {
-            // Hapus blok AI saat ini
             btn.closest('.chat-block').remove();
-            // Ambil prompt dari data button
             const prompt = btn.getAttribute('data-prompt');
-            // Hapus data AI terakhir dari history jika ada
             if(chatHistory.length > 0 && chatHistory[chatHistory.length-1].role === 'assistant') {
                 chatHistory.pop();
             }
