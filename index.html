@@ -68,7 +68,7 @@
     <!-- Header -->
     <header class="glass-header p-4 flex justify-between items-center z-30 shadow-md">
         <div class="flex items-center gap-3">
-            <!-- Top-Left 3-Dot Navigation Menu (Hanya Basic & Premium Lua Maker) -->
+            <!-- Top-Left 3-Dot Navigation Menu -->
             <div class="relative">
                 <button type="button" onclick="toggleNavMenu(event)" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white p-2.5 rounded-xl transition-all border border-gray-600 flex items-center justify-center w-10 h-10 shadow-lg">
                     <i class="fas fa-ellipsis-v text-lg"></i>
@@ -106,7 +106,7 @@
                 </p>
                 <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
                     <li><strong class="text-gray-200">Live Timer & Token Berpikir:</strong> Indikator waktu (detik) dan token berjalan secara real-time saat AI memproses script.</li>
-                    <li><strong class="text-gray-200">Referensi GTPS API Terintegrasi:</strong> Script AI dilatih berdasarkan standar database SQLite, dialog parallel rows, dan sistem command GTPS10.</li>
+                    <li><strong class="text-gray-200">Referensi GTPS API Diperbarui:</strong> Script AI kini dilatih secara spesifik HANYA menggunakan referensi <em>Convert No Golden</em>, <em>Customhelp</em>, dan <em>Exchange</em>.</li>
                     <li><strong class="text-gray-200">Navigasi:</strong> Menu pojok kiri atas kini berisi <b>Basic Lua Maker</b> dan <b>Premium Lua Maker</b>.</li>
                     <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
                 </ul>
@@ -293,20 +293,20 @@ Format respons kamu harus SELALU seperti ini:
 [Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]
 
 STANDAR REFERENSI SCRIPT & API GTPS CLOUD:
-1. **Sistem Database & Penyimpanan:**
-   - Gunakan SQLite (\`sqlite.open\`) atau file file storage (\`file.write\`, \`file.read\`, \`file.exists\`, \`onAutoSaveRequest\`)[span_12](start_span)[span_12](end_span)[span_13](start_span)[span_13](end_span).
+1. **Sistem Penyimpanan (Database/File):**
+   - Gunakan API \`file.write\`, \`file.read\`, \`file.exists\`, dan event \`onAutoSaveRequest\` untuk menyimpan data lokal ke dalam file .db biasa.
 2. **Struktur Dialog GUI & Parallel Rows:**
-   - Gunakan string builder untuk dialog dengan format \`set_bg_color\`, \`add_label_with_icon\`, \`add_custom_break\`, \`add_spacer\`.
+   - Gunakan string builder untuk dialog (misal \`set_bg_color\`, \`add_label_with_icon\`, \`add_custom_break\`, \`add_spacer\`).
    - Untuk baris item paralel (Trade/Convert), gunakan pola:
      \`add_button_with_icon|trade_req_1|ItemName|noflags|itemID|amount|left|\`
      \`add_button_with_icon|click_none||noflags|11162||\` (ikon panah)
-     \`add_button_with_icon|trade_give_1|RewardName|staticYellowFrame|rewardID|amount|left|\`[span_14](start_span)[span_14](end_span)[span_15](start_span)[span_15](end_span)
+     \`add_button_with_icon|trade_give_1|RewardName|staticYellowFrame|rewardID|amount|left|\`
 3. **API Player & World Global:**
-   - \`player:getNetID()\`, \`player:getName()\`, \`player:getRealCleanName()\`, \`player:getUserID()\`[span_16](start_span)[span_16](end_span)
-   - \`player:getItemAmount(itemID)\`, \`player:changeItem(itemID, count, 0)\`[span_17](start_span)[span_17](end_span)[span_18](start_span)[span_18](end_span)[span_19](start_span)[span_19](end_span)
-   - \`player:onDialogRequest(dialogText)\`, \`player:onConsoleMessage(msg)\`, \`player:onTalkBubble(netID, text, 0)\`[span_20](start_span)[span_20](end_span)[span_21](start_span)[span_21](end_span)[span_22](start_span)[span_22](end_span)
-   - \`player:hasRole(roleID)\`, \`getRoles()\`, \`registerLuaCommand({...})\`[span_23](start_span)[span_23](end_span)[span_24](start_span)[span_24](end_span)[span_25](start_span)[span_25](end_span)
-   - Callback event: \`onPlayerCommandCallback(function(world, player, fullCommand) ... end)\`, \`onPlayerDialogCallback(function(world, player, data) ... end)\`[span_26](start_span)[span_26](end_span)[span_27](start_span)[span_27](end_span)[span_28](start_span)[span_28](end_span)`;
+   - Atribut Player: \`player:getNetID()\`, \`player:getName()\`, \`player:getPosX()\`, \`player:getPosY()\`.
+   - Inventori: \`player:getItemAmount(itemID)\`, \`player:changeItem(itemID, count, 0)\`.
+   - Interaksi UI & Efek: \`player:onDialogRequest(dialogText)\`, \`player:onConsoleMessage(msg)\`, \`player:onTalkBubble(netID, text, 0)\`, \`player:playAudio(file)\`, \`world:useItemEffect()\`, \`world:onCreateChatBubble()\`.
+   - Role & Command: \`player:hasRole(roleID)\`, \`getRoles()\`, \`registerLuaCommand({...})\`.
+   - Event Callback: \`onPlayerCommandCallback(function(world, player, fullCommand) ... end)\`, \`onPlayerDialogCallback(function(world, player, data) ... end)\`.`;
 
         function getActiveSystemPrompt() {
             const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran mendalam terlebih dahulu dengan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
