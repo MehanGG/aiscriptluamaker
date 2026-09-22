@@ -76,8 +76,9 @@
                     <i class="fas fa-ellipsis-v text-lg"></i>
                 </button>
                 <div id="nav-dropdown" class="hidden absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
-                    <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> Basic Lua Maker</a>
-                    <a href="#" onclick="showPremiumModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-crown text-yellow-400 w-4 text-center"></i> Premium Lua Maker</a>
+                    <a href="#" onclick="startNewChat(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-plus text-emerald-400 w-4 text-center"></i> New Chat</a>
+                    <a href="#" onclick="toggleHistoryModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-history text-blue-400 w-4 text-center"></i> History Chat</a>
+                    <a href="#" onclick="handleLogout(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-red-400 flex items-center gap-3 transition-colors"><i class="fas fa-sign-out-alt w-4 text-center"></i> Logout</a>
                 </div>
             </div>
 
@@ -86,20 +87,12 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-emerald-400 to-teal-400">GTPS Script Studio</h1>
-                <p class="text-[11px] text-gray-400 font-medium" id="user-status-text">Cloud Sync Inactive</p>
+                <p class="text-[11px] text-gray-400 font-medium" id="user-status-text">Memeriksa Sesi...</p>
             </div>
         </div>
-        
-        <div class="flex gap-2">
-            <!-- Auth Button -->
-            <button id="auth-btn" onclick="openAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-indigo-500 flex items-center gap-2 text-sm font-semibold">
-                <i class="fas fa-user-circle"></i> <span class="hidden sm:inline" id="auth-btn-text">Login</span>
-            </button>
-            
-            <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-gray-600 flex items-center gap-2 text-sm font-semibold hover:shadow-emerald-500/20">
-                <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Setelan AI</span>
-            </button>
-        </div>
+        <button type="button" onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-gray-600 flex items-center gap-2 text-sm font-semibold hover:shadow-emerald-500/20">
+            <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Setelan AI</span>
+        </button>
     </header>
 
     <!-- Chat Container -->
@@ -115,11 +108,13 @@
                     Pembaruan terbaru telah diaktifkan:
                 </p>
                 <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
-                    <li><strong class="text-emerald-400">Cloud Sync (Supabase):</strong> Silakan login untuk menyimpan Chat History dan API Key secara otomatis ke database cloud!</li>
+                    <li><strong class="text-gray-200">Live Timer & Token Berpikir:</strong> Indikator waktu (detik) dan token berjalan secara real-time saat AI memproses script.</li>
                     <li><strong class="text-gray-200">Referensi GTPS API Diperbarui:</strong> Script AI kini dilatih secara spesifik HANYA menggunakan referensi <em>Convert No Golden</em>, <em>Customhelp</em>, dan <em>Exchange</em>.</li>
-                    <li><strong class="text-gray-200">Live Timer & Token Berpikir:</strong> Indikator waktu dan token berjalan saat AI memproses script.</li>
                     <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
                 </ul>
+                <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> Buka <strong>Setelan</strong>, masukkan API Key dan klik "Verifikasi" untuk memuat daftar model yang tersedia!
+                </div>
             </div>
         </div>
     </main>
@@ -129,7 +124,7 @@
         <div class="max-w-5xl mx-auto bg-gray-800/90 border border-gray-700 p-3 rounded-xl shadow-lg">
             <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
                 <span class="text-xs font-bold text-gray-300"><i class="fas fa-paperclip"></i> Lampiran (<span id="file-count">0</span>/10)</span>
-                <button onclick="clearAllAttachments()" class="text-[11px] text-red-400 hover:text-red-300 font-semibold bg-red-900/30 px-2 py-1 rounded transition-colors">Hapus Semua</button>
+                <button type="button" onclick="clearAllAttachments()" class="text-[11px] text-red-400 hover:text-red-300 font-semibold bg-red-900/30 px-2 py-1 rounded transition-colors">Hapus Semua</button>
             </div>
             <div id="file-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar"></div>
         </div>
@@ -157,7 +152,7 @@
                         <a href="#" onclick="setMode('gtps', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-code text-gray-400 w-4 text-center"></i> Mode Script GTPS (Default)</a>
                         <a href="#" onclick="setMode('music', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Mode Bikin Musik</a>
                         <a href="#" onclick="openImageModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-image text-emerald-400 w-4 text-center"></i> Mode Gambar (Direct PNG)</a>
-                        <a href="#" onclick="setMode('html', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-globe text-purple-400 w-4 text-center"></i> Mode Website HTML</a>
+                        <a href="#" onclick="setMode('html', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-globe text-purple-400 w-4 text-center"></i> Mode Website HTML</a>
                     </div>
                 </div>
 
@@ -174,37 +169,21 @@
         </form>
     </footer>
 
-    <!-- Auth (Login/Register) Modal -->
-    <div id="auth-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
-        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-gray-800 p-1.5 rounded-full w-7 h-7 flex items-center justify-center"><i class="fas fa-times"></i></button>
-            
-            <h2 class="text-xl font-bold mb-5 text-white flex items-center gap-2">
-                <i class="fas fa-cloud text-indigo-400"></i> Cloud Login
-            </h2>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1">Email</label>
-                    <input type="email" id="auth-email" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner" placeholder="Email Anda">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1">Password</label>
-                    <input type="password" id="auth-password" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner" placeholder="Minimal 6 karakter">
-                </div>
-                
-                <div class="flex gap-3 pt-2">
-                    <button onclick="handleLogin()" id="btn-login" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-lg text-sm">Login</button>
-                    <button onclick="handleRegister()" id="btn-register" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-2.5 rounded-xl transition-all text-sm">Register</button>
-                </div>
+    <!-- History Modal -->
+    <div id="history-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md p-6 shadow-2xl relative max-h-[80vh] flex flex-col">
+            <button type="button" onclick="toggleHistoryModal(event)" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-800 p-1.5 rounded-full w-7 h-7 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-history text-blue-400"></i> Riwayat Chat Tersimpan</h2>
+            <div id="history-list-container" class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                <p class="text-xs text-gray-500 italic text-center py-4">Memuat riwayat...</p>
             </div>
         </div>
     </div>
 
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[60] backdrop-blur-sm transition-opacity">
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
         <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative transform scale-95 transition-transform overflow-y-auto max-h-[90vh]" id="modal-content">
-            <button onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-gray-800 p-2 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            <button type="button" onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-gray-800 p-2 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
             <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-3">
                 <div class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400"><i class="fas fa-satellite-dish"></i></div>
                 Jaringan API & Model
@@ -227,7 +206,7 @@
                     <input type="password" id="api-key-input" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-inner" placeholder="Masukkan API Key untuk mengambil model otomatis...">
                 </div>
 
-                <button id="save-btn" onclick="saveAndFetchModels()" class="w-full bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
+                <button type="button" id="save-btn" onclick="saveAndFetchModels()" class="w-full bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
                     <i class="fas fa-sync-alt"></i> Verifikasi Key & Tarik Model
                 </button>
 
@@ -243,7 +222,7 @@
     </div>
 
     <!-- Image Canvas Size Modal -->
-    <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[70] backdrop-blur-sm transition-opacity">
+    <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[60] backdrop-blur-sm transition-opacity">
         <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
             <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-image text-emerald-400"></i> Resolusi Gambar (PNG)</h3>
             <div class="flex gap-4 mb-5">
@@ -257,148 +236,82 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <button onclick="closeImageModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Batal</button>
-                <button onclick="confirmImagePrompt()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg">Terapkan Mode</button>
+                <button type="button" onclick="closeImageModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Batal</button>
+                <button type="button" onclick="confirmImagePrompt()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg">Terapkan Mode</button>
             </div>
         </div>
     </div>
 
     <script>
         /* =========================================
-           SUPABASE INITIALIZATION & AUTH LOGIC
+           SUPABASE AUTH & CONNECTION CHECK
            ========================================= */
         const SUPABASE_URL = 'https://ynqydnmpujjtebflfawo.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlucXlkbm1wdWpqdGViZmZsYXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNjMxODQsImV4cCI6MjEwNTYzOTE4NH0.hSOiRrlG1a4_GxyQumG4EATv3l20ZdP26-KeSKW-d4E'; 
         
-        let supabase = null;
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
 
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        async function verifyAuthSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session || !session.user) {
+                window.location.href = 'login/index.html';
+                return;
+            }
+            currentUser = session.user;
+            document.getElementById('user-status-text').innerHTML = `<span class="text-emerald-400"><i class="fas fa-cloud"></i> ${currentUser.email}</span>`;
+            await loadApiKeysFromDB();
+            await loadChatHistoryFromDB();
+        }
+        verifyAuthSession();
+
+        async function handleLogout(e) {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.href = 'login/index.html';
+        }
+
+        function startNewChat(e) {
+            e.preventDefault();
+            document.getElementById('nav-dropdown').classList.add('hidden');
+            chatHistory = [];
+            document.getElementById('chat-container').innerHTML = `
+                <div class="flex items-start gap-4 w-full">
+                    <div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
+                        <h3 class="font-bold text-white mb-1 text-lg">Sesi Percakapan Baru ✨</h3>
+                        <p class="text-gray-300 text-sm">Mulai diskusi script GTPS atau coding Anda.</p>
+                    </div>
+                </div>`;
+            showToast("Sesi chat baru dimulai!");
+        }
+
+        async function toggleHistoryModal(e) {
+            e.preventDefault();
+            document.getElementById('nav-dropdown').classList.add('hidden');
+            const modal = document.getElementById('history-modal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
             
-            // Listener status login
-            supabase.auth.onAuthStateChange(async (event, session) => {
-                if (session && session.user) {
-                    currentUser = session.user;
-                    document.getElementById('auth-btn-text').textContent = 'Logout';
-                    document.getElementById('user-status-text').innerHTML = `<span class="text-emerald-400"><i class="fas fa-cloud"></i> Cloud Sync Active</span>`;
-                    closeAuthModal();
-                    
-                    // Ambil chat & API Key dari DB saat login
-                    await loadApiKeysFromDB();
-                    await loadChatHistoryFromDB();
+            if (!modal.classList.contains('hidden')) {
+                const listCont = document.getElementById('history-list-container');
+                listCont.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Memuat riwayat...</p>';
+                const { data } = await supabase.from('chat_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+                if (data && data.length > 0) {
+                    listCont.innerHTML = '';
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = "bg-gray-800/80 hover:bg-gray-800 border border-gray-700 p-3 rounded-xl cursor-pointer text-xs transition-colors";
+                        div.innerHTML = `<span class="text-emerald-400 font-bold block mb-1 uppercase">${item.role}</span><p class="text-gray-300 truncate">${item.content}</p>`;
+                        listCont.appendChild(div);
+                    });
                 } else {
-                    currentUser = null;
-                    document.getElementById('auth-btn-text').textContent = 'Login';
-                    document.getElementById('user-status-text').textContent = 'Cloud Sync Inactive';
+                    listCont.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Belum ada riwayat tersimpan.</p>';
                 }
-            });
-        }
-
-        function openAuthModal() {
-            if (currentUser) {
-                // Logout jika sudah login
-                supabase.auth.signOut();
-                showToast("Berhasil Logout!");
-            } else {
-                if(SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-                    alert("Developer: Silakan isi SUPABASE_URL & ANON_KEY di dalam script HTML terlebih dahulu.");
-                    return;
-                }
-                document.getElementById('auth-modal').classList.remove('hidden');
-                document.getElementById('auth-modal').classList.add('flex');
             }
         }
-
-        function closeAuthModal() {
-            document.getElementById('auth-modal').classList.add('hidden');
-            document.getElementById('auth-modal').classList.remove('flex');
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const btn = document.getElementById('btn-login');
-            
-            if(!email || !password) return alert("Isi email dan password!");
-            
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-            
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            
-            btn.innerHTML = 'Login';
-            btn.disabled = false;
-            
-            if (error) alert("Error: " + error.message);
-            else showToast("Berhasil Login!");
-        }
-
-        async function handleRegister() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const btn = document.getElementById('btn-register');
-            
-            if(!email || !password) return alert("Isi email dan password!");
-            
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-            
-            const { data, error } = await supabase.auth.signUp({ email, password });
-            
-            btn.innerHTML = 'Register';
-            btn.disabled = false;
-            
-            if (error) alert("Error: " + error.message);
-            else alert("Pendaftaran berhasil! (Jika email confirmation aktif, silakan cek email). Anda bisa langsung login.");
-        }
-
-        /* DATABASE API KEY LOGIC */
-        async function loadApiKeysFromDB() {
-            if (!currentUser || !supabase) return;
-            const { data, error } = await supabase.from('api_settings').select('*').eq('user_id', currentUser.id);
-            if (data && data.length > 0) {
-                data.forEach(setting => {
-                    sessionStorage.setItem(`_key_${setting.provider}`, setting.api_key); // api_key dari db sudah di encode
-                });
-            }
-        }
-
-        async function saveApiKeyToDB(provider, encodedKey) {
-            if (!currentUser || !supabase) return;
-            await supabase.from('api_settings').upsert([
-                { user_id: currentUser.id, provider: provider, api_key: encodedKey }
-            ], { onConflict: 'user_id, provider' });
-        }
-
-        /* DATABASE CHAT LOGIC */
-        async function loadChatHistoryFromDB() {
-            if (!currentUser || !supabase) return;
-            const { data, error } = await supabase.from('chat_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
-            
-            if (data && data.length > 0) {
-                chatHistory = []; // Reset memori
-                // Kita tidak membersihkan welcome message UI, biarkan bersambung
-                data.forEach(chat => {
-                    // Masukkan ke memori AI
-                    chatHistory.push({ role: chat.role === 'ai' ? 'assistant' : 'user', content: chat.content });
-                    // Tampilkan ke UI (jangan simpan ulang ke DB)
-                    appendMessage(chat.role, chat.content, [], null, false); 
-                });
-                
-                // Scroll ke bawah
-                const chatBox = document.getElementById('chat-container');
-                setTimeout(() => chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' }), 300);
-            }
-        }
-
-        async function saveChatToDB(role, content) {
-            if (!currentUser || !supabase) return;
-            await supabase.from('chat_history').insert([
-                { user_id: currentUser.id, role: role, content: content }
-            ]);
-        }
-
 
         /* =========================================
            SECURITY & NAVIGATION MENU LOGIC
@@ -418,12 +331,6 @@
             e.stopPropagation();
             const menu = document.getElementById('nav-dropdown');
             menu.classList.toggle('hidden');
-        }
-
-        function showPremiumModal(e) {
-            e.preventDefault();
-            document.getElementById('nav-dropdown').classList.add('hidden');
-            showToast("Fitur Premium Lua Maker akan segera hadir!");
         }
 
         document.addEventListener('click', function(event) {
@@ -452,7 +359,7 @@
         let canvasH = 1024;
 
         const GTPS_DOCS = `Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS Cloud (GTPS10/GrowSoft).
-Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan standar API GTPS yang valid.
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua murni berpedoman pada referensi file: convertnogolden, customhelp, dan exchange.
 
 INSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):
 Setiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran/analisa mendalam terlebih dahulu dengan menggunakan tag <think>.
@@ -460,23 +367,7 @@ Format respons kamu harus SELALU seperti ini:
 <think>
 [Tuliskan analisa logis, pengecekan error, perencanaan struktur kode, dan pemahaman terkait referensi database/API disini]
 </think>
-[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]
-
-STANDAR REFERENSI SCRIPT & API GTPS CLOUD:
-1. **Sistem Penyimpanan (Database/File):**
-   - Gunakan API \`file.write\`, \`file.read\`, \`file.exists\`, dan event \`onAutoSaveRequest\` untuk menyimpan data lokal ke dalam file .db biasa.
-2. **Struktur Dialog GUI & Parallel Rows:**
-   - Gunakan string builder untuk dialog (misal \`set_bg_color\`, \`add_label_with_icon\`, \`add_custom_break\`, \`add_spacer\`).
-   - Untuk baris item paralel (Trade/Convert), gunakan pola:
-     \`add_button_with_icon|trade_req_1|ItemName|noflags|itemID|amount|left|\`
-     \`add_button_with_icon|click_none||noflags|11162||\` (ikon panah)
-     \`add_button_with_icon|trade_give_1|RewardName|staticYellowFrame|rewardID|amount|left|\`
-3. **API Player & World Global:**
-   - Atribut Player: \`player:getNetID()\`, \`player:getName()\`, \`player:getPosX()\`, \`player:getPosY()\`.
-   - Inventori: \`player:getItemAmount(itemID)\`, \`player:changeItem(itemID, count, 0)\`.
-   - Interaksi UI & Efek: \`player:onDialogRequest(dialogText)\`, \`player:onConsoleMessage(msg)\`, \`player:onTalkBubble(netID, text, 0)\`, \`player:playAudio(file)\`, \`world:useItemEffect()\`, \`world:onCreateChatBubble()\`.
-   - Role & Command: \`player:hasRole(roleID)\`, \`getRoles()\`, \`registerLuaCommand({...})\`.
-   - Event Callback: \`onPlayerCommandCallback(function(world, player, fullCommand) ... end)\`, \`onPlayerDialogCallback(function(world, player, data) ... end)\`.`;
+[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]`;
 
         function getActiveSystemPrompt() {
             const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran mendalam terlebih dahulu dengan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
@@ -497,9 +388,6 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
             return GTPS_DOCS;
         }
 
-        /* =========================================
-           SPECIAL MENU FEATURES (UI LOGIC)
-           ========================================= */
         function toggleSpecialMenu(e) {
             e.stopPropagation();
             const menu = document.getElementById('special-menu');
@@ -639,7 +527,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
                 <div class="relative mt-4 mb-4 rounded-xl overflow-hidden bg-[#0d1117] border border-gray-700 shadow-xl w-full">
                     <div class="flex justify-between items-center px-4 py-2.5 bg-[#161b22] border-b border-gray-700 text-xs text-gray-400">
                         <span class="font-bold tracking-widest uppercase text-gray-300">${langDisplay}</span>
-                        <button onclick="copyToClipboard(this)" class="hover:text-white transition-colors flex items-center gap-1.5 outline-none bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-md">
+                        <button type="button" onclick="copyToClipboard(this)" class="hover:text-white transition-colors flex items-center gap-1.5 outline-none bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-md">
                             <i class="fas fa-copy"></i> <span>Copy Code</span>
                         </button>
                     </div>
@@ -690,6 +578,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
         function showCopyPopup(e, text) {
             document.querySelectorAll('.copy-popup').forEach(el => el.remove());
             const btn = document.createElement('button');
+            btn.type = 'button';
             btn.className = 'copy-popup fixed bg-blue-600 hover:bg-blue-500 border border-blue-400 text-white px-4 py-2 rounded-xl shadow-2xl z-[100] flex items-center gap-2 font-bold text-sm animate-pop-in outline-none';
             btn.innerHTML = '<i class="fas fa-copy"></i> Copy Prompt';
 
@@ -738,7 +627,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
 
         let chatHistory = [];
         window.lastUserReq = null;
-        let typingInterval = null; // Untuk live timer berpikir
+        let typingInterval = null;
         
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
@@ -775,7 +664,46 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
         }
 
         /* =========================================
-           DYNAMIC MODEL FETCHING & SAVING DB API KEY
+           DATABASE SYNC (API KEY & CHAT)
+           ========================================= */
+        async function loadApiKeysFromDB() {
+            if (!currentUser) return;
+            const { data } = await supabase.from('api_settings').select('*').eq('user_id', currentUser.id);
+            if (data && data.length > 0) {
+                data.forEach(setting => {
+                    sessionStorage.setItem(`_key_${setting.provider}`, setting.api_key);
+                });
+            }
+        }
+
+        async function saveApiKeyToDB(provider, encodedKey) {
+            if (!currentUser) return;
+            await supabase.from('api_settings').upsert([
+                { user_id: currentUser.id, provider: provider, api_key: encodedKey }
+            ], { onConflict: 'user_id, provider' });
+        }
+
+        async function loadChatHistoryFromDB() {
+            if (!currentUser) return;
+            const { data } = await supabase.from('chat_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
+            if (data && data.length > 0) {
+                chatHistory = [];
+                data.forEach(chat => {
+                    chatHistory.push({ role: chat.role === 'ai' ? 'assistant' : 'user', content: chat.content });
+                    appendMessage(chat.role, chat.content, [], null, false);
+                });
+            }
+        }
+
+        async function saveChatToDB(role, content) {
+            if (!currentUser) return;
+            await supabase.from('chat_history').insert([
+                { user_id: currentUser.id, role: role, content: content }
+            ]);
+        }
+
+        /* =========================================
+           DYNAMIC MODEL FETCHING
            ========================================= */
         async function saveAndFetchModels() {
             const provider = providerSelect.value;
@@ -833,12 +761,11 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
                         modelSelect.appendChild(opt);
                     });
                     
-                    const encodedApiKey = encKey(apiKey);
-                    sessionStorage.setItem(`_key_${provider}`, encodedApiKey);
+                    const encodedKey = encKey(apiKey);
+                    sessionStorage.setItem(`_key_${provider}`, encodedKey);
                     sessionStorage.setItem('_active_provider', provider);
                     
-                    // SAVE TO SUPABASE DB IF LOGGED IN
-                    saveApiKeyToDB(provider, encodedApiKey);
+                    await saveApiKeyToDB(provider, encodedKey);
                     
                     const prevModel = sessionStorage.getItem(`_model_${provider}`);
                     if(prevModel && models.find(m => m.id === prevModel)) {
@@ -871,9 +798,9 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
         }
 
         /* =========================================
-           CHAT UI RENDERING & DATABASE SYNC
+           CHAT UI RENDERING (WITH LIVE THINKING TIMER)
            ========================================= */
-        function appendMessage(sender, text, files = [], metadata = null, saveToDatabase = true) {
+        function appendMessage(sender, text, files = [], metadata = null, saveToDB = true) {
             const wrapper = document.createElement('div');
             wrapper.className = `flex items-start gap-3 md:gap-4 w-full ${sender === 'user' ? 'flex-row-reverse' : ''}`;
             
@@ -929,7 +856,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
                                 <div class="flex items-center gap-1.5"><i class="fas fa-stopwatch text-teal-500"></i> ${metadata.time}s</div>
                                 <div class="flex items-center gap-1.5" title="Total Tokens"><i class="fas fa-coins text-yellow-500"></i> Tokens: ${metadata.total}</div>
                             </div>
-                            <button onclick="regenerateLast()" class="regen-btn bg-gray-800 hover:bg-gray-700 hover:text-white text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-2 outline-none shadow-sm">
+                            <button type="button" onclick="regenerateLast()" class="regen-btn bg-gray-800 hover:bg-gray-700 hover:text-white text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-2 outline-none shadow-sm">
                                 <i class="fas fa-sync-alt"></i> Restart
                             </button>
                         </div>
@@ -948,9 +875,8 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
             wrapper.appendChild(bubble);
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
-            
-            // Simpan Chat ke Supabase jika login
-            if (saveToDatabase) {
+
+            if (saveToDB) {
                 saveChatToDB(sender, text);
             }
         }
@@ -976,7 +902,6 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
 
-            // Live Timer Berjalan
             typingInterval = setInterval(() => {
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
                 const timerEl = document.getElementById('timer-counter');
@@ -1076,7 +1001,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
                     prompt: aiResult.tokens.prompt,
                     comp: aiResult.tokens.comp,
                     total: aiResult.tokens.total
-                }, true); // Save to DB
+                }, true);
 
                 chatHistory.push({ role: 'user', content: finalUserPrompt });
                 chatHistory.push({ role: 'assistant', content: aiResult.text });
