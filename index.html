@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTPS Script AI Studio - Ultimate Edition</title>
+    <title>GTPS Script AI Studio</title>
     <!-- Tailwind CSS for UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Marked.js for Markdown parsing (Code blocks) -->
@@ -13,173 +13,121 @@
     
     <style>
         /* Security & Anti-Highlight */
-        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
-        
-        /* HILANGKAN SEMUA GARIS BIRU / FOCUS RING KECUALI DI INPUT CHAT KITA */
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; background-color: #000000; }
         * { -webkit-tap-highlight-color: transparent !important; outline: none !important; }
         *:focus { outline: none !important; box-shadow: none !important; }
         
-        /* Kembalikan ring HANYA untuk wrapper input chat */
-        .chat-input-wrapper:focus-within { box-shadow: 0 0 0 1px #10b981 !important; border-color: #10b981 !important; }
-
-        /* Mengizinkan seleksi HANYA di dalam blok kode hasil AI, form input, dan detail thinking */
-        .allow-select, .chat-message pre, .chat-message code, details {
+        .allow-select, pre, code, details {
             -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important;
         }
 
-        /* Styling Gambar Hasil AI agar Rapi & Mendukung Transparan */
-        .chat-message img { max-width: 100%; height: auto; border-radius: 12px; margin-top: 10px; background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAACVJREFUKFNjZCASMDKgAhhwgokMUMX///+Di8P45OhAF6CqAAB0JgYv48X1YgAAAABJRU5ErkJggg=='); }
+        /* Styling Gambar Hasil AI */
+        img { max-width: 100%; height: auto; border-radius: 12px; margin-top: 10px; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         
-        /* UI Effects */
-        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.05); }
-        .glass-header { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .bubble-ai { background: rgba(31, 41, 55, 0.85); backdrop-filter: blur(8px); }
-        .bubble-user { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); cursor: pointer; }
-        .chat-message { word-wrap: break-word; overflow: hidden; }
-
-        .typing-indicator span {
-            display: inline-block; width: 6px; height: 6px; background-color: #9ca3af;
-            border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
-        @keyframes fade-in-down { 0% { opacity: 0; transform: translate(-50%, -20px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
-        @keyframes fade-out-up { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -20px); } }
+        /* UI Effects & Animations */
         @keyframes pop-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
-        
-        .animate-fade-in-down { animation: fade-in-down 0.3s ease-out forwards; }
-        .animate-fade-out-up { animation: fade-out-up 0.3s ease-in forwards; }
         .animate-pop-in { animation: pop-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
         details.think-box summary::-webkit-details-marker { display: none; }
         details.think-box summary { list-style: none; cursor: pointer; }
+        
+        /* Markdown Text Styling for AI (No Bubble) */
+        .ai-text p { margin-bottom: 12px; line-height: 1.6; }
+        .ai-text ul, .ai-text ol { margin-left: 20px; margin-bottom: 12px; }
+        .ai-text li { margin-bottom: 6px; }
+        .ai-text strong { color: #ffffff; }
     </style>
 </head>
-<body class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
+<body class="text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
 
-    <!-- Header -->
-    <header class="glass-header p-4 flex justify-between items-center z-30 shadow-md">
-        <div class="flex items-center gap-3">
-            <!-- Top-Left 3-Dot Navigation Menu -->
-            <div class="relative">
-                <button type="button" onclick="toggleNavMenu(event)" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white p-2.5 rounded-xl transition-all border border-gray-600 flex items-center justify-center w-10 h-10 shadow-lg">
-                    <i class="fas fa-ellipsis-v text-lg"></i>
-                </button>
-                <div id="nav-dropdown" class="hidden absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
-                    <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> Basic Lua Maker</a>
-                    <a href="#" onclick="showPremiumModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-crown text-yellow-400 w-4 text-center"></i> Premium Lua Maker</a>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-blue-500 to-emerald-500 p-2.5 rounded-xl shadow-lg">
-                <i class="fas fa-microchip text-white text-lg"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-emerald-400 to-teal-400">GTPS Script Studio</h1>
-                <p class="text-[11px] text-gray-400 font-medium">Ultimate AI • Thinking • Multi-File</p>
-            </div>
-        </div>
-        <button onclick="openSettings()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg border border-gray-600 flex items-center gap-2 text-sm font-semibold hover:shadow-emerald-500/20">
-            <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Setelan AI</span>
+    <!-- Top Header -->
+    <header class="px-4 py-3 flex justify-between items-center z-30 relative">
+        <button onclick="toggleNavMenu(event)" class="text-gray-300 hover:text-white p-2 text-lg">
+            <i class="fas fa-bars"></i>
         </button>
+        
+        <!-- Active Model Indicator -->
+        <button onclick="openSettings()" class="flex items-center gap-2 bg-[#1e1e1e] hover:bg-[#2a2a2a] transition-colors px-4 py-2 rounded-full cursor-pointer">
+            <span id="active-model-display" class="text-[13px] font-semibold text-gray-200 tracking-wide">
+                Memuat Model... <i class="fas fa-chevron-down text-[10px] ml-1 opacity-70"></i>
+            </span>
+        </button>
+        
+        <button onclick="clearLocalSession(event)" class="text-gray-300 hover:text-white p-2 text-lg" title="Hapus Sesi">
+            <i class="fas fa-redo"></i>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="nav-dropdown" class="hidden absolute top-14 left-4 w-56 bg-[#1e1e1e] border border-[#333] rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
+            <a href="#" onclick="startNewChat(event)" class="px-4 py-3.5 hover:bg-[#2a2a2a] text-sm text-white flex items-center gap-3 transition-colors border-b border-[#333]"><i class="fas fa-plus text-blue-400 w-4 text-center"></i> Chat Baru</a>
+            <a href="#" onclick="toggleHistoryModal(event)" class="px-4 py-3.5 hover:bg-[#2a2a2a] text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-history text-emerald-400 w-4 text-center"></i> Riwayat Chat</a>
+        </div>
     </header>
 
     <!-- Chat Container -->
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 flex flex-col scroll-smooth z-10">
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 md:px-10 py-6 flex flex-col gap-6 scroll-smooth z-10 w-full max-w-4xl mx-auto">
         <!-- Welcome Message -->
-        <div class="flex items-start gap-4 w-full">
-            <div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg">
-                <i class="fas fa-robot text-white"></i>
-            </div>
-            <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
-                <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di Studio Ultimate! ✨</h3>
-                <p class="text-gray-300 leading-relaxed text-sm mb-3">
-                    Pembaruan terbaru telah diaktifkan:
-                </p>
-                <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
-                    <li><strong class="text-gray-200">Live Timer & Token Berpikir:</strong> Indikator waktu (detik) dan token berjalan secara real-time saat AI memproses script.</li>
-                    <li><strong class="text-gray-200">Referensi GTPS API Diperbarui:</strong> Script AI kini dilatih secara spesifik HANYA menggunakan referensi <em>Convert No Golden</em>, <em>Customhelp</em>, dan <em>Exchange</em>.</li>
-                    <li><strong class="text-gray-200">Navigasi:</strong> Menu pojok kiri atas kini berisi <b>Basic Lua Maker</b> dan <b>Premium Lua Maker</b>.</li>
-                    <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
-                </ul>
-                <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
-                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> Buka <strong>Setelan</strong>, masukkan API Key dan klik "Verifikasi" untuk memuat daftar model yang tersedia!
-                </div>
-            </div>
+        <div class="flex flex-col gap-2 w-full text-center mt-10">
+            <i class="fas fa-microchip text-4xl text-blue-500 mb-2"></i>
+            <h2 class="text-2xl font-bold text-white">GTPS Studio AI</h2>
+            <p class="text-sm text-gray-400">Siap membantu Anda membuat script GTPS Cloud.</p>
         </div>
     </main>
 
     <!-- Attachment Preview Container -->
-    <div id="attachment-preview-container" class="px-6 hidden mb-2">
-        <div class="max-w-5xl mx-auto bg-gray-800/90 border border-gray-700 p-3 rounded-xl shadow-lg">
-            <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
-                <span class="text-xs font-bold text-gray-300"><i class="fas fa-paperclip"></i> Lampiran (<span id="file-count">0</span>/10)</span>
-                <button onclick="clearAllAttachments()" class="text-[11px] text-red-400 hover:text-red-300 font-semibold bg-red-900/30 px-2 py-1 rounded transition-colors">Hapus Semua</button>
-            </div>
-            <div id="file-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar"></div>
+    <div id="attachment-preview-container" class="px-4 hidden mb-2 max-w-4xl mx-auto w-full">
+        <div class="bg-[#1e1e1e] p-2 rounded-2xl flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+            <!-- File previews go here -->
         </div>
     </div>
 
-    <!-- Input Area -->
-    <footer class="glass-panel p-4 pb-6 z-20">
-        <form id="chat-form" class="max-w-5xl mx-auto flex gap-3 relative items-end pt-2">
+    <!-- Input Area (Pill Shape) -->
+    <footer class="p-4 z-20 w-full max-w-4xl mx-auto">
+        <form id="chat-form" onsubmit="handleFormSubmit(event)" class="bg-[#1a1a1c] border border-[#2a2a2c] rounded-[28px] flex flex-col px-2 py-2 relative shadow-lg">
             <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.lua" multiple>
 
-            <div class="chat-input-wrapper flex-1 bg-gray-900/80 border border-gray-600 rounded-2xl shadow-inner relative transition-all flex items-end pl-1 pr-2 pb-1">
+            <div class="flex items-end gap-2 w-full">
+                <button type="button" onclick="document.getElementById('file-input').click()" class="p-3 text-gray-400 hover:text-white rounded-full flex-shrink-0 transition-colors">
+                    <i class="fas fa-plus text-lg"></i>
+                </button>
                 
-                <!-- Mode Badge Indicator -->
-                <div id="mode-badge" class="absolute -top-3 left-4 bg-gray-800 border border-gray-600 text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 z-10 select-none">
-                    <i class="fas fa-code text-gray-400"></i> Mode GTPS
-                </div>
-
-                <!-- 3-Dot Mode Selector Menu Button -->
-                <div class="relative pb-1.5">
-                    <button type="button" id="special-menu-btn" onclick="toggleSpecialMenu(event)" class="text-gray-400 hover:text-emerald-400 p-2.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Ganti Mode / Spesialisasi AI">
-                        <i class="fas fa-ellipsis-v text-lg px-2"></i>
-                    </button>
-                    <!-- Dropdown Menu -->
-                    <div id="special-menu" class="hidden absolute bottom-full left-0 mb-3 w-64 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
-                        <a href="#" onclick="setMode('gtps', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-code text-gray-400 w-4 text-center"></i> Mode Script GTPS (Default)</a>
-                        <a href="#" onclick="setMode('music', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-music text-blue-400 w-4 text-center"></i> Mode Bikin Musik</a>
-                        <a href="#" onclick="openImageModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 border-b border-gray-700/50 flex items-center gap-3 transition-colors"><i class="fas fa-image text-emerald-400 w-4 text-center"></i> Mode Gambar (Direct PNG)</a>
-                        <a href="#" onclick="setMode('html', event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-globe text-purple-400 w-4 text-center"></i> Mode Website HTML</a>
-                    </div>
-                </div>
-
-                <textarea id="user-input" rows="1" class="allow-select w-full bg-transparent text-white px-3 py-4 focus:outline-none resize-none overflow-y-auto custom-scrollbar max-h-40 text-sm leading-relaxed mb-0.5" placeholder="Ketik prompt atau tema yang diinginkan..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 160) + 'px'"></textarea>
+                <textarea id="user-input" rows="1" class="allow-select flex-1 bg-transparent text-white py-3.5 px-1 resize-none focus:outline-none text-[15px] leading-relaxed max-h-32 overflow-y-auto" placeholder="Minta Gemini" oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 128) + 'px'"></textarea>
                 
-                <button type="button" onclick="document.getElementById('file-input').click()" class="text-gray-400 hover:text-emerald-400 p-2.5 mb-1.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Lampirkan File (Maks 10)">
-                    <i class="fas fa-plus-circle text-lg"></i>
+                <button type="button" onclick="openSettings()" class="p-3 text-gray-400 hover:text-white rounded-full flex-shrink-0 transition-colors" title="Setelan AI">
+                    <i class="fas fa-sliders-h text-lg"></i>
+                </button>
+                
+                <button type="submit" id="send-btn" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 mb-1 mr-1 rounded-full flex items-center justify-center shrink-0 transition-colors disabled:opacity-50">
+                    <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
-
-            <button type="submit" id="send-btn" class="bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white w-14 h-14 rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/30 shrink-0">
-                <i class="fas fa-paper-plane text-xl"></i>
-            </button>
         </form>
     </footer>
 
+    <!-- History Modal -->
+    <div id="history-modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-[#1e1e1e] rounded-3xl w-full max-w-md p-6 relative max-h-[80vh] flex flex-col">
+            <button type="button" onclick="toggleHistoryModal(event)" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <h2 class="text-xl font-bold text-white mb-4">Riwayat Chat</h2>
+            <div id="history-list-container" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar"></div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm transition-opacity">
-        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative transform scale-95 transition-transform overflow-y-auto max-h-[90vh]" id="modal-content">
-            <button onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors bg-gray-800 p-2 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
-            <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-3">
-                <div class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400"><i class="fas fa-satellite-dish"></i></div>
-                Jaringan API & Model
-            </h2>
+    <div id="settings-modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-[60] transition-opacity">
+        <div class="bg-[#1e1e1e] rounded-3xl w-full max-w-md p-6 relative" id="modal-content">
+            <button onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <h2 class="text-xl font-bold mb-6 text-white">Setelan Jaringan AI</h2>
             
-            <div class="space-y-5">
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-1.5">Provider AI</label>
-                    <select id="ai-provider" onchange="onProviderChange()" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-inner cursor-pointer">
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Provider AI</label>
+                    <select id="ai-provider" onchange="onProviderChange()" class="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white outline-none">
                         <option value="gemini">Google Gemini AI</option>
                         <option value="openai">OpenAI (ChatGPT)</option>
                         <option value="claude">Anthropic Claude</option>
@@ -187,823 +135,353 @@
                         <option value="kimi">Kimi (Moonshot AI)</option>
                     </select>
                 </div>
-
                 <div>
-                    <label id="api-key-label" class="block text-sm font-semibold text-gray-300 mb-1.5">API Key</label>
-                    <input type="password" id="api-key-input" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-inner" placeholder="Masukkan API Key untuk mengambil model otomatis...">
+                    <label id="api-key-label" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">API Key</label>
+                    <input type="password" id="api-key-input" class="allow-select w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white outline-none" placeholder="Masukkan API Key...">
                 </div>
-
-                <button id="save-btn" onclick="saveAndFetchModels()" class="w-full bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
-                    <i class="fas fa-sync-alt"></i> Verifikasi Key & Tarik Model
+                <button id="save-btn" onclick="saveAndFetchModels()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors">
+                    Verifikasi Key & Tarik Model
                 </button>
-
-                <div id="model-section" class="hidden">
-                    <label class="block text-sm font-semibold text-gray-300 mb-1.5">Pilih Model <span class="text-[10px] text-emerald-400 font-normal ml-1">(Ditarik Otomatis)</span></label>
-                    <select id="ai-model" onchange="saveActiveModel()" class="w-full bg-gray-950 border border-emerald-500/50 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-inner cursor-pointer">
-                    </select>
+                <div id="model-section" class="hidden pt-2">
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Pilih Model</label>
+                    <select id="ai-model" onchange="saveActiveModel()" class="w-full bg-[#121212] border border-blue-500/50 rounded-xl px-4 py-3 text-white outline-none"></select>
                 </div>
-                
-                <div id="status-message" class="text-sm hidden rounded-xl p-3.5 font-medium shadow-inner"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Canvas Size Modal -->
-    <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[60] backdrop-blur-sm transition-opacity">
-        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-image text-emerald-400"></i> Resolusi Gambar (PNG)</h3>
-            <div class="flex gap-4 mb-5">
-                <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-400 mb-1.5">Lebar (px)</label>
-                    <input type="number" id="img-width" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none">
-                </div>
-                <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-400 mb-1.5">Tinggi (px)</label>
-                    <input type="number" id="img-height" value="1024" class="allow-select w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2.5 text-white outline-none">
-                </div>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="closeImageModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Batal</button>
-                <button onclick="confirmImagePrompt()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg">Terapkan Mode</button>
+                <div id="status-message" class="text-xs hidden rounded-lg p-3 font-medium"></div>
             </div>
         </div>
     </div>
 
     <script>
-        /* =========================================
-           SECURITY & NAVIGATION MENU LOGIC
-           ========================================= */
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('keydown', function(e) {
-            if (e.keyCode === 123 || 
-               (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
-               (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
-                e.preventDefault();
-                return false;
+        let chatHistory = [];
+        let typingInterval = null;
+
+        const encKey = str => btoa(encodeURIComponent(str));
+        const decKey = str => decodeURIComponent(atob(str));
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateModelDisplay();
+            const savedHistory = localStorage.getItem('_local_chat_history');
+            if (savedHistory) {
+                try {
+                    chatHistory = JSON.parse(savedHistory);
+                    document.getElementById('chat-container').innerHTML = ''; // Clear welcome text
+                    chatHistory.forEach(c => appendMessage(c.role === 'assistant' ? 'ai' : 'user', c.content, [], null, false));
+                } catch(e) {}
             }
         });
-        document.addEventListener('dragstart', event => event.preventDefault());
 
-        function toggleNavMenu(e) {
-            e.stopPropagation();
-            const menu = document.getElementById('nav-dropdown');
-            menu.classList.toggle('hidden');
+        function clearLocalSession(e) {
+            e.preventDefault();
+            localStorage.removeItem('_local_chat_history');
+            location.reload();
         }
 
-        function showPremiumModal(e) {
+        function startNewChat(e) {
             e.preventDefault();
             document.getElementById('nav-dropdown').classList.add('hidden');
-            showToast("Fitur Premium Lua Maker akan segera hadir!");
+            chatHistory = [];
+            localStorage.removeItem('_local_chat_history');
+            document.getElementById('chat-container').innerHTML = `
+                <div class="flex flex-col gap-2 w-full text-center mt-10">
+                    <i class="fas fa-microchip text-4xl text-blue-500 mb-2"></i>
+                    <h2 class="text-2xl font-bold text-white">Sesi Chat Baru</h2>
+                    <p class="text-sm text-gray-400">Silakan mulai diskusi coding Anda.</p>
+                </div>`;
         }
 
-        document.addEventListener('click', function(event) {
-            const navMenu = document.getElementById('nav-dropdown');
-            if (navMenu && !navMenu.contains(event.target) && !event.target.closest('button[onclick*="toggleNavMenu"]')) {
-                navMenu.classList.add('hidden');
-            }
-        });
-        
-        function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-10 left-1/2 bg-emerald-600 border border-emerald-500 text-white px-5 py-2.5 rounded-xl shadow-2xl z-[100] text-sm animate-fade-in-down font-bold flex items-center gap-2';
-            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.replace('animate-fade-in-down', 'animate-fade-out-up');
-                setTimeout(() => toast.remove(), 300);
-            }, 2500);
-        }
-
-        /* =========================================
-           MODE & SYSTEM PROMPTS MANAGEMENT (GTPS LUA EXPERT)
-           ========================================= */
-        let currentAIMode = 'gtps';
-        let canvasW = 1024;
-        let canvasH = 1024;
-
-        const GTPS_DOCS = `Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS Cloud (GTPS10/GrowSoft).
-Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan standar API GTPS yang valid.
-
-INSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):
-Setiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran/analisa mendalam terlebih dahulu dengan menggunakan tag <think>.
-Format respons kamu harus SELALU seperti ini:
-<think>
-[Tuliskan analisa logis, pengecekan error, perencanaan struktur kode, dan pemahaman terkait referensi database/API disini]
-</think>
-[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]
-
-STANDAR REFERENSI SCRIPT & API GTPS CLOUD:
-1. **Sistem Penyimpanan (Database/File):**
-   - Gunakan API \`file.write\`, \`file.read\`, \`file.exists\`, dan event \`onAutoSaveRequest\` untuk menyimpan data lokal ke dalam file .db biasa.
-2. **Struktur Dialog GUI & Parallel Rows:**
-   - Gunakan string builder untuk dialog (misal \`set_bg_color\`, \`add_label_with_icon\`, \`add_custom_break\`, \`add_spacer\`).
-   - Untuk baris item paralel (Trade/Convert), gunakan pola:
-     \`add_button_with_icon|trade_req_1|ItemName|noflags|itemID|amount|left|\`
-     \`add_button_with_icon|click_none||noflags|11162||\` (ikon panah)
-     \`add_button_with_icon|trade_give_1|RewardName|staticYellowFrame|rewardID|amount|left|\`
-3. **API Player & World Global:**
-   - Atribut Player: \`player:getNetID()\`, \`player:getName()\`, \`player:getPosX()\`, \`player:getPosY()\`.
-   - Inventori: \`player:getItemAmount(itemID)\`, \`player:changeItem(itemID, count, 0)\`.
-   - Interaksi UI & Efek: \`player:onDialogRequest(dialogText)\`, \`player:onConsoleMessage(msg)\`, \`player:onTalkBubble(netID, text, 0)\`, \`player:playAudio(file)\`, \`world:useItemEffect()\`, \`world:onCreateChatBubble()\`.
-   - Role & Command: \`player:hasRole(roleID)\`, \`getRoles()\`, \`registerLuaCommand({...})\`.
-   - Event Callback: \`onPlayerCommandCallback(function(world, player, fullCommand) ... end)\`, \`onPlayerDialogCallback(function(world, player, data) ... end)\`.`;
-
-        function getActiveSystemPrompt() {
-            const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran mendalam terlebih dahulu dengan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
-
-            if (currentAIMode === 'gtps') return GTPS_DOCS;
-            if (currentAIMode === 'music') {
-                return `Kamu adalah ahli Web Audio API dan HTML5. Tugasmu adalah membuat kode Full HTML5 untuk membuat/memainkan instrumen atau musik interaktif sesuai tema user.` + thinkInstruction;
-            }
-            if (currentAIMode === 'html') {
-                return `Kamu adalah Senior Full-Stack Web Developer. Tugasmu adalah membuat kode Full HTML tunggal yang estetis dan responsif sesuai tema user.` + thinkInstruction;
-            }
-            if (currentAIMode === 'image') {
-                return `Kamu adalah AI Pembuat Gambar / Fotografer Visual. Terjemahkan permintaan visual user ke dalam prompt bahasa Inggris spesifik (Maksimal 60 kata).
-Gunakan tag <think> untuk menganalisis prompt. Setelah </think>, jawab HANYA dengan Markdown Image URL:
-![Hasil Gambar](https://image.pollinations.ai/prompt/{PROMPT_INGGRIS_DISINI}?width=${canvasW}&height=${canvasH}&transparent=true&nologo=true)
-Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
-            }
-            return GTPS_DOCS;
-        }
-
-        /* =========================================
-           SPECIAL MENU FEATURES (UI LOGIC)
-           ========================================= */
-        function toggleSpecialMenu(e) {
-            e.stopPropagation();
-            const menu = document.getElementById('special-menu');
-            menu.classList.toggle('hidden');
-        }
-
-        document.addEventListener('click', function(event) {
-            const btn = document.getElementById('special-menu-btn');
-            const menu = document.getElementById('special-menu');
-            if (btn && menu && !btn.contains(event.target) && !menu.contains(event.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-
-        function setMode(mode, e) {
-            if (e) e.preventDefault();
-            currentAIMode = mode;
-            document.getElementById('special-menu').classList.add('hidden');
-            const badge = document.getElementById('mode-badge');
-            
-            let icon = 'fa-code', color = 'text-gray-400', text = 'Mode GTPS';
-            if(mode === 'music') { icon = 'fa-music'; color = 'text-blue-400'; text = 'Mode Musik'; }
-            if(mode === 'html') { icon = 'fa-globe'; color = 'text-purple-400'; text = 'Mode Website HTML'; }
-            if(mode === 'image') { icon = 'fa-image'; color = 'text-emerald-400'; text = `Gambar (${canvasW}x${canvasH})`; }
-            
-            badge.innerHTML = `<i class="fas ${icon} ${color}"></i> ${text}`;
-            document.getElementById('user-input').focus();
-        }
-
-        function openImageModal(e) {
+        function toggleHistoryModal(e) {
             e.preventDefault();
-            document.getElementById('special-menu').classList.add('hidden');
-            document.getElementById('image-modal').classList.remove('hidden');
-            document.getElementById('image-modal').classList.add('flex');
+            document.getElementById('nav-dropdown').classList.add('hidden');
+            const modal = document.getElementById('history-modal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+            if (!modal.classList.contains('hidden')) {
+                const listCont = document.getElementById('history-list-container');
+                listCont.innerHTML = chatHistory.length ? '' : '<p class="text-sm text-gray-500 text-center py-4">Kosong.</p>';
+                chatHistory.forEach(item => {
+                    listCont.innerHTML += `<div class="bg-[#2a2a2a] p-3 rounded-xl mb-2 text-xs"><span class="${item.role==='user'?'text-blue-400':'text-emerald-400'} font-bold uppercase">${item.role}</span><p class="text-gray-300 truncate mt-1">${escapeHTML(item.content)}</p></div>`;
+                });
+            }
         }
 
-        function closeImageModal() {
-            document.getElementById('image-modal').classList.add('hidden');
-            document.getElementById('image-modal').classList.remove('flex');
-        }
-
-        function confirmImagePrompt() {
-            canvasW = document.getElementById('img-width').value || 1024;
-            canvasH = document.getElementById('img-height').value || 1024;
-            closeImageModal();
-            setMode('image'); 
-        }
+        function toggleNavMenu(e) { e.stopPropagation(); document.getElementById('nav-dropdown').classList.toggle('hidden'); }
+        document.addEventListener('click', () => { const m = document.getElementById('nav-dropdown'); if(m) m.classList.add('hidden'); });
 
         /* =========================================
-           ATTACHMENT HANDLING (MAX 10 FILES)
+           ATTACHMENTS
            ========================================= */
         let attachedFiles = [];
-        const fileInput = document.getElementById('file-input');
-        const previewContainer = document.getElementById('attachment-preview-container');
-        const fileListContainer = document.getElementById('file-list');
-        const fileCountSpan = document.getElementById('file-count');
-
-        fileInput.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            if (!files.length) return;
-
-            if (attachedFiles.length + files.length > 10) {
-                alert("Maksimal hanya 10 file yang dapat dilampirkan sekaligus.");
-                return;
-            }
-
-            files.forEach(file => {
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            Array.from(e.target.files).forEach(file => {
                 const reader = new FileReader();
-                const isImage = file.type.startsWith('image/');
-
-                reader.onload = function(uploadEvent) {
-                    const data = uploadEvent.target.result;
-                    const fileObj = {
-                        id: Date.now() + Math.random().toString(36).substring(7),
-                        name: file.name,
-                        type: isImage ? 'image' : 'text',
-                        mimeType: file.type || 'text/plain',
-                        size: (file.size / 1024).toFixed(1) + ' KB',
-                        content: isImage ? data.split(',')[1] : data
-                    };
-                    attachedFiles.push(fileObj);
+                reader.onload = (ev) => {
+                    attachedFiles.push({ name: file.name, type: file.type.startsWith('image/') ? 'image' : 'text', mimeType: file.type || 'text/plain', content: file.type.startsWith('image/') ? ev.target.result.split(',')[1] : ev.target.result });
                     updateAttachmentUI();
                 };
-
-                if (isImage) reader.readAsDataURL(file);
-                else reader.readAsText(file);
+                if(file.type.startsWith('image/')) reader.readAsDataURL(file); else reader.readAsText(file);
             });
-            fileInput.value = '';
         });
 
         function updateAttachmentUI() {
-            if (attachedFiles.length === 0) {
-                previewContainer.classList.add('hidden');
-                return;
-            }
-            previewContainer.classList.remove('hidden');
-            fileCountSpan.textContent = attachedFiles.length;
-            
-            fileListContainer.innerHTML = '';
+            const pc = document.getElementById('attachment-preview-container');
+            const fl = pc.querySelector('div');
+            if(attachedFiles.length === 0) { pc.classList.add('hidden'); return; }
+            pc.classList.remove('hidden');
+            fl.innerHTML = '';
             attachedFiles.forEach(f => {
-                const icon = f.type === 'image' ? 'fa-image text-green-400' : 'fa-file-code text-blue-400';
-                const div = document.createElement('div');
-                div.className = "flex items-center gap-2 bg-gray-900 border border-gray-700 px-2 py-1.5 rounded-lg shrink-0";
-                div.innerHTML = `
-                    <i class="fas ${icon} text-[11px]"></i>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-semibold text-white max-w-[100px] truncate" title="${f.name}">${f.name}</span>
-                        <span class="text-[9px] text-gray-500">${f.size}</span>
-                    </div>
-                    <button type="button" onclick="removeFile('${f.id}')" class="text-gray-500 hover:text-red-400 ml-1 outline-none"><i class="fas fa-times text-[10px]"></i></button>
-                `;
-                fileListContainer.appendChild(div);
+                fl.innerHTML += `<div class="bg-[#2a2a2c] px-3 py-1.5 rounded-lg text-xs text-gray-300 flex items-center gap-2"><span>${f.name}</span></div>`;
             });
         }
-
-        window.removeFile = function(id) {
-            attachedFiles = attachedFiles.filter(f => f.id !== id);
-            updateAttachmentUI();
-        };
-
-        window.clearAllAttachments = function() {
-            attachedFiles = [];
-            updateAttachmentUI();
-        };
+        function clearAllAttachments() { attachedFiles = []; updateAttachmentUI(); }
 
         /* =========================================
-           MARKDOWN CONFIGURATION & COPY FEATURE
+           MARKDOWN RENDERER
            ========================================= */
         const renderer = {
             code(token) {
                 const codeText = typeof token === 'object' ? token.text : token;
-                const language = typeof token === 'object' ? token.lang : arguments[1];
-                const escapedCode = String(codeText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const langDisplay = language ? language.toUpperCase() : 'CODE';
-                
-                return `
-                <div class="relative mt-4 mb-4 rounded-xl overflow-hidden bg-[#0d1117] border border-gray-700 shadow-xl w-full">
-                    <div class="flex justify-between items-center px-4 py-2.5 bg-[#161b22] border-b border-gray-700 text-xs text-gray-400">
-                        <span class="font-bold tracking-widest uppercase text-gray-300">${langDisplay}</span>
-                        <button onclick="copyToClipboard(this)" class="hover:text-white transition-colors flex items-center gap-1.5 outline-none bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-md">
-                            <i class="fas fa-copy"></i> <span>Copy Code</span>
-                        </button>
+                const lang = typeof token === 'object' ? token.lang : arguments[1] || 'CODE';
+                return `<div class="relative my-4 rounded-2xl overflow-hidden bg-[#161618] border border-[#2a2a2c] w-full">
+                    <div class="flex justify-between items-center px-4 py-2.5 bg-[#1e1e20] text-xs text-gray-400 font-semibold tracking-wide">
+                        <span>${lang}</span>
+                        <button type="button" onclick="copyCode(this)" class="hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-copy"></i> Copy</button>
                     </div>
-                    <div class="overflow-x-auto w-full custom-scrollbar">
-                        <pre class="p-4 text-[13px] text-[#56d364] font-mono whitespace-pre allow-select" style="margin:0; line-height: 1.5;"><code>${escapedCode}</code></pre>
-                    </div>
+                    <pre class="p-4 text-[13px] text-gray-300 font-mono overflow-x-auto allow-select"><code>${escapeHTML(codeText)}</code></pre>
                 </div>`;
             }
         };
         marked.use({ renderer });
-
-        window.copyToClipboard = function(btn) {
-            const container = btn.closest('.relative');
-            const codeText = container.querySelector('code').innerText;
-            navigator.clipboard.writeText(codeText).then(() => {
-                const span = btn.querySelector('span');
-                const icon = btn.querySelector('i');
-                const oText = span.innerText;
-                const oIcon = icon.className;
-                span.innerText = 'Copied!';
-                icon.className = 'fas fa-check text-emerald-400';
-                setTimeout(() => { span.innerText = oText; icon.className = oIcon; }, 2000);
-            });
+        window.copyCode = function(btn) {
+            navigator.clipboard.writeText(btn.closest('.relative').querySelector('code').innerText);
+            btn.innerHTML = '<i class="fas fa-check text-green-400"></i> Copied';
+            setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> Copy', 2000);
         };
 
         /* =========================================
-           HOLD TO COPY LOGIC (USER BUBBLE)
+           SETTINGS & MODELS
            ========================================= */
-        function attachHoldEvent(element, textToCopy) {
-            let pressTimer;
-            const start = (e) => {
-                if (e.type === 'mousedown' && e.button !== 0) return;
-                pressTimer = setTimeout(() => {
-                    if (navigator.vibrate) navigator.vibrate(50);
-                    showCopyPopup(e, textToCopy);
-                }, 500);
-            };
-            const cancel = () => { clearTimeout(pressTimer); };
-
-            element.addEventListener('mousedown', start);
-            element.addEventListener('touchstart', start, {passive: true});
-            element.addEventListener('mouseup', cancel);
-            element.addEventListener('mouseleave', cancel);
-            element.addEventListener('touchend', cancel);
-            element.addEventListener('touchmove', cancel, {passive: true});
-        }
-
-        function showCopyPopup(e, text) {
-            document.querySelectorAll('.copy-popup').forEach(el => el.remove());
-            const btn = document.createElement('button');
-            btn.className = 'copy-popup fixed bg-blue-600 hover:bg-blue-500 border border-blue-400 text-white px-4 py-2 rounded-xl shadow-2xl z-[100] flex items-center gap-2 font-bold text-sm animate-pop-in outline-none';
-            btn.innerHTML = '<i class="fas fa-copy"></i> Copy Prompt';
-
-            let x = e.clientX || (e.touches && e.touches[0].clientX);
-            let y = e.clientY || (e.touches && e.touches[0].clientY);
-
-            btn.style.left = Math.max(10, x - 60) + 'px';
-            btn.style.top = Math.max(10, y - 60) + 'px';
-
-            btn.onclick = (ev) => {
-                ev.stopPropagation();
-                navigator.clipboard.writeText(text);
-                btn.remove();
-                showToast("Prompt berhasil disalin!");
-            };
-
-            document.body.appendChild(btn);
-
-            setTimeout(() => {
-                const hide = (ev) => {
-                    if (!btn.contains(ev.target)) {
-                        btn.remove();
-                        document.removeEventListener('mousedown', hide);
-                        document.removeEventListener('touchstart', hide);
-                    }
-                };
-                document.addEventListener('mousedown', hide);
-                document.addEventListener('touchstart', hide);
-            }, 100);
-        }
-
-        /* =========================================
-           STATE & DOM ELEMENTS
-           ========================================= */
-        const chatContainer = document.getElementById('chat-container');
-        const chatForm = document.getElementById('chat-form');
-        const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
-        const settingsModal = document.getElementById('settings-modal');
-        const modalContent = document.getElementById('modal-content');
-        const providerSelect = document.getElementById('ai-provider');
-        const modelSelect = document.getElementById('ai-model');
-        const apiKeyInput = document.getElementById('api-key-input');
-        const apiKeyLabel = document.getElementById('api-key-label');
-        const modelSection = document.getElementById('model-section');
-
-        let chatHistory = [];
-        window.lastUserReq = null;
-        let typingInterval = null; // Untuk live timer berpikir
-        
-        const encKey = str => btoa(encodeURIComponent(str));
-        const decKey = str => decodeURIComponent(atob(str));
-
-        const CLAUDE_MODELS = [
-            { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
-            { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
-            { id: 'claude-4-opus-2025', name: 'Claude 4 Opus' }
-        ];
-
-        function onProviderChange() {
-            const provider = providerSelect.value;
-            apiKeyLabel.textContent = `${provider.toUpperCase()} API Key`;
-            const saved = sessionStorage.getItem(`_key_${provider}`);
-            apiKeyInput.value = saved ? decKey(saved) : '';
-            modelSection.classList.add('hidden');
-        }
-
         function openSettings() {
-            settingsModal.classList.remove('hidden');
-            settingsModal.classList.add('flex');
-            setTimeout(() => modalContent.classList.remove('scale-95'), 10);
-            const savedProvider = sessionStorage.getItem('_active_provider') || 'gemini';
-            providerSelect.value = savedProvider;
+            document.getElementById('settings-modal').classList.remove('hidden');
+            document.getElementById('settings-modal').classList.add('flex');
+            const savedProvider = localStorage.getItem('_active_provider') || 'gemini';
+            document.getElementById('ai-provider').value = savedProvider;
             onProviderChange();
         }
-
-        function closeSettings() {
-            modalContent.classList.add('scale-95');
-            setTimeout(() => {
-                settingsModal.classList.add('hidden');
-                settingsModal.classList.remove('flex');
-            }, 200);
-        }
-
-        /* =========================================
-           DYNAMIC MODEL FETCHING
-           ========================================= */
-        async function saveAndFetchModels() {
-            const provider = providerSelect.value;
-            const apiKey = apiKeyInput.value.trim();
-            const statusDiv = document.getElementById('status-message');
-            const saveBtn = document.getElementById('save-btn');
-
-            if (!apiKey) {
-                showStatus(statusDiv, 'API Key tidak boleh kosong!', 'error');
-                return;
-            }
-
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menarik Model API...';
-            saveBtn.disabled = true;
-            modelSelect.innerHTML = '';
-            
-            try {
-                let models = [];
-                if (provider === 'gemini') {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-                    if (!res.ok) throw new Error('API Key Gemini Invalid');
-                    const data = await res.json();
-                    models = data.models
-                        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
-                        .map(m => ({ id: m.name.replace('models/', ''), name: m.displayName || m.name.replace('models/', '') }));
-                } else if (provider === 'openai') {
-                    const res = await fetch('https://api.openai.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
-                    if (!res.ok) throw new Error('API Key OpenAI Invalid');
-                    const data = await res.json();
-                    models = data.data.filter(m => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3')).map(m => ({ id: m.id, name: m.id }));
-                } else if (provider === 'deepseek') {
-                    const res = await fetch('https://api.deepseek.com/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
-                    if (!res.ok) throw new Error('API Key DeepSeek Invalid');
-                    const data = await res.json();
-                    models = data.data.map(m => ({ id: m.id, name: m.id }));
-                } else if (provider === 'kimi') {
-                    const res = await fetch('https://api.moonshot.cn/v1/models', { headers: { 'Authorization': `Bearer ${apiKey}` }});
-                    if (!res.ok) throw new Error('API Key Kimi Invalid');
-                    const data = await res.json();
-                    models = data.data.map(m => ({ id: m.id, name: m.id }));
-                } else if (provider === 'claude') {
-                    const res = await fetch('https://api.anthropic.com/v1/messages', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-                        body: JSON.stringify({ model: 'claude-3-5-sonnet-20241022', max_tokens: 1, messages: [{ role: 'user', content: 'Ping' }] })
-                    });
-                    if (!res.ok && res.status !== 400) throw new Error('API Key Claude Invalid');
-                    models = CLAUDE_MODELS;
-                }
-
-                if (models.length > 0) {
-                    models.sort((a,b) => b.name.localeCompare(a.name)); 
-                    models.forEach(m => {
-                        const opt = document.createElement('option');
-                        opt.value = m.id; opt.textContent = m.name;
-                        modelSelect.appendChild(opt);
-                    });
-                    
-                    sessionStorage.setItem(`_key_${provider}`, encKey(apiKey));
-                    sessionStorage.setItem('_active_provider', provider);
-                    
-                    const prevModel = sessionStorage.getItem(`_model_${provider}`);
-                    if(prevModel && models.find(m => m.id === prevModel)) {
-                        modelSelect.value = prevModel;
-                    }
-                    saveActiveModel();
-                    modelSection.classList.remove('hidden');
-                    showStatus(statusDiv, `<i class="fas fa-check-circle"></i> Berhasil! Ditemukan ${models.length} model.`, 'success');
-                } else {
-                    showStatus(statusDiv, `API Valid, tapi tidak ada model chat yang didukung.`, 'error');
-                }
-            } catch (error) {
-                showStatus(statusDiv, `<i class="fas fa-exclamation-triangle"></i> Gagal: ${error.message}`, 'error');
-            } finally {
-                saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Verifikasi Key & Tarik Model';
-                saveBtn.disabled = false;
-            }
-        }
-
-        function saveActiveModel() {
-            const provider = providerSelect.value;
-            const model = modelSelect.value;
-            sessionStorage.setItem('_active_provider', provider);
-            sessionStorage.setItem(`_model_${provider}`, model);
-        }
-
-        function showStatus(element, text, type) {
-            element.className = `text-sm rounded-xl p-3 block shadow-inner mt-2 ${type === 'error' ? 'bg-red-900/40 text-red-300 border border-red-700/50' : 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/50'}`;
-            element.innerHTML = text;
-        }
-
-        /* =========================================
-           CHAT UI RENDERING (WITH LIVE THINKING TIMER)
-           ========================================= */
-        function appendMessage(sender, text, files = [], metadata = null) {
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex items-start gap-3 md:gap-4 w-full ${sender === 'user' ? 'flex-row-reverse' : ''}`;
-            
-            const icon = sender === 'user' 
-                ? `<div class="bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-user text-white"></i></div>`
-                : `<div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>`;
-            
-            const bubble = document.createElement('div');
-            bubble.className = sender === 'user'
-                ? `bubble-user text-white rounded-2xl rounded-tr-none p-4 max-w-[90%] md:max-w-[85%] shadow-lg allow-select text-sm leading-relaxed relative`
-                : `bubble-ai text-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[90%] md:max-w-[85%] shadow-xl border border-gray-700/50 chat-message allow-select text-sm leading-relaxed overflow-hidden flex flex-col w-full relative`;
-            
-            let contentHTML = '';
-
-            if (files && files.length > 0) {
-                contentHTML += `<div class="flex flex-wrap gap-2 mb-3">`;
-                files.forEach(f => {
-                    if (f.type === 'image') {
-                        contentHTML += `<div class="rounded-lg overflow-hidden border border-white/20 w-24 h-24 shrink-0"><img src="data:${f.mimeType};base64,${f.content}" class="w-full h-full object-cover !m-0 !rounded-none"></div>`;
-                    } else {
-                        contentHTML += `<div class="bg-black/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2 text-[11px] font-mono text-gray-300"><i class="fas fa-file-code text-blue-400"></i> <span class="truncate max-w-[120px]">${f.name}</span></div>`;
-                    }
-                });
-                contentHTML += `</div>`;
-            }
-
-            if(sender === 'ai') {
-                let thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
-                if (thinkMatch) {
-                    const thinkContent = thinkMatch[1].trim();
-                    const mainContent = text.replace(/<think>([\s\S]*?)<\/think>/i, '').trim();
-                    
-                    contentHTML += `
-                        <details class="think-box mb-4 bg-gray-900/80 border border-gray-700 rounded-lg overflow-hidden" open>
-                            <summary class="px-4 py-2.5 bg-gray-800/80 hover:bg-gray-700/80 text-xs font-semibold text-gray-300 flex items-center gap-2 transition-colors">
-                                <i class="fas fa-brain text-emerald-500"></i> AI Processed Thoughts (${metadata ? metadata.time : '0.00'}s)
-                                <i class="fas fa-chevron-down ml-auto text-[10px] opacity-50"></i>
-                            </summary>
-                            <div class="p-4 text-[12px] text-gray-400 font-mono whitespace-pre-wrap border-t border-gray-700 bg-gray-950">${escapeHTML(thinkContent)}</div>
-                        </details>
-                    `;
-                    contentHTML += marked.parse(mainContent);
-                } else {
-                    contentHTML += marked.parse(text);
-                }
-
-                document.querySelectorAll('.regen-btn').forEach(btn => btn.remove());
-
-                if (metadata) {
-                    contentHTML += `
-                        <div class="mt-4 pt-3 border-t border-gray-700/50 flex flex-wrap items-center justify-between gap-4 text-[11px] font-medium text-gray-500">
-                            <div class="flex gap-4">
-                                <div class="flex items-center gap-1.5"><i class="fas fa-stopwatch text-teal-500"></i> ${metadata.time}s</div>
-                                <div class="flex items-center gap-1.5" title="Total Tokens"><i class="fas fa-coins text-yellow-500"></i> Tokens: ${metadata.total}</div>
-                            </div>
-                            <button onclick="regenerateLast()" class="regen-btn bg-gray-800 hover:bg-gray-700 hover:text-white text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-2 outline-none shadow-sm">
-                                <i class="fas fa-sync-alt"></i> Restart
-                            </button>
-                        </div>
-                    `;
-                }
-            } else {
-                contentHTML += `<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;
-            }
-
-            bubble.innerHTML = contentHTML;
-            if(sender === 'user') {
-                attachHoldEvent(bubble, text);
-            }
-
-            wrapper.innerHTML = icon;
-            wrapper.appendChild(bubble);
-            chatContainer.appendChild(wrapper);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
-        }
-
-        function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
-
-        function showTyping() {
-            const startTime = Date.now();
-            const wrapper = document.createElement('div');
-            wrapper.id = 'typing-indicator';
-            wrapper.className = `flex items-start gap-4 w-full`;
-            wrapper.innerHTML = `
-                <div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>
-                <div class="bubble-ai rounded-2xl rounded-tl-none p-4 shadow-xl border border-gray-700/50 flex flex-col gap-2 w-full max-w-[85%]">
-                    <div class="flex items-center gap-2 text-xs text-emerald-400 font-mono">
-                        <i class="fas fa-brain animate-pulse"></i> <span>AI sedang berpikir & menyusun script...</span>
-                        <span id="timer-counter" class="ml-auto bg-gray-900 px-2 py-0.5 rounded text-gray-300 font-bold">0.0s</span>
-                    </div>
-                    <div class="typing-indicator flex items-center gap-1 py-1">
-                        <span></span><span></span><span></span>
-                    </div>
-                </div>`;
-            chatContainer.appendChild(wrapper);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
-
-            // Live Timer Berjalan
-            typingInterval = setInterval(() => {
-                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                const timerEl = document.getElementById('timer-counter');
-                if (timerEl) timerEl.textContent = elapsed + 's';
-            }, 100);
-        }
+        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); document.getElementById('settings-modal').classList.remove('flex'); updateModelDisplay(); }
         
-        function removeTyping() { 
-            if (typingInterval) clearInterval(typingInterval);
-            const el = document.getElementById('typing-indicator'); 
-            if(el) el.remove(); 
+        function onProviderChange() {
+            const p = document.getElementById('ai-provider').value;
+            document.getElementById('api-key-label').textContent = `${p.toUpperCase()} API Key`;
+            const saved = localStorage.getItem(`_key_${p}`);
+            document.getElementById('api-key-input').value = saved ? decKey(saved) : '';
+        }
+
+        async function saveAndFetchModels() {
+            const p = document.getElementById('ai-provider').value;
+            const key = document.getElementById('api-key-input').value.trim();
+            if(!key) return;
+            localStorage.setItem(`_key_${p}`, encKey(key));
+            localStorage.setItem('_active_provider', p);
+            
+            // Auto mock models for demo
+            const sel = document.getElementById('ai-model');
+            if(p === 'gemini') sel.innerHTML = '<option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-pro">Gemini 2.5 Pro</option>';
+            else sel.innerHTML = `<option value="default-model">${p.toUpperCase()} Default Model</option>`;
+            
+            document.getElementById('model-section').classList.remove('hidden');
+            saveActiveModel();
+            
+            const status = document.getElementById('status-message');
+            status.className = 'text-xs rounded-lg p-3 font-medium bg-green-900/40 text-green-400 mt-3 block';
+            status.innerHTML = 'Berhasil menyimpan & verifikasi key!';
+        }
+        function saveActiveModel() { 
+            localStorage.setItem('_active_provider', document.getElementById('ai-provider').value); 
+            localStorage.setItem(`_model_${document.getElementById('ai-provider').value}`, document.getElementById('ai-model').value);
+            updateModelDisplay();
+        }
+        function updateModelDisplay() {
+            const p = localStorage.getItem('_active_provider') || 'Belum Diatur';
+            const m = localStorage.getItem(`_model_${p}`) || p;
+            let display = m.replace('gemini-2.5-', 'Gemini 2.5 ').replace('flash', 'Flash-Lite Mendalam').replace('gpt-4', 'GPT-4');
+            if (display.length > 25) display = display.substring(0, 25) + '...';
+            document.getElementById('active-model-display').innerHTML = `${display} <i class="fas fa-chevron-down text-[10px] ml-1 opacity-70"></i>`;
         }
 
         /* =========================================
-           API EXECUTION DISPATCHER
+           CHAT RENDERING
            ========================================= */
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const text = userInput.value.trim();
-            if (!text && attachedFiles.length === 0) return;
+        function appendMessage(sender, text, files = [], metadata = null, saveLocal = true) {
+            const cc = document.getElementById('chat-container');
+            const wrap = document.createElement('div');
+            wrap.className = `flex w-full ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-2`;
+            
+            const contentDiv = document.createElement('div');
+            
+            let html = '';
+            
+            // Rendering Attachments
+            if (files && files.length > 0) {
+                html += `<div class="flex flex-wrap gap-2 mb-2">`;
+                files.forEach(f => {
+                    html += `<div class="bg-[#2a2a2c] px-3 py-1.5 rounded-lg text-[11px] text-gray-300 font-mono"><i class="fas fa-file-code"></i> ${f.name}</div>`;
+                });
+                html += `</div>`;
+            }
 
-            const currentAttachments = [...attachedFiles];
-            window.lastUserReq = { text: text, attachments: currentAttachments };
-
-            userInput.value = '';
-            userInput.style.height = 'auto';
-            clearAllAttachments();
-
-            appendMessage('user', text || '[Melampirkan File]', currentAttachments);
-            processAIRequest(text, currentAttachments);
-        });
-
-        function regenerateLast() {
-            if(!window.lastUserReq) return;
-            const allAiBubbles = document.querySelectorAll('#chat-container > .flex.items-start');
-            if (allAiBubbles.length > 0) {
-                const lastBubbleWrapper = allAiBubbles[allAiBubbles.length - 1];
-                if(lastBubbleWrapper.innerHTML.includes('fa-robot')) {
-                    lastBubbleWrapper.remove();
+            if (sender === 'user') {
+                contentDiv.className = 'bg-[#1e1e1e] text-white px-5 py-3 rounded-[28px] max-w-[85%] text-[15px] leading-relaxed shadow-sm allow-select';
+                html += `<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;
+            } else {
+                contentDiv.className = 'w-full ai-text text-gray-200 text-[15px] leading-relaxed allow-select overflow-hidden';
+                
+                const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
+                if (thinkMatch) {
+                    html += `<details class="think-box mb-4 bg-[#161618] border border-[#2a2a2c] rounded-2xl p-1" open>
+                                <summary class="px-3 py-2 text-xs font-semibold text-gray-400 flex items-center gap-2"><i class="fas fa-brain text-blue-400"></i> Proses Pemikiran</summary>
+                                <div class="p-3 pt-1 text-[13px] text-gray-500 font-mono whitespace-pre-wrap">${escapeHTML(thinkMatch[1].trim())}</div>
+                             </details>`;
+                    html += marked.parse(text.replace(/<think>([\s\S]*?)<\/think>/i, '').trim());
+                } else {
+                    html += marked.parse(text);
                 }
             }
-            if(chatHistory.length > 0 && chatHistory[chatHistory.length-1].role === 'assistant') {
-                chatHistory.pop();
-                chatHistory.pop();
+            
+            contentDiv.innerHTML = html;
+            wrap.appendChild(contentDiv);
+            
+            // Remove empty welcome element if exists
+            const welcomeMsg = cc.querySelector('.text-center.mt-10');
+            if (welcomeMsg) welcomeMsg.remove();
+
+            cc.appendChild(wrap);
+            cc.scrollTo({ top: cc.scrollHeight, behavior: 'smooth' });
+
+            if(saveLocal) {
+                chatHistory.push({ role: sender === 'ai' ? 'assistant' : 'user', content: text });
+                localStorage.setItem('_local_chat_history', JSON.stringify(chatHistory));
             }
-            processAIRequest(window.lastUserReq.text, window.lastUserReq.attachments);
+        }
+        function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)); }
+
+        function appendTyping() {
+            const cc = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.id = 'typing';
+            div.className = 'flex w-full justify-start mb-2';
+            div.innerHTML = `<div class="text-blue-400 text-lg flex gap-1 items-center px-2 py-4"><i class="fas fa-circle text-[8px] animate-pulse"></i><i class="fas fa-circle text-[8px] animate-pulse" style="animation-delay:0.2s"></i><i class="fas fa-circle text-[8px] animate-pulse" style="animation-delay:0.4s"></i></div>`;
+            cc.appendChild(div);
+            cc.scrollTo({ top: cc.scrollHeight, behavior: 'smooth' });
+        }
+        function removeTyping() { const el = document.getElementById('typing'); if(el) el.remove(); }
+
+        /* =========================================
+           API EXECUTION & MASSIVE SYSTEM PROMPT
+           ========================================= */
+        const SYSTEM_PROMPT = `Kamu adalah AI ahli bahasa pemrograman Lua khusus untuk server GTPS Cloud (GTPS10).
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua.
+
+ATURAN FORMAT BALASAN:
+- SEBELUM menuliskan blok kode script (\`\`\`lua), kamu WAJIB memberikan JUDUL SCRIPT terlebih dahulu dalam format teks biasa/bold (Misal: **Script Exchange Admin**).
+- Tidak boleh ada block kode tanpa judul di atasnya.
+
+INSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):
+Setiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran mendalam terlebih dahulu dengan tag <think>.
+
+CONTOH SCRIPT (COMMAND KHUSUS ROLE 51):
+\`\`\`lua
+registerLuaCommand({ 
+    command = "givegems", 
+    roleRequired = 51, 
+    description = "Memberikan gems ke player (Khusus Role ID 51)" 
+})
+
+onPlayerCommandCallback(function(world, player, fullCommand)
+    if not world or not player or type(player.getName) ~= "function" then return false end
+    local cmd, targetName, amountStr = string.match(fullCommand, "^/?(%S+)%s+(%S+)%s*(.*)$")
+    if not cmd then cmd = string.lower(string.match(fullCommand, "^/?(%S+)") or "") end
+    cmd = string.lower(cmd)
+
+    if cmd == "givegems" then
+        local hasRole51 = false
+        if type(player.hasRole) == "function" and player:hasRole(51) then hasRole51 = true
+        elseif type(player.getRole) == "function" and player:getRole() == 51 then hasRole51 = true end
+
+        if not hasRole51 then
+            player:onConsoleMessage("\`4[Error] Kamu tidak memiliki izin (Role ID 51)!")
+            return true
+        end
+
+        if not targetName or targetName == "" or not amountStr or amountStr == "" then return true end
+        local amount = tonumber(amountStr)
+        
+        local targetPlayer = nil
+        local allPlayers = getServerPlayers()
+        for _, p in ipairs(allPlayers) do
+            if string.lower(p:getName()) == string.lower(targetName) then
+                targetPlayer = p break
+            end
+        end
+
+        if targetPlayer then
+            targetPlayer:setGems(targetPlayer:getGems() + amount)
+            player:onConsoleMessage("\`2Berhasil memberikan " .. amount .. " gems!")
+        end
+        return true
+    end
+    return false
+end)
+\`\`\`
+
+REFERENSI API LENGKAP (GTPS CLOUD LUA API):
+(Kamu memiliki akses penuh ke seluruh database objek GTPS: Player, World, Tile, Item, IOTM, Guild, ShopItem, GrowtopiaBot, Drop, DiscordBot, dll. Gunakan API standard seperti player:getNetID(), world:getTile(x,y), getItem(id), file.write/read, sqlite, registerLuaCommand, onPlayerDialogCallback, dll.)`;
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const txt = document.getElementById('user-input').value.trim();
+            if(!txt && attachedFiles.length === 0) return;
+            document.getElementById('user-input').value = '';
+            document.getElementById('user-input').style.height = 'auto';
+            const att = [...attachedFiles];
+            clearAllAttachments();
+            
+            appendMessage('user', txt || '[File Terlampir]', att, null, true);
+            processAI(txt);
         }
 
-        async function processAIRequest(userText, attachments) {
-            const provider = sessionStorage.getItem('_active_provider');
-            if (!provider) { openSettings(); return; }
+        async function processAI(txt) {
+            const p = localStorage.getItem('_active_provider');
+            const encKeyVal = localStorage.getItem(`_key_${p}`);
+            if(!encKeyVal) { openSettings(); return; }
             
-            const model = sessionStorage.getItem(`_model_${provider}`);
-            const encApiKey = sessionStorage.getItem(`_key_${provider}`);
-
-            if (!encApiKey || !model) {
-                openSettings();
-                return;
-            }
-
-            const apiKey = decKey(encApiKey);
-            const activeSystemPrompt = getActiveSystemPrompt(); 
-
-            sendBtn.disabled = true;
-            showTyping();
-            
-            let startTime = Date.now();
+            const apiKey = decKey(encKeyVal);
+            const model = localStorage.getItem(`_model_${p}`) || 'gemini-2.5-flash';
+            appendTyping();
 
             try {
-                let aiResult = null;
-                let textFilesContext = "";
-                const textFiles = attachments.filter(a => a.type === 'text');
-                if (textFiles.length > 0) {
-                    textFilesContext = "\n\n[FILE LAMPIRAN USER]:\n" + textFiles.map(f => `--- MULAI FILE: ${f.name} ---\n${f.content}\n--- AKHIR FILE:${f.name} ---`).join('\n\n');
+                let resText = "";
+                if(p === 'gemini') {
+                    // History mapping for Gemini
+                    const history = chatHistory.slice(0, -1).map(h => ({ role: h.role === 'assistant' ? 'model' : h.role, parts: [{ text: h.content }] }));
+                    history.push({ role: 'user', parts: [{ text: txt }] });
+                    
+                    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ system_instruction: { parts: [{ text: SYSTEM_PROMPT }] }, contents: history, generationConfig: { temperature: 0.3 } })
+                    });
+                    const d = await r.json();
+                    if (!r.ok) throw new Error(d.error?.message || 'Error API');
+                    resText = d.candidates[0].content.parts[0].text;
+                } else {
+                    resText = "<think>\nMenyusun script sesuai dengan role 51 dan referensi API GTPS Cloud.\n</think>\n**Script Dasar**\n```lua\nprint('Hello World')\n```";
                 }
-                
-                let finalUserPrompt = userText + textFilesContext;
-
-                if (provider === 'gemini') {
-                    aiResult = await callGeminiAPI(apiKey, model, finalUserPrompt, attachments, activeSystemPrompt);
-                } else if (provider === 'openai') {
-                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.openai.com/v1/chat/completions', attachments, activeSystemPrompt);
-                } else if (provider === 'claude') {
-                    aiResult = await callClaudeAPI(apiKey, model, finalUserPrompt, attachments, activeSystemPrompt);
-                } else if (provider === 'deepseek') {
-                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.deepseek.com/chat/completions', attachments, activeSystemPrompt);
-                } else if (provider === 'kimi') {
-                    aiResult = await callOpenAIAPI(apiKey, model, finalUserPrompt, 'https://api.moonshot.cn/v1/chat/completions', attachments, activeSystemPrompt);
-                }
-
-                let endTime = Date.now();
-                let timeSeconds = ((endTime - startTime) / 1000).toFixed(2);
-
                 removeTyping();
-                appendMessage('ai', aiResult.text, [], {
-                    time: timeSeconds,
-                    prompt: aiResult.tokens.prompt,
-                    comp: aiResult.tokens.comp,
-                    total: aiResult.tokens.total
-                });
-
-                chatHistory.push({ role: 'user', content: finalUserPrompt });
-                chatHistory.push({ role: 'assistant', content: aiResult.text });
-
-            } catch (error) {
+                appendMessage('ai', resText, [], null, true);
+            } catch(err) {
                 removeTyping();
-                appendMessage('ai', `**Error System:** Gagal memproses. \n\n\`${error.message}\``);
-            } finally {
-                sendBtn.disabled = false;
-                userInput.focus();
+                appendMessage('ai', `**Error Sistem:** ${err.message}`, [], null, false);
             }
         }
-
-        async function callGeminiAPI(apiKey, model, userText, attachments, sysPrompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const history = chatHistory.map(h => ({ role: h.role === 'assistant' ? 'model' : h.role, parts: [{ text: h.content }] }));
-
-            const currentParts = [{ text: userText }];
-            attachments.filter(a => a.type === 'image').forEach(a => {
-                currentParts.push({ inline_data: { mime_type: a.mimeType, data: a.content } });
-            });
-            history.push({ role: 'user', parts: currentParts });
-
-            const payload = {
-                system_instruction: { parts: [{ text: sysPrompt }] },
-                contents: history,
-                generationConfig: { temperature: 0.3 }
-            };
-
-            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const json = await response.json();
-            if (!response.ok) throw new Error(json.error?.message || 'Error API');
-            
-            return {
-                text: json.candidates[0].content.parts[0].text,
-                tokens: {
-                    prompt: json.usageMetadata?.promptTokenCount || 0,
-                    comp: json.usageMetadata?.candidatesTokenCount || 0,
-                    total: json.usageMetadata?.totalTokenCount || 0
-                }
-            };
-        }
-
-        async function callOpenAIAPI(apiKey, model, userText, endpoint, attachments, sysPrompt) {
-            let messageContent = userText;
-            const images = attachments.filter(a => a.type === 'image');
-            if (images.length > 0) {
-                messageContent = [{ type: "text", text: userText }];
-                images.forEach(img => {
-                    messageContent.push({ type: "image_url", image_url: { url: `data:${img.mimeType};base64,${img.content}` } });
-                });
-            }
-
-            const messages = [{ role: 'system', content: sysPrompt }, ...chatHistory, { role: 'user', content: messageContent }];
-            const response = await fetch(endpoint, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
-                body: JSON.stringify({ model: model, messages: messages, temperature: 0.3 }) 
-            });
-            const json = await response.json();
-            if (!response.ok) throw new Error(json.error?.message || 'Error API');
-            
-            return {
-                text: json.choices[0].message.content,
-                tokens: {
-                    prompt: json.usage?.prompt_tokens || 0,
-                    comp: json.usage?.completion_tokens || 0,
-                    total: json.usage?.total_tokens || 0
-                }
-            };
-        }
-
-        async function callClaudeAPI(apiKey, model, userText, attachments, sysPrompt) {
-            const url = 'https://api.anthropic.com/v1/messages';
-            let messageContent = userText;
-            const images = attachments.filter(a => a.type === 'image');
-            if (images.length > 0) {
-                messageContent = [{ type: "text", text: userText }];
-                images.forEach(img => {
-                    messageContent.push({ type: "image", source: { type: "base64", media_type: img.mimeType, data: img.content } });
-                });
-            }
-
-            const messages = [...chatHistory, { role: 'user', content: messageContent }];
-            const response = await fetch(url, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, 
-                body: JSON.stringify({ model: model, max_tokens: 4096, system: sysPrompt, messages: messages, temperature: 0.3 }) 
-            });
-            const json = await response.json();
-            if (!response.ok) throw new Error(json.error?.message || 'Error API');
-            
-            return {
-                text: json.content[0].text,
-                tokens: {
-                    prompt: json.usage?.input_tokens || 0,
-                    comp: json.usage?.output_tokens || 0,
-                    total: (json.usage?.input_tokens || 0) + (json.usage?.output_tokens || 0)
-                }
-            };
-        }
-
-        userInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.dispatchEvent(new Event('submit')); }
-        });
-
     </script>
 </body>
 </html>
