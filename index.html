@@ -118,9 +118,12 @@
                 <button onclick="saveAndFetchModels()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors">
                     Simpan Key
                 </button>
-                <div id="model-section" class="hidden pt-2">
+                <div id="model-section" class="pt-2">
                     <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Pilih Model</label>
-                    <select id="ai-model" onchange="saveActiveModel()" class="w-full bg-[#121212] border border-blue-500/50 rounded-xl px-4 py-3 text-white outline-none"></select>
+                    <select id="ai-model" onchange="saveActiveModel()" class="w-full bg-[#121212] border border-blue-500/50 rounded-xl px-4 py-3 text-white outline-none">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    </select>
                 </div>
                 <div id="status-message" class="text-xs hidden rounded-lg p-3 font-medium"></div>
             </div>
@@ -199,7 +202,12 @@
             Array.from(e.target.files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                    attachedFiles.push({ name: file.name, type: file.type.startsWith('image/') ? 'image' : 'text', mimeType: file.type || 'text/plain', content: file.type.startsWith('image/') ? ev.target.result.split(',')[1] : ev.target.result });
+                    attachedFiles.push({ 
+                        name: file.name, 
+                        type: file.type.startsWith('image/') ? 'image' : 'text', 
+                        mimeType: file.type || 'text/plain', 
+                        content: file.type.startsWith('image/') ? ev.target.result.split(',')[1] : ev.target.result 
+                    });
                     updateAttachmentUI();
                 };
                 if(file.type.startsWith('image/')) reader.readAsDataURL(file); else reader.readAsText(file);
@@ -249,6 +257,10 @@
             document.getElementById('settings-modal').classList.add('flex');
             const savedProvider = localStorage.getItem('_active_provider') || 'gemini';
             document.getElementById('ai-provider').value = savedProvider;
+            
+            const savedModel = localStorage.getItem(`_model_${savedProvider}`) || 'gemini-2.5-flash';
+            document.getElementById('ai-model').value = savedModel;
+
             onProviderChange();
         }
         function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); document.getElementById('settings-modal').classList.remove('flex'); updateModelDisplay(); }
@@ -266,9 +278,6 @@
             localStorage.setItem(`_key_${p}`, encKey(key));
             localStorage.setItem('_active_provider', p);
             
-            const sel = document.getElementById('ai-model');
-            sel.innerHTML = '<option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-pro">Gemini 2.5 Pro</option>';
-            document.getElementById('model-section').classList.remove('hidden');
             saveActiveModel();
             
             const status = document.getElementById('status-message');
@@ -281,9 +290,9 @@
             updateModelDisplay();
         }
         function updateModelDisplay() {
-            const p = localStorage.getItem('_active_provider') || 'Belum Diatur';
-            const m = localStorage.getItem(`_model_${p}`) || p;
-            let display = m.replace('gemini-2.5-', 'Gemini 2.5 ').replace('flash', 'Flash');
+            const p = localStorage.getItem('_active_provider') || 'gemini';
+            const m = localStorage.getItem(`_model_${p}`) || 'gemini-2.5-flash';
+            let display = m.replace('gemini-2.5-', 'Gemini 2.5 ').replace('flash', 'Flash').replace('pro', 'Pro');
             if (display.length > 25) display = display.substring(0, 25) + '...';
             document.getElementById('active-model-display').innerHTML = `${display} <i class="fas fa-chevron-down text-[10px] ml-1 opacity-70"></i>`;
         }
@@ -364,7 +373,8 @@
             if (files && files.length > 0) {
                 html += `<div class="flex flex-wrap gap-2 mb-2">`;
                 files.forEach(f => {
-                    html += `<div class="bg-[#2a2a2c] px-3 py-1.5 rounded-lg text-[11px] text-gray-300 font-mono"><i class="fas fa-file-code"></i> ${f.name}</div>`;
+                    const icon = f.type === 'image' ? 'fa-image' : 'fa-file-code';
+                    html += `<div class="bg-[#2a2a2c] px-3 py-1.5 rounded-lg text-[11px] text-gray-300 font-mono"><i class="fas ${icon}"></i> ${f.name}</div>`;
                 });
                 html += `</div>`;
             }
@@ -377,7 +387,6 @@
                 
                 const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
                 if (thinkMatch) {
-                    // THINKING PROCESS BISA DI HIDE (Menghilangkan atribut 'open')
                     html += `<details class="think-box mb-4 bg-[#161618] border border-[#2a2a2c] rounded-2xl p-1">
                                 <summary class="px-3 py-2 text-xs font-semibold text-gray-400 flex items-center gap-2"><i class="fas fa-stopwatch text-yellow-500"></i> Thinking Process</summary>
                                 <div class="p-3 pt-1 text-[13px] text-gray-500 font-mono whitespace-pre-wrap">${escapeHTML(thinkMatch[1].trim())}</div>
@@ -391,7 +400,7 @@
                     html += `<div class="mt-4 pt-3 border-t border-[#2a2a2c] flex items-center gap-5 text-[12px] text-gray-500 font-mono">
                                 <span><i class="fas fa-clock text-blue-400"></i> ${metadata.time}s</span>
                                 <span><i class="fas fa-coins text-yellow-500"></i> ${metadata.tokens} Token</span>
-                                <button onclick="restartGeneration(this)" data-prompt="${escapeHTML(metadata.lastPrompt)}" class="hover:text-white transition-colors flex items-center gap-1.5 bg-[#2a2a2c] px-2 py-1 rounded-md"><i class="fas fa-redo"></i> Jawab Ulang</button>
+                                <button onclick="restartGeneration(this)" class="hover:text-white transition-colors flex items-center gap-1.5 bg-[#2a2a2c] px-2 py-1 rounded-md"><i class="fas fa-redo"></i> Jawab Ulang</button>
                              </div>`;
                 }
             }
@@ -405,8 +414,24 @@
             cc.appendChild(wrap);
             cc.scrollTo({ top: cc.scrollHeight, behavior: 'smooth' });
 
-            chatHistory.push({ role: sender === 'ai' ? 'assistant' : 'user', content: text });
+            // Simpan history dalam format yang dimengerti oleh API (Parts array)
+            let historyParts = [];
+            if (text && text !== '[File Terlampir]') historyParts.push({ text: text });
+            
+            if (files && files.length > 0) {
+                files.forEach(f => {
+                    if (f.type === 'text') {
+                        historyParts.push({ text: `\n\n--- Isi File: ${f.name} ---\n${f.content}\n--- Akhir File ---` });
+                    } else if (f.type === 'image') {
+                        historyParts.push({ inlineData: { data: f.content, mimeType: f.mimeType } });
+                    }
+                });
+            }
+            if(historyParts.length === 0) historyParts.push({text: "Tolong analisa file yang dilampirkan."});
+
+            chatHistory.push({ role: sender === 'ai' ? 'assistant' : 'user', content: text, parts: historyParts });
         }
+        
         function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)); }
 
         function appendTyping() {
@@ -435,7 +460,7 @@
         }
 
         /* =========================================
-           API EXECUTION & SYSTEM PROMPT SUPER BESAR
+           API EXECUTION & SYSTEM PROMPT
            ========================================= */
         const SYSTEM_PROMPT = \`Kamu adalah AI ahli bahasa pemrograman Lua KHUSUS untuk server GTPS Cloud (GTPS10).
 Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud.
@@ -577,26 +602,31 @@ Gunakan table iterators seperti 'for _, p in ipairs(getServerPlayers()) do' saat
             e.preventDefault();
             const txt = document.getElementById('user-input').value.trim();
             if(!txt && attachedFiles.length === 0) return;
+            
             document.getElementById('user-input').value = '';
             document.getElementById('user-input').style.height = 'auto';
+            
             const att = [...attachedFiles];
             clearAllAttachments();
             
             appendMessage('user', txt || '[File Terlampir]', att);
-            processAI(txt);
+            processAI();
         }
 
         window.restartGeneration = function(btn) {
             btn.closest('.chat-block').remove();
-            const prompt = btn.getAttribute('data-prompt');
+            
+            // Hapus respon AI terakhir dari riwayat
             if(chatHistory.length > 0 && chatHistory[chatHistory.length-1].role === 'assistant') {
                 chatHistory.pop();
             }
-            processAI(prompt);
+            
+            // Generate ulang menggunakan pesan user terakhir yang sudah ada di riwayat
+            processAI();
         };
 
-        async function processAI(txt) {
-            const p = localStorage.getItem('_active_provider');
+        async function processAI() {
+            const p = localStorage.getItem('_active_provider') || 'gemini';
             const encKeyVal = localStorage.getItem(`_key_${p}`);
             if(!encKeyVal) { openSettings(); return; }
             
@@ -608,12 +638,24 @@ Gunakan table iterators seperti 'for _, p in ipairs(getServerPlayers()) do' saat
                 let resText = "";
                 let tokens = "N/A";
                 
-                const history = chatHistory.slice(0, -1).map(h => ({ role: h.role === 'assistant' ? 'model' : h.role, parts: [{ text: h.content }] }));
-                history.push({ role: 'user', parts: [{ text: txt }] });
+                // Ambil teks untuk sekadar disimpan sebagai metadata jika dibutuhkan
+                const lastUserMsg = chatHistory[chatHistory.length - 1];
+                const txt = lastUserMsg ? lastUserMsg.content : "";
+                
+                // Membaca full riwayat (termasuk file & base64 gambar) langsung ke format API Gemini
+                const history = chatHistory.map(h => ({
+                    role: h.role === 'assistant' ? 'model' : h.role,
+                    parts: h.parts
+                }));
                 
                 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ system_instruction: { parts: [{ text: SYSTEM_PROMPT }] }, contents: history, generationConfig: { temperature: 0.4 } })
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] }, 
+                        contents: history, 
+                        generationConfig: { temperature: 0.4 } 
+                    })
                 });
                 const d = await r.json();
                 if (!r.ok) throw new Error(d.error?.message || 'Error API');
