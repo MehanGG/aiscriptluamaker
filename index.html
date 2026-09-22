@@ -68,12 +68,11 @@
     <!-- Header -->
     <header class="glass-header p-4 flex justify-between items-center z-30 shadow-md">
         <div class="flex items-center gap-3">
-            <!-- Top-Left 3-Dot Navigation Menu -->
+            <!-- Top-Left 3-Dot Navigation Menu (Hanya Basic & Premium Lua Maker) -->
             <div class="relative">
                 <button type="button" onclick="toggleNavMenu(event)" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white p-2.5 rounded-xl transition-all border border-gray-600 flex items-center justify-center w-10 h-10 shadow-lg">
                     <i class="fas fa-ellipsis-v text-lg"></i>
                 </button>
-                <!-- Nav Dropdown Menu (Hanya Basic & Premium Lua Maker) -->
                 <div id="nav-dropdown" class="hidden absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
                     <a href="index.html" class="px-4 py-3 hover:bg-gray-700 text-sm text-white border-b border-gray-700/50 flex items-center gap-3 transition-colors bg-gray-700/40 font-semibold"><i class="fas fa-code text-emerald-400 w-4 text-center"></i> Basic Lua Maker</a>
                     <a href="#" onclick="showPremiumModal(event)" class="px-4 py-3 hover:bg-gray-700 text-sm text-gray-200 flex items-center gap-3 transition-colors"><i class="fas fa-crown text-yellow-400 w-4 text-center"></i> Premium Lua Maker</a>
@@ -103,13 +102,12 @@
             <div class="bubble-ai rounded-2xl rounded-tl-none p-5 max-w-[90%] md:max-w-[80%] shadow-xl border border-gray-700/50">
                 <h3 class="font-bold text-white mb-1 text-lg">Selamat Datang di Studio Ultimate! ✨</h3>
                 <p class="text-gray-300 leading-relaxed text-sm mb-3">
-                    Navigasi telah diperbarui:
+                    Pembaruan terbaru telah diaktifkan:
                 </p>
                 <ul class="text-xs text-gray-400 space-y-2 mb-4 list-disc list-inside">
-                    <li><strong class="text-gray-200">Menu Navigasi (Pojok Kiri Atas):</strong> Akses cepat ke <strong>Basic Lua Maker</strong> dan <strong>Premium Lua Maker</strong>.</li>
-                    <li><strong class="text-gray-200">Hold untuk Copy:</strong> Tahan bubble chat user untuk menyalin prompt.</li>
-                    <li><strong class="text-gray-200">Regenerate AI:</strong> Tombol restart tersedia di pesan balasan AI terakhir.</li>
-                    <li><strong class="text-gray-200">Direct PNG Image:</strong> Mode gambar langsung merender PNG transparan.</li>
+                    <li><strong class="text-gray-200">Live Timer & Token Berpikir:</strong> Indikator waktu (detik) dan token berjalan secara real-time saat AI memproses script.</li>
+                    <li><strong class="text-gray-200">Referensi GTPS API Terintegrasi:</strong> Script AI dilatih berdasarkan standar database SQLite, dialog parallel rows, dan sistem command GTPS10.</li>
+                    <li><strong class="text-gray-200">Navigasi:</strong> Menu pojok kiri atas kini berisi <b>Basic Lua Maker</b> dan <b>Premium Lua Maker</b>.</li>
                     <li><strong class="text-yellow-400"><i class="fas fa-star mr-1"></i> Rekomendasi Model:</strong> Gemini 2.5 Flash.</li>
                 </ul>
                 <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 text-xs text-gray-400">
@@ -142,7 +140,7 @@
                     <i class="fas fa-code text-gray-400"></i> Mode GTPS
                 </div>
 
-                <!-- 3-Dot Mode Selector Menu Button (Bottom Input) -->
+                <!-- 3-Dot Mode Selector Menu Button -->
                 <div class="relative pb-1.5">
                     <button type="button" id="special-menu-btn" onclick="toggleSpecialMenu(event)" class="text-gray-400 hover:text-emerald-400 p-2.5 transition-colors rounded-xl hover:bg-gray-800 shrink-0" title="Ganti Mode / Spesialisasi AI">
                         <i class="fas fa-ellipsis-v text-lg px-2"></i>
@@ -277,14 +275,14 @@
         }
 
         /* =========================================
-           MODE & SYSTEM PROMPTS MANAGEMENT
+           MODE & SYSTEM PROMPTS MANAGEMENT (GTPS LUA EXPERT)
            ========================================= */
         let currentAIMode = 'gtps';
         let canvasW = 1024;
         let canvasH = 1024;
 
-        const GTPS_DOCS = `Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS.cloud / GTPS10.
-Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan dokumentasi resmi GTPS.cloud Lua API.
+        const GTPS_DOCS = `Kamu adalah developer ahli bahasa pemrograman Lua khusus untuk server GTPS Cloud (GTPS10/GrowSoft).
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua berdasarkan standar API GTPS yang valid.
 
 INSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):
 Setiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran/analisa mendalam terlebih dahulu dengan menggunakan tag <think>.
@@ -292,25 +290,39 @@ Format respons kamu harus SELALU seperti ini:
 <think>
 [Tuliskan analisa logis, pengecekan error, perencanaan struktur kode, dan pemahaman terkait referensi database/API disini]
 </think>
-[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]`;
+[Berikan jawaban final, kode yang rapi, dan penjelasan untuk user disini]
+
+STANDAR REFERENSI SCRIPT & API GTPS CLOUD:
+1. **Sistem Database & Penyimpanan:**
+   - Gunakan SQLite (\`sqlite.open\`) atau file file storage (\`file.write\`, \`file.read\`, \`file.exists\`, \`onAutoSaveRequest\`)[span_12](start_span)[span_12](end_span)[span_13](start_span)[span_13](end_span).
+2. **Struktur Dialog GUI & Parallel Rows:**
+   - Gunakan string builder untuk dialog dengan format \`set_bg_color\`, \`add_label_with_icon\`, \`add_custom_break\`, \`add_spacer\`.
+   - Untuk baris item paralel (Trade/Convert), gunakan pola:
+     \`add_button_with_icon|trade_req_1|ItemName|noflags|itemID|amount|left|\`
+     \`add_button_with_icon|click_none||noflags|11162||\` (ikon panah)
+     \`add_button_with_icon|trade_give_1|RewardName|staticYellowFrame|rewardID|amount|left|\`[span_14](start_span)[span_14](end_span)[span_15](start_span)[span_15](end_span)
+3. **API Player & World Global:**
+   - \`player:getNetID()\`, \`player:getName()\`, \`player:getRealCleanName()\`, \`player:getUserID()\`[span_16](start_span)[span_16](end_span)
+   - \`player:getItemAmount(itemID)\`, \`player:changeItem(itemID, count, 0)\`[span_17](start_span)[span_17](end_span)[span_18](start_span)[span_18](end_span)[span_19](start_span)[span_19](end_span)
+   - \`player:onDialogRequest(dialogText)\`, \`player:onConsoleMessage(msg)\`, \`player:onTalkBubble(netID, text, 0)\`[span_20](start_span)[span_20](end_span)[span_21](start_span)[span_21](end_span)[span_22](start_span)[span_22](end_span)
+   - \`player:hasRole(roleID)\`, \`getRoles()\`, \`registerLuaCommand({...})\`[span_23](start_span)[span_23](end_span)[span_24](start_span)[span_24](end_span)[span_25](start_span)[span_25](end_span)
+   - Callback event: \`onPlayerCommandCallback(function(world, player, fullCommand) ... end)\`, \`onPlayerDialogCallback(function(world, player, data) ... end)\`[span_26](start_span)[span_26](end_span)[span_27](start_span)[span_27](end_span)[span_28](start_span)[span_28](end_span)`;
 
         function getActiveSystemPrompt() {
             const thinkInstruction = `\n\nINSTRUKSI WAJIB UNTUK PROSES BERPIKIR (THINKING):\nSetiap kali kamu akan memberikan respon, kamu WAJIB melakukan pemikiran mendalam terlebih dahulu dengan tag <think>.\nFormat respons kamu harus SELALU seperti ini:\n<think>\n[Tuliskan analisa logis dan perencanaan disini]\n</think>\n[Berikan jawaban final dan kode yang rapi disini]`;
 
             if (currentAIMode === 'gtps') return GTPS_DOCS;
             if (currentAIMode === 'music') {
-                return `Kamu adalah ahli Web Audio API dan HTML5. Tugasmu adalah membuat kode Full HTML5 (didalamnya ada JS Web Audio API yang digabung) untuk membuat/memainkan instrumen atau musik sesuai tema yang diminta user.` + thinkInstruction;
+                return `Kamu adalah ahli Web Audio API dan HTML5. Tugasmu adalah membuat kode Full HTML5 untuk membuat/memainkan instrumen atau musik interaktif sesuai tema user.` + thinkInstruction;
             }
             if (currentAIMode === 'html') {
-                return `Kamu adalah Senior Full-Stack Web Developer. Tugasmu adalah membuat kode Full HTML tunggal (CSS & JS wajib ditulis langsung di dalam file HTML yang sama) untuk membuat website interaktif sesuai tema yang diminta user.` + thinkInstruction;
+                return `Kamu adalah Senior Full-Stack Web Developer. Tugasmu adalah membuat kode Full HTML tunggal yang estetis dan responsif sesuai tema user.` + thinkInstruction;
             }
             if (currentAIMode === 'image') {
-                return `Kamu adalah AI Pembuat Gambar / Fotografer Visual. Tugasmu adalah menerjemahkan permintaan visual dari user ke dalam prompt bahasa Inggris yang sangat spesifik dan fotorealistik (Maksimal 60 kata).
-
-Gunakan tag <think> untuk menganalisis prompt visual.
-Setelah </think>, jawab HANYA dengan Markdown Image URL ini:
+                return `Kamu adalah AI Pembuat Gambar / Fotografer Visual. Terjemahkan permintaan visual user ke dalam prompt bahasa Inggris spesifik (Maksimal 60 kata).
+Gunakan tag <think> untuk menganalisis prompt. Setelah </think>, jawab HANYA dengan Markdown Image URL:
 ![Hasil Gambar](https://image.pollinations.ai/prompt/{PROMPT_INGGRIS_DISINI}?width=${canvasW}&height=${canvasH}&transparent=true&nologo=true)
-Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background", dan jangan berikan teks lain di luar markdown gambar.`;
+Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background".`;
             }
             return GTPS_DOCS;
         }
@@ -556,6 +568,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background", dan jang
 
         let chatHistory = [];
         window.lastUserReq = null;
+        let typingInterval = null; // Untuk live timer berpikir
         
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
@@ -684,7 +697,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background", dan jang
         }
 
         /* =========================================
-           CHAT UI RENDERING
+           CHAT UI RENDERING (WITH LIVE THINKING TIMER)
            ========================================= */
         function appendMessage(sender, text, files = [], metadata = null) {
             const wrapper = document.createElement('div');
@@ -720,9 +733,9 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background", dan jang
                     const mainContent = text.replace(/<think>([\s\S]*?)<\/think>/i, '').trim();
                     
                     contentHTML += `
-                        <details class="think-box mb-4 bg-gray-900/80 border border-gray-700 rounded-lg overflow-hidden">
+                        <details class="think-box mb-4 bg-gray-900/80 border border-gray-700 rounded-lg overflow-hidden" open>
                             <summary class="px-4 py-2.5 bg-gray-800/80 hover:bg-gray-700/80 text-xs font-semibold text-gray-300 flex items-center gap-2 transition-colors">
-                                <i class="fas fa-brain text-emerald-500"></i> AI Processed Thoughts
+                                <i class="fas fa-brain text-emerald-500"></i> AI Processed Thoughts (${metadata ? metadata.time : '0.00'}s)
                                 <i class="fas fa-chevron-down ml-auto text-[10px] opacity-50"></i>
                             </summary>
                             <div class="p-4 text-[12px] text-gray-400 font-mono whitespace-pre-wrap border-t border-gray-700 bg-gray-950">${escapeHTML(thinkContent)}</div>
@@ -740,7 +753,7 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background", dan jang
                         <div class="mt-4 pt-3 border-t border-gray-700/50 flex flex-wrap items-center justify-between gap-4 text-[11px] font-medium text-gray-500">
                             <div class="flex gap-4">
                                 <div class="flex items-center gap-1.5"><i class="fas fa-stopwatch text-teal-500"></i> ${metadata.time}s</div>
-                                <div class="flex items-center gap-1.5" title="Prompt + Completion"><i class="fas fa-coins text-yellow-500"></i> Tokens: ${metadata.total}</div>
+                                <div class="flex items-center gap-1.5" title="Total Tokens"><i class="fas fa-coins text-yellow-500"></i> Tokens: ${metadata.total}</div>
                             </div>
                             <button onclick="regenerateLast()" class="regen-btn bg-gray-800 hover:bg-gray-700 hover:text-white text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-2 outline-none shadow-sm">
                                 <i class="fas fa-sync-alt"></i> Restart
@@ -766,18 +779,37 @@ Aturan: Ganti spasi dengan "%20", tambahkan "transparent%20background", dan jang
         function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
 
         function showTyping() {
+            const startTime = Date.now();
             const wrapper = document.createElement('div');
             wrapper.id = 'typing-indicator';
             wrapper.className = `flex items-start gap-4 w-full`;
-            wrapper.innerHTML = `<div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>
-                <div class="bubble-ai rounded-2xl rounded-tl-none p-5 shadow-xl border border-gray-700/50 typing-indicator flex items-center gap-2">
-                    <i class="fas fa-brain text-emerald-400 animate-pulse text-xs"></i><span></span><span></span><span></span>
+            wrapper.innerHTML = `
+                <div class="bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0 shadow-lg"><i class="fas fa-robot text-white"></i></div>
+                <div class="bubble-ai rounded-2xl rounded-tl-none p-4 shadow-xl border border-gray-700/50 flex flex-col gap-2 w-full max-w-[85%]">
+                    <div class="flex items-center gap-2 text-xs text-emerald-400 font-mono">
+                        <i class="fas fa-brain animate-pulse"></i> <span>AI sedang berpikir & menyusun script...</span>
+                        <span id="timer-counter" class="ml-auto bg-gray-900 px-2 py-0.5 rounded text-gray-300 font-bold">0.0s</span>
+                    </div>
+                    <div class="typing-indicator flex items-center gap-1 py-1">
+                        <span></span><span></span><span></span>
+                    </div>
                 </div>`;
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+
+            // Live Timer Berjalan
+            typingInterval = setInterval(() => {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                const timerEl = document.getElementById('timer-counter');
+                if (timerEl) timerEl.textContent = elapsed + 's';
+            }, 100);
         }
         
-        function removeTyping() { const el = document.getElementById('typing-indicator'); if(el) el.remove(); }
+        function removeTyping() { 
+            if (typingInterval) clearInterval(typingInterval);
+            const el = document.getElementById('typing-indicator'); 
+            if(el) el.remove(); 
+        }
 
         /* =========================================
            API EXECUTION DISPATCHER
