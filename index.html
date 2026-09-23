@@ -175,9 +175,7 @@
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
 
-        // FIX BUG STUCK MEMUAT MODEL:
-        // Panggil updateModelDisplay() secara langsung agar tidak perlu menunggu DOMContentLoaded 
-        // yang terkadang gagal terpanggil di beberapa editor atau live server.
+        // Tampilkan Model Langsung
         updateModelDisplay();
 
         function startNewChat(e) {
@@ -269,7 +267,11 @@
         function onProviderChange() {
             const p = document.getElementById('ai-provider').value;
             const saved = localStorage.getItem(`_key_${p}`);
-            document.getElementById('api-key-input').value = saved ? decKey(saved) : '';
+            try {
+                document.getElementById('api-key-input').value = saved ? decKey(saved) : '';
+            } catch (error) {
+                document.getElementById('api-key-input').value = '';
+            }
         }
 
         async function saveAndFetchModels() {
@@ -467,7 +469,7 @@
         /* =========================================
            API EXECUTION & SYSTEM PROMPT
            ========================================= */
-        const SYSTEM_PROMPT = \`Kamu adalah AI ahli bahasa pemrograman Lua KHUSUS untuk server GTPS Cloud (GTPS10).
+        const SYSTEM_PROMPT = `Kamu adalah AI ahli bahasa pemrograman Lua KHUSUS untuk server GTPS Cloud (GTPS10).
 Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud.
 
 ATURAN FORMAT BALASAN:
@@ -601,7 +603,7 @@ Callbacks (Gunakan sesuai format API):
 
 PENTING: JANGAN MENGGUNAKAN API ATAU FUNGSI LUA YANG TIDAK TERCANTUM DI GTPS CLOUD API DI ATAS. 
 Gunakan table iterators seperti 'for _, p in ipairs(getServerPlayers()) do' saat mencari player.
-\``;
+`;
 
         function handleFormSubmit(e) {
             e.preventDefault();
@@ -635,7 +637,16 @@ Gunakan table iterators seperti 'for _, p in ipairs(getServerPlayers()) do' saat
             const encKeyVal = localStorage.getItem(`_key_${p}`);
             if(!encKeyVal) { openSettings(); return; }
             
-            const apiKey = decKey(encKeyVal);
+            let apiKey = "";
+            try {
+                apiKey = decKey(encKeyVal);
+            } catch (error) {
+                alert("API Key tersimpan rusak/tidak valid. Silakan atur ulang di setelan.");
+                localStorage.removeItem(`_key_${p}`);
+                openSettings();
+                return;
+            }
+
             const model = localStorage.getItem(`_model_${p}`) || 'gemini-2.5-flash';
             appendTyping();
 
