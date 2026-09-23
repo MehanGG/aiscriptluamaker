@@ -175,9 +175,10 @@
         const encKey = str => btoa(encodeURIComponent(str));
         const decKey = str => decodeURIComponent(atob(str));
 
-        window.addEventListener('DOMContentLoaded', () => {
-            updateModelDisplay();
-        });
+        // FIX BUG STUCK MEMUAT MODEL:
+        // Panggil updateModelDisplay() secara langsung agar tidak perlu menunggu DOMContentLoaded 
+        // yang terkadang gagal terpanggil di beberapa editor atau live server.
+        updateModelDisplay();
 
         function startNewChat(e) {
             e.preventDefault();
@@ -294,7 +295,11 @@
             const m = localStorage.getItem(`_model_${p}`) || 'gemini-2.5-flash';
             let display = m.replace('gemini-2.5-', 'Gemini 2.5 ').replace('flash', 'Flash').replace('pro', 'Pro');
             if (display.length > 25) display = display.substring(0, 25) + '...';
-            document.getElementById('active-model-display').innerHTML = `${display} <i class="fas fa-chevron-down text-[10px] ml-1 opacity-70"></i>`;
+            
+            const modelDisplayElement = document.getElementById('active-model-display');
+            if(modelDisplayElement) {
+                modelDisplayElement.innerHTML = `${display} <i class="fas fa-chevron-down text-[10px] ml-1 opacity-70"></i>`;
+            }
         }
 
         /* =========================================
