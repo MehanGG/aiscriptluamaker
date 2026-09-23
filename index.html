@@ -181,7 +181,9 @@
         const decKey = str => decodeURIComponent(atob(str));
 
         // Inisialisasi Tampilan
-        updateModelDisplay();
+        document.addEventListener('DOMContentLoaded', () => {
+            updateModelDisplay();
+        });
 
         function startNewChat(e) {
             e.preventDefault();
@@ -307,7 +309,6 @@
         async function saveAndFetchModels() {
             const p = document.getElementById('ai-provider').value;
             const key = document.getElementById('api-key-input').value.trim();
-            const statusBox = document.getElementById('status-message');
             const btn = document.getElementById('btn-verify');
             
             if(!key) {
@@ -379,11 +380,18 @@
         }
         
         function updateModelDisplay() {
-            const p = localStorage.getItem('_active_provider') || 'Belum Diatur';
-            const m = localStorage.getItem(`_model_${p}`) || 'Pilih Provider';
-            let providerName = p === 'gemini' ? 'Gemini' : p === 'openai' ? 'OpenAI' : p === 'claude' ? 'Claude' : '';
+            const p = localStorage.getItem('_active_provider');
+            const m = localStorage.getItem(`_model_${p}`);
             const modelDisplayElement = document.getElementById('active-model-display');
-            if(modelDisplayElement) modelDisplayElement.innerHTML = `${providerName}: ${m}`;
+            
+            if (modelDisplayElement) {
+                if (!p || !m) {
+                    modelDisplayElement.innerHTML = `Pilih API & Model`;
+                } else {
+                    let providerName = p === 'gemini' ? 'Gemini' : p === 'openai' ? 'OpenAI' : p === 'claude' ? 'Claude' : p;
+                    modelDisplayElement.innerHTML = `${providerName}: ${m}`;
+                }
+            }
         }
 
         /* =========================================
@@ -566,7 +574,7 @@ registerLuaCommand({ command = "cv", roleRequired = 0, description = "Buka Menu 
 
 local function showConvertDialog(player)
     local dialog = "set_bg_color|10,10,10,255|\\n"
-    dialog = dialog .. "add_label_with_icon|big|\\`wConverter Menu|left|7070|\\n"
+    dialog = dialog .. "add_label_with_icon|big|\\\`wConverter Menu|left|7070|\\n"
     dialog = dialog .. "add_button_with_icon|convert_dl|Blue Gem Lock|staticYellowFrame|7188||left|\\n"
     dialog = dialog .. "end_dialog|show_convert_dialog|Close||\\n"
     player:onDialogRequest(dialog)
