@@ -16,7 +16,8 @@
         * { -webkit-tap-highlight-color: transparent !important; outline: none !important; }
         *:focus { outline: none !important; box-shadow: none !important; }
         
-        .allow-select, pre, code, details {
+        /* Hanya input dan textarea yang bisa di-select/diblok */
+        .allow-select {
             -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important;
         }
 
@@ -26,7 +27,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         
-        @keyframes pop-in { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes pop-in { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
         .animate-pop-in { animation: pop-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
         details.think-box summary::-webkit-details-marker { display: none; }
@@ -237,7 +238,7 @@
                         <span>${lang}</span>
                         <button type="button" onclick="copyCode(this)" class="hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-copy"></i> Copy</button>
                     </div>
-                    <pre class="p-4 text-[13px] text-gray-300 font-mono overflow-x-auto allow-select"><code>${escapeHTML(codeText)}</code></pre>
+                    <pre class="p-4 text-[13px] text-gray-300 font-mono overflow-x-auto"><code>${escapeHTML(codeText)}</code></pre>
                 </div>`;
             }
         };
@@ -387,14 +388,14 @@
             }
 
             if (sender === 'user') {
-                contentDiv.className = 'bg-[#1e1e1e] text-white px-5 py-3 rounded-[28px] max-w-[85%] text-[15px] leading-relaxed shadow-sm allow-select';
+                contentDiv.className = 'bg-[#1e1e1e] text-white px-5 py-3 rounded-[28px] max-w-[85%] text-[15px] leading-relaxed shadow-sm chat-bubble-content cursor-pointer';
                 html += `<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;
             } else {
-                contentDiv.className = 'w-full ai-text text-gray-200 text-[15px] leading-relaxed allow-select overflow-hidden';
+                contentDiv.className = 'w-full ai-text text-gray-200 text-[15px] leading-relaxed overflow-hidden chat-bubble-content cursor-pointer';
                 
                 const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
                 if (thinkMatch) {
-                    html += `<details class="think-box mb-4 bg-[#161618] border border-[#2a2a2c] rounded-2xl p-1">
+                    html += `<details class="think-box mb-4 bg-[#161618] border border-[#2a2a2c] rounded-2xl p-1 cursor-pointer">
                                 <summary class="px-3 py-2 text-xs font-semibold text-gray-400 flex items-center gap-2"><i class="fas fa-stopwatch text-yellow-500"></i> Thinking Process</summary>
                                 <div class="p-3 pt-1 text-[13px] text-gray-500 font-mono whitespace-pre-wrap">${escapeHTML(thinkMatch[1].trim())}</div>
                              </details>`;
@@ -404,10 +405,10 @@
                 }
 
                 if (metadata) {
-                    html += `<div class="mt-4 pt-3 border-t border-[#2a2a2c] flex items-center gap-5 text-[12px] text-gray-500 font-mono">
+                    html += `<div class="mt-4 pt-3 border-t border-[#2a2a2c] flex items-center gap-5 text-[12px] text-gray-500 font-mono pointer-events-auto">
                                 <span><i class="fas fa-clock text-blue-400"></i> ${metadata.time}s</span>
                                 <span><i class="fas fa-coins text-yellow-500"></i> ${metadata.tokens} Token</span>
-                                <button onclick="restartGeneration(this)" class="hover:text-white transition-colors flex items-center gap-1.5 bg-[#2a2a2c] px-2 py-1 rounded-md"><i class="fas fa-redo"></i> Jawab Ulang</button>
+                                <button onclick="restartGeneration(this)" class="hover:text-white transition-colors flex items-center gap-1.5 bg-[#2a2a2c] px-2 py-1 rounded-md cursor-pointer"><i class="fas fa-redo"></i> Jawab Ulang</button>
                              </div>`;
                 }
             }
@@ -689,6 +690,93 @@ Gunakan table iterators seperti 'for _, p in ipairs(getServerPlayers()) do' saat
                 removeTyping();
                 appendMessage('ai', `**Error Sistem:** ${err.message}`);
             }
+        }
+
+        /* =========================================
+           SECURITY & UX (ANTI F12, HOLD TO COPY)
+           ========================================= */
+        
+        // 1. Anti Right Click (Kecuali pada input area yang mungkin butuh paste)
+        document.addEventListener('contextmenu', function(e) {
+            if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
+        // 2. Anti F12 & Inspect Element Shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (
+                e.keyCode === 123 || // F12
+                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || // Ctrl+Shift+I atau J
+                (e.ctrlKey && e.keyCode === 85) // Ctrl+U
+            ) {
+                e.preventDefault();
+            }
+        });
+
+        // 3. Hold to Copy pada Bubble Chat
+        let holdTimer;
+        const HOLD_DURATION = 600; // 0.6 detik
+
+        // Event listener global untuk mendeteksi sentuhan/klik
+        document.addEventListener('touchstart', handleHoldStart, {passive: true});
+        document.addEventListener('touchend', handleHoldEnd);
+        document.addEventListener('touchmove', handleHoldEnd);
+        
+        document.addEventListener('mousedown', handleHoldStart);
+        document.addEventListener('mouseup', handleHoldEnd);
+        document.addEventListener('mousemove', handleHoldEnd);
+
+        function handleHoldStart(e) {
+            // Cek apakah yang ditekan adalah bubble chat
+            const bubble = e.target.closest('.chat-bubble-content');
+            if (!bubble) return;
+            
+            // Jangan jalankan timer jika menekan tombol (misal tombol copy code atau details)
+            if (e.target.closest('button') || e.target.closest('details')) return;
+
+            holdTimer = setTimeout(() => {
+                const textToCopy = bubble.innerText;
+                if (textToCopy.trim()) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        showCopyToast(e);
+                    });
+                }
+            }, HOLD_DURATION);
+        }
+
+        function handleHoldEnd() {
+            clearTimeout(holdTimer);
+        }
+
+        // Animasi Pop-up Teks Berhasil Disalin
+        function showCopyToast(e) {
+            let x, y;
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+
+            const toast = document.createElement('div');
+            toast.innerHTML = '<i class="fas fa-check-circle"></i> Teks Disalin!';
+            toast.className = 'fixed bg-[#4CAF50] text-white px-4 py-2 rounded-full text-xs font-bold shadow-2xl z-[9999] animate-pop-in flex items-center gap-2 pointer-events-none';
+            
+            // Atur posisi agar muncul tepat di atas jari/kursor
+            toast.style.left = `${x}px`;
+            toast.style.top = `${y - 60}px`;
+            toast.style.transform = 'translate(-50%, -50%)';
+            
+            document.body.appendChild(toast);
+
+            // Hilangkan perlahan
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.4s ease-out';
+                setTimeout(() => toast.remove(), 400);
+            }, 1200);
         }
     </script>
 </body>
