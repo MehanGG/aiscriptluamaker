@@ -341,9 +341,9 @@
                     if(data.error) throw new Error(data.error.message);
                     
                     models = data.data
-                        .filter(m => m.id.includes('gpt'))
+                        .filter(m => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3'))
                         .map(m => m.id)
-                        .sort(); // Urutkan alfabet
+                        .sort();
                 } 
                 // 3. Ambil Model Claude (Anthropic)
                 else if (p === 'claude') {
@@ -357,10 +357,10 @@
                         });
                         const data = await res.json();
                         if(data.error) throw new Error(data.error.message);
-                        models = data.data.map(m => m.id);
+                        models = data.models.map(m => m.id);
                     } catch (e) {
                         // Fallback jika API endpoint models terblokir CORS di browser
-                        models = ['claude-3-5-sonnet-20240620', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'];
+                        models = ['claude-3-7-sonnet-20250219', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'];
                     }
                 }
 
@@ -579,19 +579,19 @@
         }
 
         const SYSTEM_PROMPT = `Kamu adalah AI ahli bahasa pemrograman Lua KHUSUS untuk server GTPS Cloud (GTPS10).
-Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud.
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud. Referensi ekstensif API dan contoh command telah disediakan di memori mu. 
 
 ATURAN FORMAT BALASAN:
 - LANGSUNG BERIKAN SCRIPT LUA-NYA DALAM SATU BALASAN! JANGAN bertele-tele, JANGAN meminta konfirmasi, dan JANGAN menunda memberikan kode.
 - SEBELUM menuliskan blok kode script (\`\`\`lua), kamu WAJIB memberikan JUDUL SCRIPT terlebih dahulu.
 - SELALU gunakan tag <think>...</think> di awal responmu untuk menjelaskan pemikiran dan analisamu secara mendalam.
 
---- DOKUMENTASI LENGKAP GTPS CLOUD LUA API ---
-Global Functions: registerLuaCommand, getServerPlayers, getServerWorlds, getItem, print, saveStringToServer, loadStringFromServer, saveDataToServer, loadDataFromServer, file.write, file.read, file.exists, timer.setTimeout, timer.setInterval.
-Player Class: getName, getNetID, getCleanName, hasRole, getRole, onConsoleMessage, onTalkBubble, onDialogRequest, getGems, addGems, setGems, removeGems, getItemAmount, changeItem, getPosX, getPosY, playAudio, disconnect, ban, sendRawPacket.
-World Class: getName, getPlayers, getTile, spawnItem, useItemEffect, onCreateChatBubble, setWeather.
+--- RINGKASAN GTPS CLOUD LUA API ---
+Global Functions: registerLuaCommand, registerLuaPlaymod, getServerPlayers, getServerWorlds, getItem, print, saveStringToServer, loadStringFromServer, saveDataToServer, loadDataFromServer, file.write, file.read, file.exists, timer.setTimeout, timer.setInterval, getItemsCount, getActiveDailyOffers, formatTime.
+Player Class: getName, getNetID, getCleanName, hasRole, getRole, onConsoleMessage, onTalkBubble, onDialogRequest, getGems, addGems, setGems, removeGems, getItemAmount, changeItem, getPosX, getPosY, playAudio, disconnect, ban, sendRawPacket, hasAccessToTile, addInventorySpace.
+World Class: getName, getPlayers, getTile, spawnItem, useItemEffect, onCreateChatBubble, setWeather, getTileDroppedItems, useConsumable.
 Tile Class: getTileID, getFlags, getPosX, getPosY, getTileData, setTileData.
-Callbacks: onPlayerCommandCallback, onPlayerDialogCallback, onPlayerChatCallback, onPlayerJoinCallback.`;
+Callbacks Utama: onPlayerCommandCallback, onPlayerDialogCallback, onPlayerChatCallback, onPlayerJoinCallback, onPlayerDeathCallback.`;
 
         function handleFormSubmit(e) {
             e.preventDefault();
@@ -638,6 +638,7 @@ Callbacks: onPlayerCommandCallback, onPlayerDialogCallback, onPlayerChatCallback
                 const lastUserMsg = chatHistory[chatHistory.length - 1];
                 const lastTxt = lastUserMsg ? lastUserMsg.content : "";
 
+                // Eksekusi API sesuai dengan Provider yang dipilih
                 if (p === 'gemini') {
                     const history = chatHistory.map(h => ({
                         role: h.role === 'assistant' ? 'model' : h.role,
