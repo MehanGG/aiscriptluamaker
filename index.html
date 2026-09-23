@@ -281,7 +281,6 @@
                 document.getElementById('api-key-input').value = '';
             }
             
-            // Muat ulang daftar model jika sudah pernah difetch sebelumnya
             const savedModels = localStorage.getItem(`_models_list_${p}`);
             const modelSection = document.getElementById('model-section');
             const selectModel = document.getElementById('ai-model');
@@ -322,72 +321,45 @@
             try {
                 let models = [];
                 
-                // 1. Ambil Model Gemini
                 if (p === 'gemini') {
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
                     const data = await res.json();
                     if(data.error) throw new Error(data.error.message);
-                    
-                    models = data.models
-                        .filter(m => m.supportedGenerationMethods.includes('generateContent'))
-                        .map(m => m.name.replace('models/', ''));
-                } 
-                // 2. Ambil Model OpenAI
-                else if (p === 'openai') {
-                    const res = await fetch(`https://api.openai.com/v1/models`, {
-                        headers: { 'Authorization': `Bearer ${key}` }
-                    });
+                    models = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => m.name.replace('models/', ''));
+                } else if (p === 'openai') {
+                    const res = await fetch(`https://api.openai.com/v1/models`, { headers: { 'Authorization': `Bearer ${key}` } });
                     const data = await res.json();
                     if(data.error) throw new Error(data.error.message);
-                    
-                    models = data.data
-                        .filter(m => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3'))
-                        .map(m => m.id)
-                        .sort();
-                } 
-                // 3. Ambil Model Claude (Anthropic)
-                else if (p === 'claude') {
+                    models = data.data.filter(m => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3')).map(m => m.id).sort();
+                } else if (p === 'claude') {
                     try {
                         const res = await fetch(`https://api.anthropic.com/v1/models`, {
-                            headers: { 
-                                'x-api-key': key, 
-                                'anthropic-version': '2023-06-01', 
-                                'anthropic-dangerous-direct-browser-access': 'true' 
-                            }
+                            headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }
                         });
                         const data = await res.json();
                         if(data.error) throw new Error(data.error.message);
                         models = data.models.map(m => m.id);
                     } catch (e) {
-                        // Fallback jika API endpoint models terblokir CORS di browser
                         models = ['claude-3-7-sonnet-20250219', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'];
                     }
                 }
 
-                if (models.length === 0) throw new Error("Tidak ada model chat yang ditemukan untuk API Key ini.");
+                if (models.length === 0) throw new Error("Tidak ada model chat yang ditemukan.");
 
-                // Berhasil, simpan data ke LocalStorage
                 localStorage.setItem(`_key_${p}`, encKey(key));
                 localStorage.setItem('_active_provider', p);
                 localStorage.setItem(`_models_list_${p}`, JSON.stringify(models));
                 
-                // Render ke Select Box
                 const selectModel = document.getElementById('ai-model');
                 selectModel.innerHTML = '';
-                models.forEach(m => {
-                    selectModel.innerHTML += `<option value="${m}">${m}</option>`;
-                });
-                
+                models.forEach(m => { selectModel.innerHTML += `<option value="${m}">${m}</option>`; });
                 document.getElementById('model-section').classList.remove('hidden');
                 
-                // Simpan model aktif pertama kali
                 saveActiveModel();
-                
                 showStatus(`Berhasil! Ditemukan ${models.length} model.`, 'success');
             } catch (error) {
                 showStatus(error.message, 'error');
             }
-
             btn.innerHTML = '<i class="fas fa-sync-alt"></i> Simpan & Verifikasi Key';
             btn.disabled = false;
         }
@@ -410,11 +382,8 @@
             const p = localStorage.getItem('_active_provider') || 'Belum Diatur';
             const m = localStorage.getItem(`_model_${p}`) || 'Pilih Provider';
             let providerName = p === 'gemini' ? 'Gemini' : p === 'openai' ? 'OpenAI' : p === 'claude' ? 'Claude' : '';
-            
             const modelDisplayElement = document.getElementById('active-model-display');
-            if(modelDisplayElement) {
-                modelDisplayElement.innerHTML = `${providerName}:${m}`;
-            }
+            if(modelDisplayElement) modelDisplayElement.innerHTML = `${providerName}: ${m}`;
         }
 
         /* =========================================
@@ -578,20 +547,179 @@
             if(el) el.remove(); 
         }
 
+        // =========================================================================
+        // FULL SYSTEM PROMPT (DILENGKAPI API LENGKAP & REFERENSI SCRIPT GTPS)
+        // =========================================================================
         const SYSTEM_PROMPT = `Kamu adalah AI ahli bahasa pemrograman Lua KHUSUS untuk server GTPS Cloud (GTPS10).
-Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud. Referensi ekstensif API dan contoh command telah disediakan di memori mu. 
+Tugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud.
 
 ATURAN FORMAT BALASAN:
 - LANGSUNG BERIKAN SCRIPT LUA-NYA DALAM SATU BALASAN! JANGAN bertele-tele, JANGAN meminta konfirmasi, dan JANGAN menunda memberikan kode.
 - SEBELUM menuliskan blok kode script (\`\`\`lua), kamu WAJIB memberikan JUDUL SCRIPT terlebih dahulu.
-- SELALU gunakan tag <think>...</think> di awal responmu untuk menjelaskan pemikiran dan analisamu secara mendalam.
+- SELALU gunakan tag <think>...</think> di awal responmu untuk menjelaskan pemikiran dan analisamu.
+- HANYA gunakan fungsi yang terdaftar di dokumentasi resmi di bawah ini.
 
---- RINGKASAN GTPS CLOUD LUA API ---
-Global Functions: registerLuaCommand, registerLuaPlaymod, getServerPlayers, getServerWorlds, getItem, print, saveStringToServer, loadStringFromServer, saveDataToServer, loadDataFromServer, file.write, file.read, file.exists, timer.setTimeout, timer.setInterval, getItemsCount, getActiveDailyOffers, formatTime.
-Player Class: getName, getNetID, getCleanName, hasRole, getRole, onConsoleMessage, onTalkBubble, onDialogRequest, getGems, addGems, setGems, removeGems, getItemAmount, changeItem, getPosX, getPosY, playAudio, disconnect, ban, sendRawPacket, hasAccessToTile, addInventorySpace.
-World Class: getName, getPlayers, getTile, spawnItem, useItemEffect, onCreateChatBubble, setWeather, getTileDroppedItems, useConsumable.
-Tile Class: getTileID, getFlags, getPosX, getPosY, getTileData, setTileData.
-Callbacks Utama: onPlayerCommandCallback, onPlayerDialogCallback, onPlayerChatCallback, onPlayerJoinCallback, onPlayerDeathCallback.`;
+=======================================================
+[REFERENSI 1: MEMBUAT COMMAND, DIALOG, DAN ITEM CONVERSION]
+=======================================================
+registerLuaCommand({ command = "cv", roleRequired = 0, description = "Buka Menu Convert" })
+
+local function showConvertDialog(player)
+    local dialog = "set_bg_color|10,10,10,255|\\n"
+    dialog = dialog .. "add_label_with_icon|big|\\`wConverter Menu|left|7070|\\n"
+    dialog = dialog .. "add_button_with_icon|convert_dl|Blue Gem Lock|staticYellowFrame|7188||left|\\n"
+    dialog = dialog .. "end_dialog|show_convert_dialog|Close||\\n"
+    player:onDialogRequest(dialog)
+end
+
+onPlayerCommandCallback(function(world, player, fullCommand)
+    local command = fullCommand:match("^(%S+)")
+    if command == "cv" then 
+        showConvertDialog(player) 
+        return true 
+    end
+    return false
+end)
+
+onPlayerDialogCallback(function(world, player, data)
+    local dialogName = data["dialog_name"] or ""
+    local btn = data["buttonClicked"] or ""
+    
+    if dialogName == "show_convert_dialog" then
+        if btn == "convert_dl" then
+            if player:getItemAmount(1796) >= 100 then
+                player:changeItem(1796, -100, 0)
+                player:changeItem(7188, 1, 0)
+                player:onConsoleMessage("Berhasil Convert DL ke BGL!")
+            end
+        end
+        return true
+    end
+    return false
+end)
+
+=======================================================
+[REFERENSI 2: SISTEM DATABASE (FILE I/O) & MULTI-ROW MENU]
+=======================================================
+local DB_FILE = "data_exchange.db"
+local dataCache = {}
+
+local function saveDB()
+    local lines = {}
+    for k, v in pairs(dataCache) do
+        table.insert(lines, string.format("%s|%s", k, v))
+    end
+    file.write(DB_FILE, table.concat(lines, "\\n"))
+end
+
+local function loadDB()
+    if not file.exists(DB_FILE) then return end
+    local content = file.read(DB_FILE)
+    for line in string.gmatch(content, "[^\\r\\n]+") do
+        -- Parsing logic here
+    end
+end
+loadDB()
+onAutoSaveRequest(function() saveDB() end)
+
+=======================================================
+[DOKUMENTASI GTPS CLOUD LUA API LENGKAP]
+=======================================================
+**Global Functions:**
+registerLuaPlaymod(config), registerLuaCommand(config), registerLuaEvent(config), registerLuaDailyEvent(config), registerLuaAchievement(config), registerLuaItem(config)
+getItem(itemID), getItemsCount(), getMaxItems(), getRealGTItemsCount()
+getServerPlayers(), getServerWorlds(), getAllPlayers(), getAllWorlds(), getAllGuilds()
+reloadScripts(), reloadConfigs(), reloadItems()
+getPlayer(userID), getPlayerByName(playerName, client), savePlayer(player)
+getActiveDailyOffers(), getEventOffers(), getCurrentServerEvent(), getCurrentServerDailyEvent(), getStoreItems(), getIOTMItem(itemID), getEasterBuyTime(userID)
+isDailyOfferPurchased(userID, storeItemID), addDailyOfferPurchased(userID, storeItemID), getEasterEggs(userID)
+formatStoreTime(targetTime, currentTime), getTopPlayerByBalance(), getTopWorldByVisitors()
+print(...), getServerName(), getServerID(), getNewsBanner(), getNewsBannerDimensions(), getTodaysDate(), getTodaysEvents(), getMaxLevel()
+getCurrentEventDescription(), getCurrentDailyEventDescription(), getCurrentRoleDayDescription()
+resetColor(message), formatTime(targetTime, currentTime), getAchievementsCount()
+getWorld(WorldID), getGuild(GuildID), getWorldByName(worldName), saveWorld(world), worldExists(worldName), getActiveWorlds()
+getCorruptedSouls(userID), saveDataToServer(uniqueID, data), loadDataFromServer(uniqueID), saveStringToServer(uniqueID, data), loadStringFromServer(uniqueID)
+addWorldMenuWorld(world_id, display_name, decimal_color, is_priority), removeWorldMenuWorld(world_id), hideWorldMenuDefaultSpecialWorlds(hide_default_special_worlds)
+addSocialPortalButton(button_data, callback), getCurrencyShortName(), getCurrencyLongName(), getCurrencyMediumName(), getCurrencyIcon()
+addSidebarButton(sidebar_button), removeSidebarButton(sidebar_button_name), parseText(str)
+getBlessingName(blessingID), getBlessingInfo(blessingID), getBlessingRarity(blessingID)
+setGemEvent(boostGem), setXPEvent(boostXp), getGemEvent(), getXPEvent(), setEvent(event_id), setDailyEvent(daily_event_id)
+queueRestart(in_seconds, full_restart, message), getRoles(), getTitles(), getPlaymods(), getHighestPriorityRole()
+getEcoQuantity(itemID), getEcoQuantityPlayers(itemID), getEcoQuantityWorlds(itemID)
+createRedeemCode(config), setPlaymodDuration(playmod_id, seconds), setBroadcastWorld(worldName), getJimDailyQuest()
+deleteAccount(id), deleteWorld(id), deleteGuild(id), getServerDefaultPort(), getEvents(), getDailyEvents()
+getItemEffects(), getWorldEffects(), getPlayerEffects(), getRoleQuestDay(), getAchievements(), getMachineCaps(), hasFeatureEnabled(name)
+createTemplate(backupName), applyTemplate(backupName), getTemplates(), hasTemplate(backupName), deleteTemplate(backupName)
+includeClientFile(url, name), enableCaching(item_id), disableCaching(item_id), getServerDiscordLink(), getServerDiscordHowToPlay(), deleteExport(exportName)
+addCombinerRecipe(...), removeCombinerRecipe(...), getCombinerRecipes(), getSpecialStoreItems(player)
+setGuildCreatePriceSSUP(price), setGuildCreatePriceSUP(price), setGuildCreatePriceNormal(price)
+
+**Utilities (Timer, File, SQLite, dll):**
+timer.setTimeout(seconds, callback, ...), timer.setInterval(seconds, callback, ...), timer.clear(id)
+http.get(url), http.post(url, post_data)
+file.read(path), file.write(path, data), file.exists(path), file.delete(path)
+dir.create(path), dir.exists(path), dir.delete(path)
+sqlite:open(path) -> returns SqliteDB, SqliteDB:query(sql), SqliteDB:close()
+bit.band, bit.bor, bit.bxor, bit.bnot, bit.lshift, bit.rshift, bit.arshift, bit.mod
+os.time(), require(modname)
+
+**Player Class:**
+getName(), enterWorld(worldName, notification, bypass), leaveWorld(), punchBlock(x, y), placeBlock(x, y, itemID)
+getCleanName(), getRealName(), getRealCleanName(), getTotalWorldLocks(), getUserID(), getPosX(), getPosY(), getBlockPosX(), getBlockPosY(), getMiddlePosX(), getMiddlePosY(), getNetID()
+hasMod(modID), hasRole(roleID), setRole(roleID), addMod(modID, value), removeMod(modID), getMod(modID)
+changeItem(itemID, itemCount, addBackpack), getItemAmount(itemID), getItemAmountBackpack(itemID)
+getXP(), setXP(xp), removeXP(xp), getLevel(), getStats(statType), setStats(statType, statNumber), getRequiredXP()
+getGems(), addGems(gems, instantSet, progressQuests), removeGems(gems, instantSet), setGems(gems, instantSet), updateGems(instantSet)
+getAutofarm(), onConsoleMessage(message, delay), playAudio(message), onDialogRequest(message, delay, callback), onStoreRequest(message, delay), onStorePurchaseResult(message, delay), onTalkBubble(netID, message, persistMessage, delay), onTextOverlay(message, delay)
+canFit(items), getCoins(), addCoins(coins), setCoins(coins), removeCoins(coins, progressQuests), progressQuests(itemID, itemCount)
+upgradeInventorySpace(size), removeInventorySpace(size), setInventorySpace(newSize), isMaxInventorySpace(), getInventorySize()
+onRedeemMenu(), getWorldName(), getWorld(), onGrow4GoodDonate(), getMods(), getClothingItemID(index)
+getSubscription(subType), addSubscription(Type, exp), removeSubscription(type), getPlaytime(), setPlaytime(time), addPlaytime(time), getAccountCreationTime(), setAccountCreationTime(time), getAccountCreationDateStr()
+getTransformProfileButtons(), onTradeHistoryUI(targetPlayer), onBackpackUI(targetPlayer), onMentorshipUI(), onVouchersUI(), onNameIconsUI(targetPlayer), onWrenchIconsUI(targetPlayer), onTitlesUI(targetPlayer), onAchievementsUI(targetPlayer), onClothesUI(targetPlayer)
+getClassicProfileContent(catType, flags), getDiscordID(), onLinkDiscordUI(), onUnlinkDiscordUI(), getUnlockedAchievementsCount(), getBackpackUsedSize(), onFavItemsUI(), onOnlineStatusUI(), getOnlineStatus(), onPersonalizeWrenchUI()
+getHomeWorldID(), getProfileGuildInfo(), getSubscriptionInfo(), getCardBattleInfo(), getProfileAccessButton(), getProfileGuildJoinButton()
+onBillboardUI(), onNotebookUI(), onGrowpassUI(), onGrowmojiUI(), onGrow4GoodUI(), onTradeScanUI(), getGuildID(), onGuildNotebookUI(), onProfileUI(world, tab)
+onAddNotification(texture, message, audio, num, delay), onParticleEffect(particleID, posX, posY, num, num2, delay), setNextDialogRGBA(R, G, B, A), resetDialogColor(), setNextDialogBorderRGBA(R, G, B, A), updateStats(world, type, amount)
+getCountry(), setCountry(country), getPlatform(), sendVariant(variantList, delay, netID), sendAction(action_str), getInventoryItems(), disconnect(), sendRawPacket(data), getType(), isFacingLeft(), isOnline()
+addTitle(title_id), hasTitle(title_id), removeTitle(title_id), getActiveTitles(), addActiveTitle(title_id), removeActiveTitle(title_id)
+addMail(mail), clearMailbox(), setNickname(nickname), resetNickname(), getBankBalance(), addBankBalance(balance), removeBankBalance(balance), setBankBalance(balance)
+setCountryFlagForeground(item_id), setCountryFlagBackground(item_id), getCountryFlagForeground(), getCountryFlagBackground()
+addLevel(level), removeLevel(level), setLevel(level), ban(modDuration, reason, punishedBy, banDevice, banIP), setRoleQuestLevel(type, newLevel), getRoleQuestLevel(type)
+getIP(), getRID(), setPassword(tankIDPass), getEmail(), getBackpackItems(), getGender(), hasActiveBlessing(blessingID), hasBlessing(blessingID), removeBlessing(blessingID), addBlessing(blessingID), checkPassword(password), getDiscordInvites()
+doAction(str), doRawPacket(data), getAltAccounts(), getRole(), getTitles(), getOwnedWorlds(), getRecentWorlds(), getAccessWorlds(), getIPHistory(), getRIDHistory(), getSmallLockedWorlds(), setBroadcastWorld(worldName)
+getFriends(), addFriend(second_player), removeFriend(second_player), getLifeGoals(), getBiweeklyQuests(), getGrowpassPoints(), addGrowpassPoints(points), setGrowpassPoints(points)
+adjustBlockHitCount(adjust), getAdjustedBlockHitCount(), getPing(), getDungeonScrolls(), setDungeonScrolls(scrolls), hasGrowID(), addNote(note), setAAPEnabled(aapEnabled), setCustomAutofarmDelay(delay), getGameVersion(), getItemEffects()
+visualPunch(tile), visualBuild(tile), getLastOnline(), earnAchievement(type), getAchievements(), getActivePet(), getEffects(), setEffects(effects), deleteEffects(), getOverlappingTiles()
+setLegendaryWizardTask(currentTaskNum), hasAccessToTile(tile, itemID, isSilent, ignoreReach), isPublicTile(tile), getState(), hasRoleFlag(flag), moveToTile(tile), moveToPos(x, y), isMoving(), getMovementError()
+setLifeGoalQuestProgress(taskID, value), setBiweeklyQuestProgress(taskID, value), triggerFindGeiger(), setFishingWaitTime(time), setSkinColor(r, g, b, a), createGuild(guildName, guildStatement)
+
+**World Class:**
+getName(), getOwner(), setOwner(user_id), removeOwner(), addPunishment(player, type, expiresAt, reason, invoker_id), removePunishment(player, type), getPunishment(player, type), getAllPunishments()
+getID(), getTile(x, y), spawnItem(x, y, itemID, itemCount, center_item), spawnGems(x, y, gemsCount, player), adjustGems(player, tile, gemsCount, showParticles), onLoot(player, tile, gemsCount)
+useItemEffect(netID, itemID, secondNetID, effectDelay), useItemTileEffect(tile, netID, itemID, reverse, effectDelay)
+getPlayers(), getPlayersCount(show_all), getVisiblePlayersCount(), isGameActive(), onGameWinHighestScore(), updateClothing(player)
+onCreateChatBubble(posX, posY, message, persistMessage), onCreateExplosion(posX, posY, radius, power), setTileForeground(tile, id, visual_update, player), setTileBackground(tile, id, visual_update, player)
+getWorldSizeX(), getWorldSizeY(), getWorldType(), getTiles(), getEmptyTiles(), getNoCollisionTiles(), getDroppedItems(), getTileDroppedItems(tile)
+addXP(player, xp_amount), setPlayerPosition(player, x, y, no_packet), removeDroppedItem(uid), removeDroppedItemsByID(id), removeAllDroppedItems(), updateTile(tile, player), sendPlayerMessage(player, message)
+punchTile(tile, player), placeTile(tile, id, player), hasTileAccess(player, tile), hasAccess(player), addTileAccess(player, tile), addAccess(player, admin_type), removeTileAccess(player, tile), removeAllTileAccess(), removeAccess(player)
+kill(player, force_respawn_on_white_door), setClothing(player, item_id), createNPC(name, x, y), removeNPC(player), findNPCByName(name), getAllNPC(), redeemCode(player, code), setWeather(weatherID)
+getWorldLock(), getMagplantRemoteTile(player), setMagplantRemoteTile(player, tile), hasFlag(flag), addFlag(flag), useConsumable(player, tile, id, noCallback), spawnGhost(tile, id, sb, wd, sp), findPathByTile(tile_1, tile_2, max_rad_x, max_rad_y)
+isNuked(), nuke(ownerBanTime, adminsBanTime, everyoneElseBanTime), removeNuke(unbanBannedUsers), getGuildID(), getMachineCap(item_id), setMachineCap(item_id, item_count), getMachineCaps(), removeMachineCap(item_id)
+getEffects(), setEffects(effects), deleteEffects(), getCached(item_id), delete(), save()
+World.new(name, sizeX, sizeY, worldType), World.newFromTemplate(name, templateName), World.newFromGlobalTemplate(name, templateName)
+hasAccessByType(player, adminType), setTileOwner(tile, userID), export(), import(importName)
+
+**Tile Class:**
+getTileID(), getTileItem(), getLastPunched(), getPosX(), getPosY(), getNote(), getTileForeground(), getTileBackground()
+getTileData(data_type), setTileData(data_type, data_value), setTileDataInt(data_type, data_value), getFlags(), setFlags(flags)
+
+**Callback Utama:**
+onPlayerChatCallback(function(world, player, message)), onPlayerCommandCallback(function(world, player, command)), onPlayerDialogCallback(function(world, player, dialogName))
+onPlayerJoinCallback(function(world, player)), onPlayerLeaveWorldCallback(function(world, player)), onPlayerDeathCallback(function(world, player, spikeKill))
+onTilePunchCallback(function(world, player, tile)), onTileBreakCallback(function(world, player, tile)), onTilePlaceCallback(function(world, player, tile, itemID))
+onPlayerDropCallback(function(world, player, itemID, itemCount)), onPlayerTrashCallback(function(world, player, itemID, itemCount)), onPlayerPickupItemCallback(function(world, player, itemID, itemCount))
+onTick(function()), onWorldTick(function(world)), onPlayerTick(function(player))
+`;
 
         function handleFormSubmit(e) {
             e.preventDefault();
