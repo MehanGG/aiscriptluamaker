@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -70,21 +69,41 @@
         .gb-color { width:40px; height:34px; border-radius:9px; border:1px solid #31343a; background:#fff; padding:2px; }
         .gb-range { width:100%; }
         .gb-empty { color:#6f747c; font-size:11px; line-height:1.5; text-align:center; padding:22px 10px; }
-        .gb-chip-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-        .gb-chip { padding:8px 7px; border-radius:10px; border:1px solid #292c31; background:#14161a; color:#cfd3d8; font-size:10px; text-align:left; }
-        .gb-chip:hover { border-color:#3b82f6; color:#fff; }
+        .gb-chip-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .gb-chip { padding:8px; border-radius:13px; border:1px solid #292c31; background:linear-gradient(180deg,#17191d,#111214); color:#cfd3d8; font-size:10px; text-align:left; transition:.15s; overflow:hidden; }
+        .gb-chip:hover { border-color:#3b82f6; color:#fff; transform:translateY(-1px); }
+        .gb-chip-preview { height:48px; margin-bottom:7px; display:flex; align-items:center; justify-content:center; padding:4px; border-radius:9px; background:#090a0c; border:1px solid #24272d; overflow:hidden; }
+        .gb-chip-name { display:block; font-weight:700; color:#f2f4f6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .gb-chip-add { display:block; margin-top:5px; color:#60a5fa; font-size:9px; font-weight:700; }
         .gb-mini { font-size:10px; color:#727780; }
+        .gb-meta { padding:10px 12px; border-bottom:1px solid #23252a; background:linear-gradient(180deg,#121417,#0f1012); }
+        .gb-meta-grid { display:grid; grid-template-columns:1.1fr 1.5fr .6fr; gap:9px; }
+        .gb-meta-wide { grid-column:1/-1; }
+        .gb-field-title { color:#9ba0a8; font-size:9px; text-transform:uppercase; letter-spacing:.1em; font-weight:800; margin-bottom:5px; }
+        .gb-feature { min-height:58px; resize:vertical; }
+        .gb-connection-grid { display:grid; grid-template-columns:160px 1fr; gap:9px; align-items:end; margin-top:9px; }
+        .gb-inline-btn { border:1px solid #2a2d33; background:#15171a; color:#d9dce1; border-radius:11px; padding:8px 10px; font-size:11px; }
+        .gb-add-element-title { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; }
+        .gb-add-element-badge { font-size:9px; color:#60a5fa; background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.22); padding:4px 7px; border-radius:999px; }
+        .gb-delete-visual { width:30px; height:30px; border-radius:9px; }
         .gb-divider { height:1px; background:#212329; margin:10px 0; }
         .gb-generated-preview { white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; background:#090a0c; border:1px solid #24272d; border-radius:12px; padding:10px; max-height:300px; overflow:auto; color:#d3d6db; }
         @media (max-width: 980px) {
-            .gb-layout { grid-template-columns:190px minmax(0,1fr); }
+            .gb-layout { grid-template-columns:210px minmax(0,1fr); }
             .gb-inspector { display:none; }
+            .gb-meta-grid { grid-template-columns:1fr 1.2fr .6fr; }
         }
         @media (max-width: 700px) {
             .gb-shell { width:100vw; height:100vh; border-radius:0; }
-            .gb-layout { grid-template-columns:1fr; }
-            .gb-sidebar { display:none; }
+            .gb-layout { grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr); }
+            .gb-sidebar { display:block; border-right:0; border-bottom:1px solid #24262a; max-height:38vh; }
+            .gb-chip-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+            .gb-meta-grid { grid-template-columns:1fr 1fr; }
+            .gb-meta-grid > div:nth-child(3) { grid-column:1/-1; }
+            .gb-connection-grid { grid-template-columns:1fr; }
+            #gb-command-trigger-box { grid-column:auto; }
             .gb-topbar { min-height:58px; }
+            .gb-topbar .gb-btn { padding:7px 8px; font-size:10px; }
             .gb-canvas-wrap { padding:10px; }
         }
     </style>
@@ -178,11 +197,11 @@
             <div class="gb-layout">
                 <aside class="gb-sidebar gb-scroll">
                     <div class="gb-section">
-                        <div class="flex items-center justify-between mb-2"><div class="gb-label m-0">GUI Backgrounds</div><button onclick="addGUIBackground()" class="gb-btn !p-1.5" title="Tambah GUI Background"><i class="fas fa-plus"></i></button></div>
+                        <div class="flex items-center justify-between mb-2"><div class="gb-label m-0">GUI Background</div><button onclick="addGUIBackground()" class="gb-btn !p-1.5" title="Tambah GUI Background"><i class="fas fa-plus"></i></button></div>
                         <div id="gb-gui-list"></div>
                     </div>
                     <div class="gb-section">
-                        <div class="gb-label">Elements</div>
+                        <div class="gb-add-element-title"><div class="gb-label m-0">Add Element</div><span class="gb-add-element-badge">CLICK TO ADD</span></div>
                         <div class="gb-chip-grid" id="gb-element-palette"></div>
                     </div>
                 </aside>
@@ -195,10 +214,33 @@
                             <button id="gb-sim-mobile" onclick="setSimulator('mobile')" class="gb-btn !px-3 !py-1.5"><i class="fas fa-mobile-screen-button"></i> Mobile</button>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="duplicateSelectedElement()" class="gb-btn !px-3 !py-1.5"><i class="fas fa-copy"></i></button>
-                            <button onclick="deleteSelectedElement()" class="gb-btn gb-btn-danger !px-3 !py-1.5"><i class="fas fa-trash"></i></button>
+                            <button onclick="duplicateSelectedElement()" class="gb-btn !px-3 !py-1.5"><i class="fas fa-copy"></i> Duplicate</button>
+                            <button onclick="deleteSelectedElement()" class="gb-btn gb-btn-danger !px-3 !py-1.5"><i class="fas fa-trash"></i> Delete</button>
                         </div>
                     </div>
+
+                    <div class="gb-meta">
+                        <div class="gb-meta-grid">
+                            <div><div class="gb-field-title">Command</div><input id="gb-command" class="gb-input allow-select" placeholder="/gui"></div>
+                            <div><div class="gb-field-title">Description</div><input id="gb-description" class="gb-input allow-select" placeholder="Buka custom dialog"></div>
+                            <div><div class="gb-field-title">Role ID</div><input id="gb-role" class="gb-input allow-select" type="number" min="0" value="0"></div>
+                            <div class="gb-meta-wide"><div class="gb-field-title">Fitur di GUI • GUI ini nanti ngapain?</div><textarea id="gb-feature" class="gb-textarea gb-feature allow-select" placeholder="Contoh: Menampilkan menu convert DL → BGL, menerima input jumlah, lalu punya tombol Convert dan Close."></textarea></div>
+                        </div>
+
+                        <div class="gb-connection-grid">
+                            <div><div class="gb-field-title">Trigger / Sambungan</div><select id="gb-trigger-type" onchange="updateTriggerUI()" class="gb-select"><option value="command">Command</option><option value="button">If Button Clicked</option></select></div>
+                            <div id="gb-command-trigger-box"><div class="gb-field-title">Command Trigger</div><input id="gb-trigger-command" class="gb-input allow-select" placeholder="/gui2"></div>
+                            <div id="gb-button-trigger-box" class="hidden col-span-2">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div><div class="gb-field-title">Klik Button pada GUI</div><select id="gb-source-gui" class="gb-select" onchange="updateSourceButtonSelect();saveActiveGUIFromForm()"></select></div>
+                                    <div><div class="gb-field-title">Nama / ID Button</div><select id="gb-source-button-select" class="gb-select" onchange="syncSourceButtonField()"></select></div>
+                                    <div class="col-span-2"><input id="gb-source-button" class="gb-input allow-select" placeholder="Atau ketik Button ID sendiri..." oninput="saveActiveGUIFromForm()"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gb-mini mt-2">GUI 2, 3, 4, dst. bisa disambungkan dari Command atau Button GUI lain.</div>
+                    </div>
+
                     <div class="gb-canvas-wrap">
                         <div class="gb-stage">
                             <div id="gb-canvas" class="gb-canvas pc"></div>
@@ -208,28 +250,12 @@
 
                 <aside class="gb-inspector gb-scroll">
                     <div class="gb-section">
-                        <div class="gb-label">GUI Settings</div>
-                        <div class="space-y-2">
-                            <div><div class="gb-label !normal-case !tracking-normal">Command</div><input id="gb-command" class="gb-input" placeholder="/gui"></div>
-                            <div><div class="gb-label !normal-case !tracking-normal">Description</div><input id="gb-description" class="gb-input" placeholder="Buka custom dialog"></div>
-                            <div><div class="gb-label !normal-case !tracking-normal">Role ID</div><input id="gb-role" class="gb-input" type="number" min="0" value="0"></div>
-                        </div>
-                    </div>
-                    <div class="gb-section">
-                        <div class="gb-label">GUI Background</div>
-                        <div class="flex items-center gap-2"><input id="gb-bg-color" type="color" class="gb-color" value="#121212"><input id="gb-bg-alpha" class="gb-input" type="number" min="0" max="255" value="255" title="Alpha"></div>
-                        <div class="mt-3"><div class="gb-label !normal-case !tracking-normal">Trigger / Sambungan</div>
-                            <select id="gb-trigger-type" onchange="updateTriggerUI()" class="gb-select"><option value="command">Command</option><option value="button">If Button Clicked</option></select>
-                        </div>
-                        <div id="gb-command-trigger-box" class="mt-2"><div class="gb-label !normal-case !tracking-normal">Command Trigger</div><input id="gb-trigger-command" class="gb-input" placeholder="/gui2"></div>
-                        <div id="gb-button-trigger-box" class="mt-2 hidden">
-                            <div class="gb-label !normal-case !tracking-normal">Klik Button pada GUI</div><select id="gb-source-gui" class="gb-select" onchange="saveActiveGUIFromForm()"></select>
-                            <div class="gb-label !normal-case !tracking-normal mt-2">Nama / ID Button</div><input id="gb-source-button" class="gb-input" placeholder="btn_next"></div>
-                        <div class="gb-mini mt-2">Untuk GUI 2+ bisa memakai Command atau sambungan dari GUI 1/2/3/4 dan seterusnya.</div>
-                    </div>
-                    <div class="gb-section">
                         <div class="gb-label">Selected Element</div>
                         <div id="gb-inspector-content" class="gb-empty">Pilih elemen di canvas untuk mengatur properti, warna, ukuran, dan teks.</div>
+                    </div>
+                    <div class="gb-section">
+                        <div class="gb-label">Background</div>
+                        <div class="flex items-center gap-2"><input id="gb-bg-color" type="color" class="gb-color" value="#121212"><input id="gb-bg-alpha" class="gb-input" type="number" min="0" max="255" value="255" title="Alpha"></div>
                     </div>
                 </aside>
             </div>
@@ -354,7 +380,7 @@
             return base;
         }
         function uid(prefix){return prefix+'_'+Math.random().toString(36).slice(2,8);}
-        function defaultGUI(index){return {name:`GUI ${index}`,command:index===1?'/gui':'',description:'Custom GTPS Dialog',role:0,bg:'#121212',alpha:255,trigger:{type:'command',command:index===1?'/gui':'/gui'+index,sourceGui:Math.max(0,index-1),sourceButton:''},elements:[newElement('label'),newElement('textbox'),newElement('button'),newElement('end')]};}
+        function defaultGUI(index){return {name:`GUI ${index}`,command:index===1?'/gui':'',description:'Custom GTPS Dialog',feature:index===1?'Jelaskan fungsi GUI ini dan aksi apa saja yang harus bisa dilakukan pemain.':'',role:0,bg:'#121212',alpha:255,trigger:{type:'command',command:index===1?'/gui':'/gui'+index,sourceGui:Math.max(0,index-1),sourceButton:''},elements:[newElement('label'),newElement('textbox'),newElement('button'),newElement('end')]};}
         function initGUIBuilder(){loadGUIBuilder();renderPalette();renderGUIList();renderCanvas();updateGUIForm();}
         function loadGUIBuilder(){try{const saved=JSON.parse(localStorage.getItem(GUI_STORAGE_KEY)||'null');if(saved&&Array.isArray(saved.guis)&&saved.guis.length){guiBuilder=saved;if(typeof guiBuilder.simulator!=='string')guiBuilder.simulator='pc';if(guiBuilder.activeIndex>=guiBuilder.guis.length)guiBuilder.activeIndex=0;return;}}catch(e){}guiBuilder={simulator:'pc',activeIndex:0,guis:[defaultGUI(1)]};saveGUIBuilder();}
         function saveGUIBuilder(){try{localStorage.setItem(GUI_STORAGE_KEY,JSON.stringify(guiBuilder));}catch(e){}}
@@ -366,8 +392,8 @@
         function selectGUI(index){guiBuilder.activeIndex=index;gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
         function deleteActiveGUI(){if(guiBuilder.guis.length<=1)return alert('GUI 1 tidak dapat dihapus.');if(!confirm(`Hapus ${activeGUI().name}?`))return;guiBuilder.guis.splice(guiBuilder.activeIndex,1);guiBuilder.activeIndex=Math.max(0,guiBuilder.activeIndex-1);gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
         function renderAllBuilder(){renderGUIList();renderCanvas();updateGUIForm();renderInspector();setSimulator(guiBuilder.simulator);}
-        function renderGUIList(){const el=document.getElementById('gb-gui-list');if(!el)return;el.innerHTML='';guiBuilder.guis.forEach((g,i)=>{const card=document.createElement('div');card.className='gb-gui-card '+(i===guiBuilder.activeIndex?'active':'');card.onclick=()=>selectGUI(i);const trigger=g.trigger?.type==='button'?`Klik: ${escapeHTML(g.trigger.sourceButton||'button')}`:escapeHTML(g.trigger?.command||g.command||'Manual');card.innerHTML=`<div class="flex items-center justify-between gap-2"><div class="gb-gui-title">${escapeHTML(g.name||`GUI ${i+1}`)}</div><div class="text-[9px] text-gray-500">${g.elements?.length||0}</div></div><div class="gb-gui-sub">${trigger}</div>`;el.appendChild(card);});if(guiBuilder.guis.length>1){const del=document.createElement('button');del.className='gb-btn gb-btn-danger w-full mt-2';del.innerHTML='<i class="fas fa-trash"></i> Hapus GUI Aktif';del.onclick=deleteActiveGUI;el.appendChild(del);}}
-        function renderPalette(){const el=document.getElementById('gb-element-palette');if(!el)return;el.innerHTML='';Object.entries(GB_TYPES).forEach(([type,meta])=>{const b=document.createElement('button');b.className='gb-chip';b.innerHTML=`<i class="fas ${meta.icon} mr-1"></i>${meta.name}`;b.onclick=()=>addElement(type);el.appendChild(b);});}
+        function renderGUIList(){const el=document.getElementById('gb-gui-list');if(!el)return;el.innerHTML='';guiBuilder.guis.forEach((g,i)=>{const card=document.createElement('div');card.className='gb-gui-card '+(i===guiBuilder.activeIndex?'active':'');card.onclick=()=>selectGUI(i);const trigger=g.trigger?.type==='button'?`Klik GUI ${Number(g.trigger.sourceGui)+1}: ${escapeHTML(g.trigger.sourceButton||'Button')}`:escapeHTML(g.trigger?.command||g.command||'Manual');card.innerHTML=`<div class="flex items-center justify-between gap-2"><div class="gb-gui-title">${escapeHTML(g.name||`GUI ${i+1}`)}</div><div class="text-[9px] text-gray-500">${g.elements?.length||0}</div></div><div class="gb-gui-sub">${trigger}</div><div class="gb-gui-sub mt-1">${escapeHTML(g.feature||'Fitur GUI belum diisi')}</div>`;el.appendChild(card);});if(guiBuilder.guis.length>1){const del=document.createElement('button');del.className='gb-btn gb-btn-danger w-full mt-2';del.innerHTML='<i class="fas fa-trash"></i> Hapus GUI Aktif';del.onclick=deleteActiveGUI;el.appendChild(del);}}
+        function renderPalette(){const el=document.getElementById('gb-element-palette');if(!el)return;el.innerHTML='';Object.entries(GB_TYPES).forEach(([type,meta])=>{const b=document.createElement('button');b.type='button';b.className='gb-chip';const preview=document.createElement('div');preview.className='gb-chip-preview';const sample=newElement(type);sample.id='preview_'+type;sample.width=86;sample.height=72;sample.x=7;sample.y=7;preview.innerHTML=elementPreviewHTML(sample);b.innerHTML=`<div class="gb-chip-preview"></div><span class="gb-chip-name"></span><span class="gb-chip-add">+ Add ${escapeHTML(meta.name)}</span>`;b.querySelector('.gb-chip-preview').innerHTML=elementPreviewHTML(sample);b.querySelector('.gb-chip-name').textContent=meta.name;b.onclick=()=>addElement(type);el.appendChild(b);});}
         function addElement(type){const g=activeGUI();if(!g)return;const item=newElement(type);item.x=8+((g.elements.length%5)*6);item.y=8+((g.elements.length%4)*10);if(type==='label')item.y=7;if(type==='textbox')item.width=46;if(type==='button')item.width=30;if(type==='end')item.x=68;g.elements.push(item);gbSelectedId=item.id;saveGUIBuilder();renderCanvas();renderInspector();}
         function duplicateSelectedElement(){const e=activeElement();if(!e)return;const copy=JSON.parse(JSON.stringify(e));copy.id=uid(e.type);copy.x=Math.min(85,e.x+3);copy.y=Math.min(86,e.y+3);if('id' in copy && ['button','text_input','small_text_input','checkbox','search','item_selector','player_selector','world_selector','dropdown','progress'].includes(copy.type))copy.id=uid(copy.type);activeGUI().elements.push(copy);gbSelectedId=copy.id;saveGUIBuilder();renderCanvas();renderInspector();}
         function deleteSelectedElement(){const g=activeGUI();if(!g||!gbSelectedId)return;const idx=g.elements.findIndex(e=>e.id===gbSelectedId);if(idx<0)return;g.elements.splice(idx,1);gbSelectedId=null;saveGUIBuilder();renderCanvas();renderInspector();}
@@ -443,12 +469,15 @@
         }
         function onElementPointerUp(){gbDrag=null;gbResize=null;saveGUIBuilder();renderInspector();}
 
-        function updateGUIForm(){const g=activeGUI();if(!g)return;document.getElementById('gb-command').value=g.command||'';document.getElementById('gb-description').value=g.description||'';document.getElementById('gb-role').value=g.role??0;document.getElementById('gb-bg-color').value=g.bg||'#121212';document.getElementById('gb-bg-alpha').value=g.alpha??255;document.getElementById('gb-trigger-type').value=g.trigger?.type||'command';document.getElementById('gb-trigger-command').value=g.trigger?.command||g.command||'';updateSourceGUISelect();document.getElementById('gb-source-gui').value=String(g.trigger?.sourceGui??Math.max(0,guiBuilder.activeIndex-1));document.getElementById('gb-source-button').value=g.trigger?.sourceButton||'';updateTriggerUI();}
-        function updateSourceGUISelect(){const s=document.getElementById('gb-source-gui');if(!s)return;s.innerHTML=guiBuilder.guis.map((g,i)=>`<option value="${i}">${escapeHTML(g.name||`GUI ${i+1}`)}</option>`).join('');}
-        function updateTriggerUI(){const type=document.getElementById('gb-trigger-type').value;document.getElementById('gb-command-trigger-box').classList.toggle('hidden',type!=='command');document.getElementById('gb-button-trigger-box').classList.toggle('hidden',type!=='button');saveActiveGUIFromForm();}
-        function saveActiveGUIFromForm(){const g=activeGUI();if(!g)return;g.command=document.getElementById('gb-command').value.trim();g.description=document.getElementById('gb-description').value.trim();g.role=Math.max(0,parseInt(document.getElementById('gb-role').value||0));g.bg=document.getElementById('gb-bg-color').value;g.alpha=Math.max(0,Math.min(255,parseInt(document.getElementById('gb-bg-alpha').value||255)));const tt=document.getElementById('gb-trigger-type').value;g.trigger={type:tt,command:document.getElementById('gb-trigger-command').value.trim(),sourceGui:parseInt(document.getElementById('gb-source-gui').value||0),sourceButton:document.getElementById('gb-source-button').value.trim()};if(tt==='command'&&g.command!==''&&guiBuilder.activeIndex===0&&!g.trigger.command)g.trigger.command=g.command;saveGUIBuilder();renderGUIList();renderCanvas();}
-        ['gb-command','gb-description','gb-role','gb-bg-color','gb-bg-alpha','gb-trigger-command','gb-source-button'].forEach(id=>document.getElementById(id).addEventListener('input',saveActiveGUIFromForm));
-        document.getElementById('gb-source-gui').addEventListener('change',saveActiveGUIFromForm);
+        function updateGUIForm(){const g=activeGUI();if(!g)return;document.getElementById('gb-command').value=g.command||'';document.getElementById('gb-description').value=g.description||'';document.getElementById('gb-feature').value=g.feature||'';document.getElementById('gb-role').value=g.role??0;document.getElementById('gb-bg-color').value=g.bg||'#121212';document.getElementById('gb-bg-alpha').value=g.alpha??255;document.getElementById('gb-trigger-type').value=g.trigger?.type||'command';document.getElementById('gb-trigger-command').value=g.trigger?.command||g.command||'';updateSourceGUISelect();document.getElementById('gb-source-gui').value=String(g.trigger?.sourceGui??Math.max(0,guiBuilder.activeIndex-1));updateSourceButtonSelect();document.getElementById('gb-source-button').value=g.trigger?.sourceButton||'';syncSourceButtonSelectFromField();updateTriggerUI();}
+        function updateSourceGUISelect(){const s=document.getElementById('gb-source-gui');if(!s)return;s.innerHTML=guiBuilder.guis.map((g,i)=>`<option value="${i}">GUI ${i+1} — ${escapeHTML(g.name||`GUI ${i+1}`)}</option>`).join('');if(guiBuilder.guis.length<=1){s.disabled=true;}else{s.disabled=false;}}
+        function updateSourceButtonSelect(){const select=document.getElementById('gb-source-button-select');const source=Number(document.getElementById('gb-source-gui')?.value||0);if(!select)return;const buttons=effectiveButtonIds(source);select.innerHTML='';if(buttons.length){buttons.forEach(b=>{const o=document.createElement('option');o.value=b.id;o.textContent=`${b.id} — ${b.text||'Button'}`;select.appendChild(o);});select.disabled=false;}else{const o=document.createElement('option');o.value='';o.textContent='(Belum ada Button di GUI ini)';select.appendChild(o);select.disabled=true;}}
+        function syncSourceButtonSelectFromField(){const select=document.getElementById('gb-source-button-select');if(!select)return;const current=String(document.getElementById('gb-source-button')?.value||'');if(current&&Array.from(select.options).some(o=>o.value===current))select.value=current;}
+        function syncSourceButtonField(){const select=document.getElementById('gb-source-button-select');const input=document.getElementById('gb-source-button');if(select&&input&&select.value)input.value=select.value;saveActiveGUIFromForm();}
+        function updateTriggerUI(){const type=document.getElementById('gb-trigger-type').value;document.getElementById('gb-command-trigger-box').classList.toggle('hidden',type!=='command');document.getElementById('gb-button-trigger-box').classList.toggle('hidden',type!=='button');if(type==='button'){updateSourceGUISelect();updateSourceButtonSelect();syncSourceButtonSelectFromField();}saveActiveGUIFromForm();}
+        function saveActiveGUIFromForm(){const g=activeGUI();if(!g)return;g.command=document.getElementById('gb-command').value.trim();g.description=document.getElementById('gb-description').value.trim();g.feature=document.getElementById('gb-feature').value.trim();g.role=Math.max(0,parseInt(document.getElementById('gb-role').value||0));g.bg=document.getElementById('gb-bg-color').value;g.alpha=Math.max(0,Math.min(255,parseInt(document.getElementById('gb-bg-alpha').value||255)));const tt=document.getElementById('gb-trigger-type').value;g.trigger={type:tt,command:document.getElementById('gb-trigger-command').value.trim(),sourceGui:parseInt(document.getElementById('gb-source-gui').value||0),sourceButton:document.getElementById('gb-source-button').value.trim()};if(tt==='command'&&g.command!==''&&guiBuilder.activeIndex===0&&!g.trigger.command)g.trigger.command=g.command;saveGUIBuilder();renderGUIList();renderCanvas();}
+        ['gb-command','gb-description','gb-feature','gb-role','gb-bg-color','gb-bg-alpha','gb-trigger-command','gb-source-button'].forEach(id=>document.getElementById(id).addEventListener('input',saveActiveGUIFromForm));
+        document.getElementById('gb-source-gui').addEventListener('change',()=>{updateSourceButtonSelect();saveActiveGUIFromForm();});
 
         function renderInspector(){const box=document.getElementById('gb-inspector-content');const e=activeElement();if(!box)return;if(!e){box.className='gb-empty';box.innerText='Pilih elemen di canvas untuk mengatur properti, warna, ukuran, dan teks.';return;}box.className='space-y-2';box.innerHTML=`<div class="text-white font-bold text-xs mb-2">${escapeHTML(GB_TYPES[e.type]?.name||e.type)}</div><div><div class="gb-label !normal-case !tracking-normal">ID / Key</div><input id="prop-id" class="gb-input" value="${escapeHTML(e.id||'')}" data-prop="id"></div>`+elementPropertyFields(e)+`<div class="gb-divider"></div><div class="gb-label">Layout</div><div class="gb-prop-grid"><div><div class="gb-label !normal-case !tracking-normal">X %</div><input id="prop-x" class="gb-input" type="number" min="0" max="100" value="${e.x}" data-prop="x"></div><div><div class="gb-label !normal-case !tracking-normal">Y %</div><input id="prop-y" class="gb-input" type="number" min="0" max="100" value="${e.y}" data-prop="y"></div><div><div class="gb-label !normal-case !tracking-normal">Width %</div><input id="prop-width" class="gb-input" type="number" min="4" max="100" value="${e.width}" data-prop="width"></div><div><div class="gb-label !normal-case !tracking-normal">Height %</div><input id="prop-height" class="gb-input" type="number" min="4" max="100" value="${e.height}" data-prop="height"></div></div>`;box.querySelectorAll('[data-prop]').forEach(inp=>inp.addEventListener('input',()=>{applyInspectorValue(inp.dataset.prop,inp.value); }));box.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>applyInspectorValue(btn.dataset.action,btn.value||btn.innerText)));}
         function field(label,html){return `<div><div class="gb-label !normal-case !tracking-normal">${label}</div>${html}</div>`;}
@@ -520,6 +549,7 @@
                     `- Name: ${g.name}`,
                     `- Command: ${g.command||'(none)'}`,
                     `- Description: ${g.description||''}`,
+                    `- Fitur di GUI: ${g.feature||'(jelaskan fungsi GUI)'}`,
                     `- Role ID: ${g.role??0}`,
                     `- Background: ${g.bg} alpha ${g.alpha}`,
                     `- Trigger: ${triggerText}`,
@@ -536,6 +566,7 @@
                 '2. Buat fungsi showGUI1, showGUI2, dst untuk setiap GUI.',
                 '3. GUI 1 dan GUI lain yang memakai Command harus memakai registerLuaCommand.',
                 '4. GUI yang memakai "If Button Clicked" harus dibuka dari onPlayerDialogCallback dengan dialog_name dan buttonClicked. Cocokkan Button ID, bukan hanya teks tampilannya.',
+                '4a. Gunakan kolom Fitur di GUI sebagai requirement utama untuk menentukan apa yang GUI lakukan dan aksi tombol/input-nya.',
                 '5. Pertahankan urutan elemen secara visual: sort berdasarkan posisi Y lalu X, karena Dialog GTPS menggunakan alur vertikal.',
                 '6. Gunakan set_bg_color dengan nilai RGBA dari desain.',
                 '7. Sertakan registerLuaCommand description dan roleRequired bila Command digunakan.',
