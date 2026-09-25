@@ -1,1 +1,580 @@
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTPS Script AI Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; background-color: #000000; }
+        * { -webkit-tap-highlight-color: transparent !important; outline: none !important; }
+        *:focus { outline: none !important; box-shadow: none !important; }
+        .allow-select, pre, code, details, input, textarea, select { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
+        img { max-width: 100%; height: auto; border-radius: 12px; margin-top: 10px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        @keyframes pop-in { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+        .animate-pop-in { animation: pop-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        details.think-box summary::-webkit-details-marker { display: none; }
+        details.think-box summary { list-style: none; cursor: pointer; }
+        .ai-text p { margin-bottom: 12px; line-height: 1.6; }
+        .ai-text ul, .ai-text ol { margin-left: 20px; margin-bottom: 12px; }
+        .ai-text li { margin-bottom: 6px; }
+        .ai-text strong { color: #ffffff; }
+
+        /* ================= GUI BUILDER ================= */
+        #gui-builder-modal { background: rgba(0,0,0,.94); backdrop-filter: blur(10px); }
+        .gb-shell { width: min(1500px, 98vw); height: min(94vh, 980px); background: #0d0e10; border: 1px solid #25272b; border-radius: 24px; overflow: hidden; box-shadow: 0 30px 100px rgba(0,0,0,.6); display:flex; flex-direction:column; }
+        .gb-topbar { min-height:64px; border-bottom:1px solid #24262a; background:#111214; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; }
+        .gb-layout { flex:1; min-height:0; display:grid; grid-template-columns:230px minmax(0,1fr) 285px; }
+        .gb-sidebar, .gb-inspector { min-width:0; background:#111214; }
+        .gb-sidebar { border-right:1px solid #24262a; }
+        .gb-inspector { border-left:1px solid #24262a; }
+        .gb-scroll { overflow:auto; }
+        .gb-section { padding:14px; border-bottom:1px solid #202226; }
+        .gb-label { color:#8e929a; font-size:10px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; margin-bottom:7px; }
+        .gb-input, .gb-select, .gb-textarea { width:100%; background:#090a0c; border:1px solid #292c31; color:#f4f5f7; border-radius:12px; padding:9px 10px; font-size:12px; }
+        .gb-textarea { min-height:76px; resize:vertical; }
+        .gb-input:focus, .gb-select:focus, .gb-textarea:focus { border-color:#3b82f6 !important; box-shadow:0 0 0 2px rgba(59,130,246,.14) !important; }
+        .gb-btn { border:1px solid #2b2e33; background:#17191d; color:#e6e8eb; border-radius:11px; padding:8px 10px; font-size:12px; display:inline-flex; align-items:center; justify-content:center; gap:7px; transition:.15s; }
+        .gb-btn:hover { background:#1f2227; border-color:#3a3f48; }
+        .gb-btn-primary { background:#2563eb; border-color:#2563eb; color:#fff; }
+        .gb-btn-primary:hover { background:#3b82f6; }
+        .gb-btn-danger { color:#fca5a5; }
+        .gb-btn-danger:hover { background:#2b1719; border-color:#5c2629; }
+        .gb-gui-card { background:#0b0c0f; border:1px solid #25282e; border-radius:14px; padding:10px; cursor:pointer; margin-bottom:8px; }
+        .gb-gui-card.active { border-color:#3b82f6; background:rgba(37,99,235,.11); }
+        .gb-gui-title { font-weight:700; font-size:12px; color:#fff; }
+        .gb-gui-sub { font-size:10px; color:#777c85; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .gb-workspace { min-width:0; min-height:0; display:flex; flex-direction:column; background: radial-gradient(circle at top, #17191d 0%, #0d0e10 55%); }
+        .gb-toolbar { padding:10px 12px; border-bottom:1px solid #23252a; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+        .gb-canvas-wrap { flex:1; min-height:0; overflow:auto; display:flex; align-items:center; justify-content:center; padding:20px; }
+        .gb-stage { width:min(1100px, 100%); display:flex; align-items:center; justify-content:center; }
+        .gb-canvas { position:relative; width:100%; aspect-ratio:16 / 9; border-radius:18px; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), 0 25px 70px rgba(0,0,0,.45); touch-action:none; }
+        .gb-canvas.pc { max-width:1100px; }
+        .gb-canvas.mobile { max-width:740px; }
+        .gb-canvas::after { content:""; position:absolute; inset:0; pointer-events:none; border:1px solid rgba(255,255,255,.06); border-radius:18px; }
+        .gb-element { position:absolute; min-width:30px; min-height:24px; box-sizing:border-box; cursor:move; }
+        .gb-element.selected { outline:1px dashed #60a5fa !important; outline-offset:2px; }
+        .gb-element .gb-resize { position:absolute; right:-6px; bottom:-6px; width:13px; height:13px; border-radius:4px; background:#60a5fa; border:2px solid #0d0e10; cursor:nwse-resize; display:none; z-index:30; }
+        .gb-element.selected .gb-resize { display:block; }
+        .gb-canvas-hint { position:absolute; inset:auto 14px 12px auto; font-size:9px; color:rgba(255,255,255,.4); background:rgba(0,0,0,.25); padding:4px 7px; border-radius:999px; pointer-events:none; }
+        .gb-sim-label { position:absolute; left:14px; top:12px; padding:4px 7px; border-radius:999px; background:rgba(0,0,0,.28); color:rgba(255,255,255,.6); font-size:9px; pointer-events:none; }
+        .gb-prop-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .gb-color-row { display:flex; gap:7px; align-items:center; }
+        .gb-color { width:40px; height:34px; border-radius:9px; border:1px solid #31343a; background:#fff; padding:2px; }
+        .gb-range { width:100%; }
+        .gb-empty { color:#6f747c; font-size:11px; line-height:1.5; text-align:center; padding:22px 10px; }
+        .gb-chip-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .gb-chip { padding:8px 7px; border-radius:10px; border:1px solid #292c31; background:#14161a; color:#cfd3d8; font-size:10px; text-align:left; }
+        .gb-chip:hover { border-color:#3b82f6; color:#fff; }
+        .gb-mini { font-size:10px; color:#727780; }
+        .gb-divider { height:1px; background:#212329; margin:10px 0; }
+        .gb-generated-preview { white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; background:#090a0c; border:1px solid #24272d; border-radius:12px; padding:10px; max-height:300px; overflow:auto; color:#d3d6db; }
+        @media (max-width: 980px) {
+            .gb-layout { grid-template-columns:190px minmax(0,1fr); }
+            .gb-inspector { display:none; }
+        }
+        @media (max-width: 700px) {
+            .gb-shell { width:100vw; height:100vh; border-radius:0; }
+            .gb-layout { grid-template-columns:1fr; }
+            .gb-sidebar { display:none; }
+            .gb-topbar { min-height:58px; }
+            .gb-canvas-wrap { padding:10px; }
+        }
+    </style>
+</head>
+<body class="text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
+
+    <header class="px-4 py-3 flex justify-between items-center z-30 relative">
+        <button onclick="toggleNavMenu(event)" class="text-gray-300 hover:text-white p-2 text-lg"><i class="fas fa-bars"></i></button>
+        <button onclick="openSettings()" class="flex items-center gap-2 bg-[#1e1e1e] hover:bg-[#2a2a2a] transition-colors px-4 py-2 rounded-full cursor-pointer max-w-[60%]">
+            <span id="active-model-display" class="text-[13px] font-semibold text-gray-200 tracking-wide truncate">Memuat Model...</span>
+            <i class="fas fa-chevron-down text-[10px] opacity-70 flex-shrink-0"></i>
+        </button>
+        <div class="w-8"></div>
+        <div id="nav-dropdown" class="hidden absolute top-14 left-4 w-56 bg-[#1e1e1e] border border-[#333] rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col text-left">
+            <a href="#" onclick="startNewChat(event)" class="px-4 py-3.5 hover:bg-[#2a2a2a] text-sm text-white flex items-center gap-3 transition-colors"><i class="fas fa-plus text-blue-400 w-4 text-center"></i> Chat Baru</a>
+            <button onclick="openGUIBuilder();document.getElementById('nav-dropdown').classList.add('hidden')" class="px-4 py-3.5 hover:bg-[#2a2a2a] text-sm text-white flex items-center gap-3 transition-colors"><i class="fas fa-window-restore text-purple-400 w-4 text-center"></i> Make Custom Dialog</button>
+        </div>
+    </header>
+
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 md:px-10 py-6 flex flex-col gap-6 scroll-smooth z-10 w-full max-w-4xl mx-auto">
+        <div class="flex flex-col gap-2 w-full text-center mt-10">
+            <i class="fas fa-microchip text-4xl text-blue-500 mb-2"></i>
+            <h2 class="text-2xl font-bold text-white">GTPS Studio AI</h2>
+            <p class="text-sm text-gray-400">Siap membantu Anda membuat script GTPS Cloud.</p>
+        </div>
+    </main>
+
+    <div id="attachment-preview-container" class="px-4 hidden mb-2 max-w-4xl mx-auto w-full">
+        <div class="bg-[#1e1e1e] p-2 rounded-2xl flex flex-wrap gap-2 max-h-24 overflow-y-auto"></div>
+    </div>
+
+    <footer class="p-4 z-20 w-full max-w-4xl mx-auto">
+        <form id="chat-form" onsubmit="handleFormSubmit(event)" class="bg-[#1a1a1c] border border-[#2a2a2c] rounded-[28px] flex flex-col px-2 py-2 relative shadow-lg">
+            <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.lua" multiple>
+            <div class="flex items-end gap-2 w-full">
+                <button type="button" onclick="document.getElementById('file-input').click()" class="p-3 text-gray-400 hover:text-white rounded-full flex-shrink-0 transition-colors"><i class="fas fa-plus text-lg"></i></button>
+                <textarea id="user-input" rows="1" class="allow-select flex-1 bg-transparent text-white py-3.5 px-1 resize-none focus:outline-none text-[15px] leading-relaxed max-h-32 overflow-y-auto" placeholder="Minta AI buatkan Script..." oninput="this.style.height = '';this.style.height = Math.min(this.scrollHeight, 128) + 'px'"></textarea>
+                <button type="button" onclick="openImageModal()" class="p-3 text-gray-400 hover:text-blue-400 rounded-full flex-shrink-0 transition-colors" title="Buat Gambar PNG"><i class="fas fa-image text-lg"></i></button>
+                <button type="submit" id="send-btn" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 mb-1 mr-1 rounded-full flex items-center justify-center shrink-0 transition-colors disabled:opacity-50"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </form>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-[60] transition-opacity">
+        <div class="bg-[#1e1e1e] rounded-3xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <h2 class="text-xl font-bold mb-6 text-white">Setelan AI Provider</h2>
+            <div class="space-y-4">
+                <div><label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Pilih Provider</label><select id="ai-provider" onchange="onProviderChange()" class="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white outline-none"><option value="gemini">Google Gemini AI</option><option value="openai">OpenAI (ChatGPT)</option><option value="claude">Anthropic (Claude)</option></select></div>
+                <div><label id="api-key-label" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">API Key</label><input type="password" id="api-key-input" class="allow-select w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white outline-none" placeholder="Masukkan API Key..."></div>
+                <button id="btn-verify" onclick="saveAndFetchModels()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors flex justify-center items-center gap-2"><i class="fas fa-sync-alt"></i> Simpan & Verifikasi Key</button>
+                <div id="model-section" class="pt-2 hidden"><label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Pilih Model yang Tersedia</label><select id="ai-model" onchange="saveActiveModel()" class="w-full bg-[#121212] border border-blue-500/50 rounded-xl px-4 py-3 text-white outline-none"></select></div>
+                <div id="status-message" class="text-xs hidden rounded-lg p-3 font-medium"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-[70] transition-opacity">
+        <div class="bg-[#1e1e1e] rounded-3xl w-full max-w-md p-6 relative">
+            <button onclick="closeImageModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <h2 class="text-xl font-bold mb-2 text-white"><i class="fas fa-magic text-purple-500"></i> Buat Gambar PNG</h2>
+            <p class="text-xs text-gray-400 mb-6">Prompt AI menjadi gambar resolusi tinggi.</p>
+            <div class="space-y-4">
+                <div><label class="block text-xs font-semibold text-gray-400 mb-1.5 tracking-wider">Deskripsi Gambar (Inggris disarankan)</label><textarea id="img-prompt" rows="3" class="allow-select w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white outline-none resize-none" placeholder="A futuristic city cyberpunk..."></textarea></div>
+                <div class="flex gap-4"><div class="flex-1"><label class="block text-xs font-semibold text-gray-400 mb-1.5">Lebar (Width)</label><input type="number" id="img-width" value="1024" class="allow-select w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white outline-none"></div><div class="flex-1"><label class="block text-xs font-semibold text-gray-400 mb-1.5">Tinggi (Height)</label><input type="number" id="img-height" value="1024" class="allow-select w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white outline-none"></div></div>
+                <button id="btn-generate-img" onclick="generateImage()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"><i class="fas fa-paint-brush"></i> Generate Gambar</button>
+                <div id="img-result-container" class="hidden flex-col items-center mt-4"><img id="img-result" class="rounded-xl border border-[#333] shadow-lg max-h-48 object-cover mb-3" src=""><button id="dl-img-btn" onclick="downloadGeneratedImage()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2"><i class="fas fa-download"></i> Download PNG</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= GUI BUILDER MODAL ================= -->
+    <div id="gui-builder-modal" class="fixed inset-0 hidden items-center justify-center z-[90]">
+        <div class="gb-shell">
+            <div class="gb-topbar">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button onclick="closeGUIBuilder()" class="gb-btn w-10 h-10 p-0"><i class="fas fa-arrow-left"></i></button>
+                    <div class="min-w-0">
+                        <div class="text-white font-bold text-sm truncate">Make Custom Dialog</div>
+                        <div class="text-[10px] text-gray-500 truncate">Visual GTPS Cloud Dialog GUI Builder</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap justify-end">
+                    <button onclick="openBuilderPromptModal()" class="gb-btn"><i class="fas fa-wand-magic-sparkles text-purple-400"></i> Generate Prompt</button>
+                    <button onclick="generateAndSendBuilderPrompt()" class="gb-btn gb-btn-primary"><i class="fas fa-code"></i> Generate Script</button>
+                </div>
+            </div>
+
+            <div class="gb-layout">
+                <aside class="gb-sidebar gb-scroll">
+                    <div class="gb-section">
+                        <div class="flex items-center justify-between mb-2"><div class="gb-label m-0">GUI Backgrounds</div><button onclick="addGUIBackground()" class="gb-btn !p-1.5" title="Tambah GUI Background"><i class="fas fa-plus"></i></button></div>
+                        <div id="gb-gui-list"></div>
+                    </div>
+                    <div class="gb-section">
+                        <div class="gb-label">Elements</div>
+                        <div class="gb-chip-grid" id="gb-element-palette"></div>
+                    </div>
+                </aside>
+
+                <section class="gb-workspace">
+                    <div class="gb-toolbar">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="gb-mini">Simulator:</span>
+                            <button id="gb-sim-pc" onclick="setSimulator('pc')" class="gb-btn !px-3 !py-1.5"><i class="fas fa-desktop"></i> PC</button>
+                            <button id="gb-sim-mobile" onclick="setSimulator('mobile')" class="gb-btn !px-3 !py-1.5"><i class="fas fa-mobile-screen-button"></i> Mobile</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="duplicateSelectedElement()" class="gb-btn !px-3 !py-1.5"><i class="fas fa-copy"></i></button>
+                            <button onclick="deleteSelectedElement()" class="gb-btn gb-btn-danger !px-3 !py-1.5"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="gb-canvas-wrap">
+                        <div class="gb-stage">
+                            <div id="gb-canvas" class="gb-canvas pc"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="gb-inspector gb-scroll">
+                    <div class="gb-section">
+                        <div class="gb-label">GUI Settings</div>
+                        <div class="space-y-2">
+                            <div><div class="gb-label !normal-case !tracking-normal">Command</div><input id="gb-command" class="gb-input" placeholder="/gui"></div>
+                            <div><div class="gb-label !normal-case !tracking-normal">Description</div><input id="gb-description" class="gb-input" placeholder="Buka custom dialog"></div>
+                            <div><div class="gb-label !normal-case !tracking-normal">Role ID</div><input id="gb-role" class="gb-input" type="number" min="0" value="0"></div>
+                        </div>
+                    </div>
+                    <div class="gb-section">
+                        <div class="gb-label">GUI Background</div>
+                        <div class="flex items-center gap-2"><input id="gb-bg-color" type="color" class="gb-color" value="#121212"><input id="gb-bg-alpha" class="gb-input" type="number" min="0" max="255" value="255" title="Alpha"></div>
+                        <div class="mt-3"><div class="gb-label !normal-case !tracking-normal">Trigger / Sambungan</div>
+                            <select id="gb-trigger-type" onchange="updateTriggerUI()" class="gb-select"><option value="command">Command</option><option value="button">If Button Clicked</option></select>
+                        </div>
+                        <div id="gb-command-trigger-box" class="mt-2"><div class="gb-label !normal-case !tracking-normal">Command Trigger</div><input id="gb-trigger-command" class="gb-input" placeholder="/gui2"></div>
+                        <div id="gb-button-trigger-box" class="mt-2 hidden">
+                            <div class="gb-label !normal-case !tracking-normal">Klik Button pada GUI</div><select id="gb-source-gui" class="gb-select" onchange="saveActiveGUIFromForm()"></select>
+                            <div class="gb-label !normal-case !tracking-normal mt-2">Nama / ID Button</div><input id="gb-source-button" class="gb-input" placeholder="btn_next"></div>
+                        <div class="gb-mini mt-2">Untuk GUI 2+ bisa memakai Command atau sambungan dari GUI 1/2/3/4 dan seterusnya.</div>
+                    </div>
+                    <div class="gb-section">
+                        <div class="gb-label">Selected Element</div>
+                        <div id="gb-inspector-content" class="gb-empty">Pilih elemen di canvas untuk mengatur properti, warna, ukuran, dan teks.</div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <!-- Builder Prompt Modal -->
+    <div id="builder-prompt-modal" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[100]">
+        <div class="bg-[#111214] border border-[#2b2e33] rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="p-5 border-b border-[#25282d] flex items-center justify-between"><div><h3 class="font-bold text-white">Prompt untuk AI</h3><p class="text-[11px] text-gray-500">Prompt dibuat otomatis dari desain GUI yang kamu buat.</p></div><button onclick="closeBuilderPromptModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button></div>
+            <div class="p-5 space-y-4 overflow-y-auto max-h-[72vh]">
+                <textarea id="builder-prompt-output" class="gb-textarea min-h-[420px] font-mono text-[11px] allow-select"></textarea>
+                <div class="flex flex-wrap gap-2 justify-end"><button onclick="copyBuilderPrompt()" class="gb-btn"><i class="fas fa-copy"></i> Copy Prompt</button><button onclick="closeBuilderPromptModal();generateAndSendBuilderPrompt()" class="gb-btn gb-btn-primary"><i class="fas fa-paper-plane"></i> Kirim ke AI</button></div>
+                <details class="think-box bg-[#0b0c0f] border border-[#24272c] rounded-xl p-2"><summary class="text-[10px] text-gray-500 px-2 py-1">Preview Lua hasil visual generator</summary><pre id="builder-lua-preview" class="gb-generated-preview mt-2 allow-select"></pre></details>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chatHistory = [];
+        let timerInterval = null;
+        let aiStartTime = 0;
+        let currentGeneratedImgUrl = "";
+
+        const encKey = str => btoa(encodeURIComponent(str));
+        const decKey = str => decodeURIComponent(atob(str));
+
+        document.addEventListener('DOMContentLoaded', () => { updateModelDisplay(); initGUIBuilder(); });
+
+        function startNewChat(e) {
+            e.preventDefault();
+            document.getElementById('nav-dropdown').classList.add('hidden');
+            chatHistory = [];
+            document.getElementById('chat-container').innerHTML = `<div class="flex flex-col gap-2 w-full text-center mt-10"><i class="fas fa-microchip text-4xl text-blue-500 mb-2"></i><h2 class="text-2xl font-bold text-white">Sesi Chat Baru</h2><p class="text-sm text-gray-400">Silakan mulai diskusi coding Anda.</p></div>`;
+        }
+        function toggleNavMenu(e) { e.stopPropagation(); document.getElementById('nav-dropdown').classList.toggle('hidden'); }
+        document.addEventListener('click', () => { const m = document.getElementById('nav-dropdown'); if(m) m.classList.add('hidden'); });
+
+        /* Attachments */
+        let attachedFiles = [];
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            Array.from(e.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    attachedFiles.push({ name:file.name, type:file.type.startsWith('image/')?'image':'text', mimeType:file.type||'text/plain', content:file.type.startsWith('image/')?ev.target.result.split(',')[1]:ev.target.result });
+                    updateAttachmentUI();
+                };
+                if(file.type.startsWith('image/')) reader.readAsDataURL(file); else reader.readAsText(file);
+            });
+            e.target.value = '';
+        });
+        function updateAttachmentUI() {
+            const pc=document.getElementById('attachment-preview-container'); const fl=pc.querySelector('div');
+            if(attachedFiles.length===0){pc.classList.add('hidden');return;} pc.classList.remove('hidden'); fl.innerHTML='';
+            attachedFiles.forEach(f=>{fl.innerHTML += `<div class="bg-[#2a2a2c] px-3 py-1.5 rounded-lg text-xs text-gray-300 flex items-center gap-2"><span>${escapeHTML(f.name)}</span></div>`;});
+        }
+        function clearAllAttachments(){attachedFiles=[];updateAttachmentUI();}
+
+        /* Markdown */
+        const renderer = { code(token){ const codeText=typeof token==='object'?token.text:token; const lang=typeof token==='object'?(token.lang||'CODE'):arguments[1]||'CODE'; return `<div class="relative my-4 rounded-2xl overflow-hidden bg-[#161618] border border-[#2a2a2c] w-full"><div class="flex justify-between items-center px-4 py-2.5 bg-[#1e1e20] text-xs text-gray-400 font-semibold tracking-wide"><span>${escapeHTML(lang)}</span><button type="button" onclick="copyCode(this)" class="hover:text-white transition-colors flex items-center gap-2 pointer-events-auto"><i class="fas fa-copy"></i> Copy</button></div><pre class="p-4 text-[13px] text-gray-300 font-mono overflow-x-auto allow-select pointer-events-auto"><code>${escapeHTML(codeText)}</code></pre></div>`; } };
+        marked.use({renderer});
+        window.copyCode = function(btn){navigator.clipboard.writeText(btn.closest('.relative').querySelector('code').innerText);btn.innerHTML='<i class="fas fa-check text-green-400"></i> Copied';setTimeout(()=>btn.innerHTML='<i class="fas fa-copy"></i> Copy',2000);};
+
+        /* Settings */
+        function openSettings(){document.getElementById('settings-modal').classList.remove('hidden');document.getElementById('settings-modal').classList.add('flex');const savedProvider=localStorage.getItem('_active_provider')||'gemini';document.getElementById('ai-provider').value=savedProvider;onProviderChange();}
+        function closeSettings(){document.getElementById('settings-modal').classList.add('hidden');document.getElementById('settings-modal').classList.remove('flex');updateModelDisplay();}
+        function onProviderChange(){const p=document.getElementById('ai-provider').value;const savedKey=localStorage.getItem(`_key_${p}`);try{document.getElementById('api-key-input').value=savedKey?decKey(savedKey):'';}catch(error){document.getElementById('api-key-input').value='';}const savedModels=localStorage.getItem(`_models_list_${p}`);const modelSection=document.getElementById('model-section');const selectModel=document.getElementById('ai-model');if(savedModels){const modelsArr=JSON.parse(savedModels);selectModel.innerHTML='';modelsArr.forEach(m=>selectModel.innerHTML+=`<option value="${escapeHTML(m)}">${escapeHTML(m)}</option>`);const activeModel=localStorage.getItem(`_model_${p}`);if(activeModel&&modelsArr.includes(activeModel))selectModel.value=activeModel;modelSection.classList.remove('hidden');}else modelSection.classList.add('hidden');document.getElementById('status-message').classList.add('hidden');}
+        async function saveAndFetchModels(){const p=document.getElementById('ai-provider').value;const key=document.getElementById('api-key-input').value.trim();const btn=document.getElementById('btn-verify');if(!key){showStatus('API Key tidak boleh kosong!','error');return;}btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memeriksa Key...';btn.disabled=true;try{let models=[];if(p==='gemini'){const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);const data=await res.json();if(data.error)throw new Error(data.error.message);models=data.models.filter(m=>m.supportedGenerationMethods.includes('generateContent')).map(m=>m.name.replace('models/',''));}else if(p==='openai'){const res=await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':`Bearer ${key}`}});const data=await res.json();if(data.error)throw new Error(data.error.message);models=data.data.filter(m=>m.id.includes('gpt')||m.id.includes('o1')||m.id.includes('o3')).map(m=>m.id).sort();}else{try{const res=await fetch('https://api.anthropic.com/v1/models',{headers:{'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}});const data=await res.json();if(data.error)throw new Error(data.error.message);models=(data.data||data.models||[]).map(m=>m.id);}catch(e){models=['claude-3-7-sonnet-20250219','claude-3-5-sonnet-20241022','claude-3-5-haiku-20241022'];}}if(models.length===0)throw new Error('Tidak ada model chat yang ditemukan.');localStorage.setItem(`_key_${p}`,encKey(key));localStorage.setItem('_active_provider',p);localStorage.setItem(`_models_list_${p}`,JSON.stringify(models));const selectModel=document.getElementById('ai-model');selectModel.innerHTML='';models.forEach(m=>selectModel.innerHTML+=`<option value="${escapeHTML(m)}">${escapeHTML(m)}</option>`);document.getElementById('model-section').classList.remove('hidden');saveActiveModel();showStatus(`Berhasil! Ditemukan ${models.length} model.`,'success');}catch(error){showStatus(error.message,'error');}btn.innerHTML='<i class="fas fa-sync-alt"></i> Simpan & Verifikasi Key';btn.disabled=false;}
+        function showStatus(msg,type){const status=document.getElementById('status-message');status.classList.remove('hidden');status.className=`text-xs rounded-lg p-3 font-medium mt-3 block ${type==='success'?'bg-green-900/40 text-green-400':'bg-red-900/40 text-red-400'}`;status.innerHTML=escapeHTML(msg);}
+        function saveActiveModel(){const p=document.getElementById('ai-provider').value;localStorage.setItem('_active_provider',p);const m=document.getElementById('ai-model').value;if(m)localStorage.setItem(`_model_${p}`,m);updateModelDisplay();}
+        function updateModelDisplay(){const p=localStorage.getItem('_active_provider');const m=localStorage.getItem(`_model_${p}`);const el=document.getElementById('active-model-display');if(el)el.innerHTML=!p||!m?'Pilih API & Model':`${p==='gemini'?'Gemini':p==='openai'?'OpenAI':'Claude'}: ${escapeHTML(m)}`;}
+
+        /* Image */
+        function openImageModal(){document.getElementById('image-modal').classList.remove('hidden');document.getElementById('image-modal').classList.add('flex');document.getElementById('img-result-container').classList.add('hidden');}
+        function closeImageModal(){document.getElementById('image-modal').classList.add('hidden');document.getElementById('image-modal').classList.remove('flex');}
+        function generateImage(){const prompt=document.getElementById('img-prompt').value.trim();const w=document.getElementById('img-width').value||1024;const h=document.getElementById('img-height').value||1024;if(!prompt)return alert('Prompt tidak boleh kosong!');const btn=document.getElementById('btn-generate-img');btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Generating...';btn.disabled=true;const seed=Math.floor(Math.random()*99999999);const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true`;const img=document.getElementById('img-result');img.onload=()=>{document.getElementById('img-result-container').classList.remove('hidden');document.getElementById('img-result-container').classList.add('flex');btn.innerHTML='<i class="fas fa-paint-brush"></i> Generate Gambar';btn.disabled=false;currentGeneratedImgUrl=url;};img.onerror=()=>{alert('Gagal membuat gambar.');btn.innerHTML='<i class="fas fa-paint-brush"></i> Generate Gambar';btn.disabled=false;};img.src=url;}
+        async function downloadGeneratedImage(){if(!currentGeneratedImgUrl)return;const btn=document.getElementById('dl-img-btn');btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Mendownload...';try{const w=document.getElementById('img-width').value;const h=document.getElementById('img-height').value;const resp=await fetch(currentGeneratedImgUrl);const blob=await resp.blob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`AI_Gen_${w}x${h}.png`;document.body.appendChild(a);a.click();document.body.removeChild(a);}catch(e){alert('Gagal mendownload gambar!');}btn.innerHTML='<i class="fas fa-download"></i> Download PNG';}
+
+        /* Chat */
+        function appendMessage(sender,text,files=[],metadata=null){const cc=document.getElementById('chat-container');const wrap=document.createElement('div');wrap.className=`flex w-full ${sender==='user'?'justify-end':'justify-start'} mb-2 relative chat-block`;const contentDiv=document.createElement('div');let html='';if(files&&files.length>0){html+='<div class="flex flex-wrap gap-2 mb-2 pointer-events-auto">';files.forEach(f=>{const icon=f.type==='image'?'fa-image':'fa-file-code';html+=`<div class="bg-[#2a2a2c] px-3 py-1.5 rounded-lg text-[11px] text-gray-300 font-mono"><i class="fas ${icon}"></i> ${escapeHTML(f.name)}</div>`;});html+='</div>';}if(sender==='user'){contentDiv.className='bg-[#1e1e1e] text-white px-5 py-3 rounded-[28px] max-w-[85%] text-[15px] leading-relaxed shadow-sm chat-bubble-content cursor-pointer';html+=`<p class="whitespace-pre-wrap">${escapeHTML(text)}</p>`;}else{contentDiv.className='w-full ai-text text-gray-200 text-[15px] leading-relaxed overflow-hidden chat-bubble-content cursor-pointer';const thinkMatch=text.match(/<think>([\s\S]*?)<\/think>/i);if(thinkMatch){html+=`<details class="think-box mb-4 bg-[#161618] border border-[#2a2a2c] rounded-2xl p-1 cursor-pointer pointer-events-auto"><summary class="px-3 py-2 text-xs font-semibold text-gray-400 flex items-center gap-2"><i class="fas fa-stopwatch text-yellow-500"></i> Thinking Process</summary><div class="p-3 pt-1 text-[13px] text-gray-500 font-mono whitespace-pre-wrap">${escapeHTML(thinkMatch[1].trim())}</div></details>`;html+=marked.parse(text.replace(/<think>([\s\S]*?)<\/think>/i,'').trim());}else html+=marked.parse(text);if(metadata)html+=`<div class="mt-4 pt-3 border-t border-[#2a2a2c] flex items-center gap-5 text-[12px] text-gray-500 font-mono pointer-events-auto"><span><i class="fas fa-clock text-blue-400"></i> ${escapeHTML(String(metadata.time))}s</span><span><i class="fas fa-coins text-yellow-500"></i> ${escapeHTML(String(metadata.tokens))} Token</span><button onclick="restartGeneration(this)" class="hover:text-white transition-colors flex items-center gap-1.5 bg-[#2a2a2c] px-2 py-1 rounded-md cursor-pointer"><i class="fas fa-redo"></i> Jawab Ulang</button></div>`;}contentDiv.innerHTML=html;wrap.appendChild(contentDiv);const welcomeMsg=cc.querySelector('.text-center.mt-10');if(welcomeMsg)welcomeMsg.remove();cc.appendChild(wrap);cc.scrollTo({top:cc.scrollHeight,behavior:'smooth'});let historyParts=[];if(text&&text!=='[File Terlampir]')historyParts.push({text:text});if(files&&files.length>0)files.forEach(f=>{if(f.type==='text')historyParts.push({text:`\n\n--- Isi File: ${f.name} ---\n${f.content}\n--- Akhir File ---`});else historyParts.push({inlineData:{data:f.content,mimeType:f.mimeType}});});if(historyParts.length===0)historyParts.push({text:'Tolong analisa file yang dilampirkan.'});chatHistory.push({role:sender==='ai'?'assistant':'user',content:text,parts:historyParts});}
+        function escapeHTML(str){return String(str??'').replace(/[&<>'"]/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));}
+        function appendTyping(){aiStartTime=Date.now();const cc=document.getElementById('chat-container');const div=document.createElement('div');div.id='typing';div.className='flex w-full justify-start mb-2';div.innerHTML=`<div class="bg-[#1e1e1e] border border-[#2a2a2c] rounded-full px-5 py-2.5 flex items-center gap-4"><div class="text-blue-400 text-sm flex gap-1 items-center"><i class="fas fa-circle text-[8px] animate-pulse"></i><i class="fas fa-circle text-[8px] animate-pulse" style="animation-delay:0.2s"></i><i class="fas fa-circle text-[8px] animate-pulse" style="animation-delay:0.4s"></i></div><span id="ai-timer" class="text-xs text-yellow-500 font-mono font-bold tracking-widest">0.0s</span></div>`;cc.appendChild(div);cc.scrollTo({top:cc.scrollHeight,behavior:'smooth'});timerInterval=setInterval(()=>{const el=document.getElementById('ai-timer');if(el)el.innerText=((Date.now()-aiStartTime)/1000).toFixed(1)+'s';},100);}
+        function removeTyping(){clearInterval(timerInterval);const el=document.getElementById('typing');if(el)el.remove();}
+
+        const SYSTEM_PROMPT = "Kamu adalah AI ahli bahasa pemrograman Lua KHUSUS untuk server GTPS Cloud (GTPS10).\nTugasmu adalah membuat, menganalisis, atau memperbaiki script Lua sesuai spesifikasi GTPS Cloud.\n\nATURAN FORMAT BALASAN:\n- LANGSUNG BERIKAN SCRIPT LUA-NYA DALAM SATU BALASAN! JANGAN bertele-tele, JANGAN meminta konfirmasi, dan JANGAN menunda memberikan kode.\n- SEBELUM menuliskan blok kode script Lua, kamu WAJIB memberikan JUDUL SCRIPT terlebih dahulu.\n- SELALU gunakan tag <think>...</think> di awal responmu untuk menjelaskan pemikiran dan analisamu.\n- HANYA gunakan fungsi yang terdaftar di dokumentasi resmi di bawah ini.\n\n=======================================================\n[REFERENSI 1: MEMBUAT COMMAND, DIALOG, DAN ITEM CONVERSION]\n=======================================================\nregisterLuaCommand({ command = \"cv\", roleRequired = 0, description = \"Buka Menu Convert\" })\n\nlocal function showConvertDialog(player)\n    local dialog = \"set_bg_color|10,10,10,255|\\\\n\"\n    dialog = dialog .. \"add_label_with_icon|big|\\\\`wConverter Menu|left|7070|\\\\n\"\n    dialog = dialog .. \"add_button_with_icon|convert_dl|Blue Gem Lock|staticYellowFrame|7188||left|\\\\n\"\n    dialog = dialog .. \"end_dialog|show_convert_dialog|Close||\\\\n\"\n    player:onDialogRequest(dialog)\nend\n\nonPlayerCommandCallback(function(world, player, fullCommand)\n    local command = fullCommand:match(\"^(%S+)\")\n    if command == \"cv\" then \n        showConvertDialog(player) \n        return true \n    end\n    return false\nend)\n\nonPlayerDialogCallback(function(world, player, data)\n    local dialogName = data[\"dialog_name\"] or \"\"\n    local btn = data[\"buttonClicked\"] or \"\"\n    \n    if dialogName == \"show_convert_dialog\" then\n        if btn == \"convert_dl\" then\n            if player:getItemAmount(1796) >= 100 then\n                player:changeItem(1796, -100, 0)\n                player:changeItem(7188, 1, 0)\n                player:onConsoleMessage(\"Berhasil Convert DL ke BGL!\")\n            end\n        end\n        return true\n    end\n    return false\nend)\n\n=======================================================\n[REFERENSI 2: SISTEM DATABASE (FILE I/O) & MULTI-ROW MENU]\n=======================================================\nlocal DB_FILE = \"data_exchange.db\"\nlocal dataCache = {}\n\nlocal function saveDB()\n    local lines = {}\n    for k, v in pairs(dataCache) do\n        table.insert(lines, string.format(\"%s|%s\", k, v))\n    end\n    file.write(DB_FILE, table.concat(lines, \"\\\\n\"))\nend\n\nlocal function loadDB()\n    if not file.exists(DB_FILE) then return end\n    local content = file.read(DB_FILE)\n    for line in string.gmatch(content, \"[^\\\\r\\\\n]+\") do\n        -- Parsing logic here\n    end\nend\nloadDB()\nonAutoSaveRequest(function() saveDB() end)\n\n=======================================================\n[DOKUMENTASI GTPS CLOUD LUA API LENGKAP]\n=======================================================\n**Global Functions:**\nregisterLuaPlaymod(config), registerLuaCommand(config), registerLuaEvent(config), registerLuaDailyEvent(config), registerLuaAchievement(config), registerLuaItem(config)\ngetItem(itemID), getItemsCount(), getMaxItems(), getRealGTItemsCount()\ngetServerPlayers(), getServerWorlds(), getAllPlayers(), getAllWorlds(), getAllGuilds()\nreloadScripts(), reloadConfigs(), reloadItems()\ngetPlayer(userID), getPlayerByName(playerName, client), savePlayer(player)\ngetActiveDailyOffers(), getEventOffers(), getCurrentServerEvent(), getCurrentServerDailyEvent(), getStoreItems(), getIOTMItem(itemID), getEasterBuyTime(userID)\nisDailyOfferPurchased(userID, storeItemID), addDailyOfferPurchased(userID, storeItemID), getEasterEggs(userID)\nformatStoreTime(targetTime, currentTime), getTopPlayerByBalance(), getTopWorldByVisitors()\nprint(...), getServerName(), getServerID(), getNewsBanner(), getNewsBannerDimensions(), getTodaysDate(), getTodaysEvents(), getMaxLevel()\ngetCurrentEventDescription(), getCurrentDailyEventDescription(), getCurrentRoleDayDescription()\nresetColor(message), formatTime(targetTime, currentTime), getAchievementsCount()\ngetWorld(WorldID), getGuild(GuildID), getWorldByName(worldName), saveWorld(world), worldExists(worldName), getActiveWorlds()\ngetCorruptedSouls(userID), saveDataToServer(uniqueID, data), loadDataFromServer(uniqueID), saveStringToServer(uniqueID, data), loadStringFromServer(uniqueID)\naddWorldMenuWorld(world_id, display_name, decimal_color, is_priority), removeWorldMenuWorld(world_id), hideWorldMenuDefaultSpecialWorlds(hide_default_special_worlds)\naddSocialPortalButton(button_data, callback), getCurrencyShortName(), getCurrencyLongName(), getCurrencyMediumName(), getCurrencyIcon()\naddSidebarButton(sidebar_button), removeSidebarButton(sidebar_button_name), parseText(str)\ngetBlessingName(blessingID), getBlessingInfo(blessingID), getBlessingRarity(blessingID)\nsetGemEvent(boostGem), setXPEvent(boostXp), getGemEvent(), getXPEvent(), setEvent(event_id), setDailyEvent(daily_event_id)\nqueueRestart(in_seconds, full_restart, message), getRoles(), getTitles(), getPlaymods(), getHighestPriorityRole()\ngetEcoQuantity(itemID), getEcoQuantityPlayers(itemID), getEcoQuantityWorlds(itemID)\ncreateRedeemCode(config), setPlaymodDuration(playmod_id, seconds), setBroadcastWorld(worldName), getJimDailyQuest()\ndeleteAccount(id), deleteWorld(id), deleteGuild(id), getServerDefaultPort(), getEvents(), getDailyEvents()\ngetItemEffects(), getWorldEffects(), getPlayerEffects(), getRoleQuestDay(), getAchievements(), getMachineCaps(), hasFeatureEnabled(name)\ncreateTemplate(backupName), applyTemplate(backupName), getTemplates(), hasTemplate(backupName), deleteTemplate(backupName)\nincludeClientFile(url, name), enableCaching(item_id), disableCaching(item_id), getServerDiscordLink(), getServerDiscordHowToPlay(), deleteExport(exportName)\naddCombinerRecipe(...), removeCombinerRecipe(...), getCombinerRecipes(), getSpecialStoreItems(player)\nsetGuildCreatePriceSSUP(price), setGuildCreatePriceSUP(price), setGuildCreatePriceNormal(price)\n\n**Utilities (Timer, File, SQLite, dll):**\ntimer.setTimeout(seconds, callback, ...), timer.setInterval(seconds, callback, ...), timer.clear(id)\nhttp.get(url), http.post(url, post_data)\nfile.read(path), file.write(path, data), file.exists(path), file.delete(path)\ndir.create(path), dir.exists(path), dir.delete(path)\nsqlite:open(path) -> returns SqliteDB, SqliteDB:query(sql), SqliteDB:close()\nbit.band, bit.bor, bit.bxor, bit.bnot, bit.lshift, bit.rshift, bit.arshift, bit.mod\nos.time(), require(modname)\n\n**Player Class:**\ngetName(), enterWorld(worldName, notification, bypass), leaveWorld(), punchBlock(x, y), placeBlock(x, y, itemID)\ngetCleanName(), getRealName(), getRealCleanName(), getTotalWorldLocks(), getUserID(), getPosX(), getPosY(), getBlockPosX(), getBlockPosY(), getMiddlePosX(), getMiddlePosY(), getNetID()\nhasMod(modID), hasRole(roleID), setRole(roleID), addMod(modID, value), removeMod(modID), getMod(modID)\nchangeItem(itemID, itemCount, addBackpack), getItemAmount(itemID), getItemAmountBackpack(itemID)\ngetXP(), setXP(xp), removeXP(xp), getLevel(), getStats(statType), setStats(statType, statNumber), getRequiredXP()\ngetGems(), addGems(gems, instantSet, progressQuests), removeGems(gems, instantSet), setGems(gems, instantSet), updateGems(instantSet)\ngetAutofarm(), onConsoleMessage(message, delay), playAudio(message), onDialogRequest(message, delay, callback), onStoreRequest(message, delay), onStorePurchaseResult(message, delay), onTalkBubble(netID, message, persistMessage, delay), onTextOverlay(message, delay)\ncanFit(items), getCoins(), addCoins(coins), setCoins(coins), removeCoins(coins, progressQuests), progressQuests(itemID, itemCount)\nupgradeInventorySpace(size), removeInventorySpace(size), setInventorySpace(newSize), isMaxInventorySpace(), getInventorySize()\nonRedeemMenu(), getWorldName(), getWorld(), onGrow4GoodDonate(), onTradeHistoryUI(targetPlayer), onBackpackUI(targetPlayer), onMentorshipUI(), onVouchersUI(), onNameIconsUI(targetPlayer), onWrenchIconsUI(targetPlayer), onTitlesUI(targetPlayer), onAchievementsUI(), onClothesUI(), onProfileUI(world, tab)\ngetSubscription(subType), addSubscription(Type, exp), removeSubscription(type), getPlaytime(), setPlaytime(time), addPlaytime(time), getAccountCreationTime(), setAccountCreationTime(time), getAccountCreationDateStr()\ngetTransformProfileButtons(), onTradeHistoryUI(targetPlayer), onBackpackUI(targetPlayer), onMentorshipUI(), onVouchersUI(), onNameIconsUI(targetPlayer), onWrenchIconsUI(targetPlayer), onTitlesUI(targetPlayer), onAchievementsUI(), onClothesUI()\ngetClassicProfileContent(catType, flags), getDiscordID(), onLinkDiscordUI(), onUnlinkDiscordUI(), getUnlockedAchievementsCount(), getBackpackUsedSize(), onFavItemsUI(), onOnlineStatusUI(), getOnlineStatus(), onPersonalizeWrenchUI()\ngetHomeWorldID(), getProfileGuildInfo(), getSubscriptionInfo(), getCardBattleInfo(), getProfileAccessButton(), getProfileGuildJoinButton()\nonBillboardUI(), onNotebookUI(), onGrowpassUI(), onGrowmojiUI(), onGrow4GoodUI(), onTradeScanUI(), getGuildID(), onGuildNotebookUI(), onProfileUI(world, tab)\nonAddNotification(texture, message, audio, num, delay), onParticleEffect(particleID, posX, posY, num, num2, delay), setNextDialogRGBA(R, G, B, A), resetDialogColor(), setNextDialogBorderRGBA(R, G, B, A), updateStats(world, type, amount)\ngetCountry(), setCountry(country), getPlatform(), sendVariant(variantList, delay, netID), sendAction(action_str)\ngetInventoryItems(), disconnect(), sendRawPacket(data), getType(), isFacingLeft(), isOnline()\naddTitle(title_id), hasTitle(title_id), removeTitle(title_id), getActiveTitles(), addActiveTitle(title_id), removeActiveTitle(title_id)\naddMail(mail), clearMailbox(), setNickname(nickname), resetNickname(), getBankBalance(), addBankBalance(balance), removeBankBalance(balance), setBankBalance(balance)\nsetCountryFlagForeground(item_id), setCountryFlagBackground(item_id), getCountryFlagForeground(), getCountryFlagBackground()\naddLevel(level), removeLevel(level), setLevel(level), ban(modDuration, reason, punishedBy, banDevice, banIP), setRoleQuestLevel(type, newLevel)\ngetRoleQuestLevel(type), getIP(), getRID(), setPassword(tankIDPass), getEmail(), getBackpackItems(), getGender(), hasActiveBlessing(blessingID), hasBlessing(blessingID), removeBlessing(blessingID), addBlessing(blessingID), checkPassword(password), getDiscordInvites()\ndoAction(str), doRawPacket(data), getAltAccounts(), getRole(), getTitles(), getOwnedWorlds(), getRecentWorlds(), getAccessWorlds(), getIPHistory(), getRIDHistory(), getSmallLockedWorlds(), setBroadcastWorld(worldName)\ngetFriends(), addFriend(second_player), removeFriend(second_player), getLifeGoals(), getBiweeklyQuests(), getGrowpassPoints(), addGrowpassPoints(points), setGrowpassPoints(points)\nadjustBlockHitCount(adjust), getAdjustedBlockHitCount(), getPing(), getDungeonScrolls(), setDungeonScrolls(scrolls), hasGrowID(), addNote(note), setAAPEnabled(aapEnabled), setCustomAutofarmDelay(delay), getGameVersion(), getItemEffects()\nvisualPunch(tile), visualBuild(tile), getLastOnline(), earnAchievement(type), getAchievements(), getActivePet(), getEffects(), setEffects(effects), deleteEffects(), getOverlappingTiles()\nsetLegendaryWizardTask(currentTaskNum), hasAccessToTile(tile, itemID, isSilent, ignoreReach), isPublicTile(tile), moveToTile(tile), moveToPos(x, y), isMoving(), getMovementError(), getState()\nsetLifeGoalQuestProgress(taskID, value), setBiweeklyQuestProgress(taskID, value), triggerFindGeiger(), setFishingWaitTime(time), setSkinColor(r, g, b, a), createGuild(guildName, guildStatement)\n\n**World Class:**\ngetName(), getOwner(), setOwner(user_id), removeOwner(), addPunishment(player, type, expiresAt, reason, invoker_id), removePunishment(player, type), getPunishment(player, type), getAllPunishments()\ngetID(), getTile(x, y), spawnItem(x, y, itemID, itemCount, center_item), spawnGems(x, y, gemsCount, player), adjustGems(player, tile, gemsCount), onLoot(player, tile, gemsCount)\nuseItemEffect(netID, itemID, secondNetID, effectDelay), useItemTileEffect(tile, netID, itemID, reverse, effectDelay)\ngetPlayers(), getPlayersCount(show_all), getVisiblePlayersCount(), isGameActive(), onGameWinHighestScore(), updateClothing(player)\nonCreateChatBubble(posX, posY, message, persistMessage), onCreateExplosion(posX, posY, radius, power), setTileForeground(tile, id, visual_update, player), setTileBackground(tile, id, visual_update, player)\ngetWorldSizeX(), getWorldSizeY(), getWorldType(), getTiles(), getEmptyTiles(), getNoCollisionTiles(), getDroppedItems(), getTileDroppedItems(tile)\naddXP(player, xp_amount), setPlayerPosition(player, x, y, no_packet), removeDroppedItem(uid), removeDroppedItemsByID(id), removeAllDroppedItems(), updateTile(tile, player), sendPlayerMessage(player, message)\npunchTile(tile, player), placeTile(tile, id, player), hasTileAccess(player, tile), hasAccess(player), addTileAccess(player, tile), addAccess(player, admin_type), removeTileAccess(player, tile), removeAllTileAccess(), removeAccess(player)\nkill(player, force_respawn_on_white_door), setClothing(player, item_id), createNPC(name, x, y), removeNPC(player), findNPCByName(name), getAllNPC(), redeemCode(player, code), setWeather(weatherID)\ngetWorldLock(), getMagplantRemoteTile(player), setMagplantRemoteTile(player, tile), hasFlag(flag), addFlag(flag), useConsumable(player, tile, id, noCallback), spawnGhost(tile, id, sb, wd, sp), findPathByTile(tile_1, tile_2, max_rad_x, max_rad_y)\nisNuked(), nuke(ownerBanTime, adminsBanTime, everyoneElseBanTime), removeNuke(unbanBannedUsers), getGuildID(), getMachineCap(item_id), setMachineCap(item_id, item_count), getMachineCaps(), removeMachineCap(item_id)\ngetEffects(), setEffects(effects), deleteEffects(), getCached(item_id), delete(), save()\nWorld.new(name, sizeX, sizeY, worldType), World.newFromTemplate(name, templateName), World.newFromGlobalTemplate(name, templateName)\nhasAccessByType(player, adminType), setTileOwner(tile, userID), export(), import(importName)\n\n**Tile Class:**\ngetTileID(), getTileItem(), getLastPunched(), getPosX(), getPosY(), getNote(), getTileForeground(), getTileBackground()\ngetTileData(data_type), setTileData(data_type, data_value), setTileDataInt(data_type, data_value), getFlags(), setFlags(flags)\n\n**Callback Utama:**\nonPlayerChatCallback(function(world, player, message)), onPlayerCommandCallback(function(world, player, command)), onPlayerDialogCallback(function(world, player, dialogName))\nonPlayerJoinCallback(function(world, player)), onPlayerLeaveWorldCallback(function(world, player)), onPlayerDeathCallback(function(world, player, spikeKill))\nonTilePunchCallback(function(world, player, tile)), onTileBreakCallback(function(world, player, tile)), onTilePlaceCallback(function(world, player, tile, itemID))\nonPlayerDropCallback(function(world, player, itemID, itemCount)), onPlayerTrashCallback(function(world, player, itemID, itemCount)), onPlayerPickupItemCallback(function(world, player, itemID, itemCount))\nonTick(function()), onWorldTick(function(world)), onPlayerTick(function(player))\n";
+
+        function handleFormSubmit(e){e.preventDefault();const txt=document.getElementById('user-input').value.trim();if(!txt&&attachedFiles.length===0)return;document.getElementById('user-input').value='';document.getElementById('user-input').style.height='auto';const att=[...attachedFiles];clearAllAttachments();appendMessage('user',txt||'[File Terlampir]',att);processAI();}
+        window.restartGeneration=function(btn){btn.closest('.chat-block').remove();if(chatHistory.length>0&&chatHistory[chatHistory.length-1].role==='assistant')chatHistory.pop();processAI();};
+        async function processAI(){const p=localStorage.getItem('_active_provider');if(!p){openSettings();return;}const encKeyVal=localStorage.getItem(`_key_${p}`);if(!encKeyVal){openSettings();return;}let apiKey='';try{apiKey=decKey(encKeyVal);}catch(error){alert('API Key tidak valid. Silakan atur ulang di setelan.');localStorage.removeItem(`_key_${p}`);openSettings();return;}const model=localStorage.getItem(`_model_${p}`);if(!model){openSettings();return;}appendTyping();try{let resText='';let tokens='N/A';const lastUserMsg=chatHistory[chatHistory.length-1];const lastTxt=lastUserMsg?lastUserMsg.content:'';if(p==='gemini'){const history=chatHistory.map(h=>({role:h.role==='assistant'?'model':h.role,parts:h.parts}));const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:SYSTEM_PROMPT}]},contents:history,generationConfig:{temperature:0.4}})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||'Error API Gemini');resText=d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'Tidak ada respons.';tokens=d.usageMetadata?.totalTokenCount||'N/A';}else if(p==='openai'){let messages=[{role:'system',content:SYSTEM_PROMPT}];chatHistory.forEach(h=>{let contentArr=[];h.parts.forEach(pt=>{if(pt.text)contentArr.push({type:'text',text:pt.text});if(pt.inlineData)contentArr.push({type:'image_url',image_url:{url:`data:${pt.inlineData.mimeType};base64,${pt.inlineData.data}`}});});messages.push({role:h.role,content:contentArr.length===1&&contentArr[0].type==='text'?contentArr[0].text:contentArr});});const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},body:JSON.stringify({model,messages,temperature:0.4})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||'Error API OpenAI');resText=d.choices?.[0]?.message?.content||'Tidak ada respons.';tokens=d.usage?.total_tokens||'N/A';}else{let messages=[];chatHistory.forEach(h=>{let contentArr=[];h.parts.forEach(pt=>{if(pt.text)contentArr.push({type:'text',text:pt.text});if(pt.inlineData)contentArr.push({type:'image',source:{type:'base64',media_type:pt.inlineData.mimeType,data:pt.inlineData.data}});});messages.push({role:h.role,content:contentArr.length===1&&contentArr[0].type==='text'?contentArr[0].text:contentArr});});const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,system:SYSTEM_PROMPT,messages,max_tokens:4096,temperature:0.4})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||'Error API Claude');resText=d.content?.map(x=>x.text||'').join('')||'Tidak ada respons.';tokens=(d.usage?.input_tokens+d.usage?.output_tokens)||'N/A';}removeTyping();const timeTaken=((Date.now()-aiStartTime)/1000).toFixed(2);appendMessage('ai',resText,[],{time:timeTaken,tokens,lastPrompt:lastTxt});}catch(err){removeTyping();appendMessage('ai',`**Error Sistem:** ${err.message}`);}}
+
+        /* ========================= GUI BUILDER LOGIC ========================= */
+        const GUI_STORAGE_KEY='GTPS_GUI_BUILDER_V1';
+        let guiBuilder={simulator:'pc',activeIndex:0,guis:[]};
+        let gbSelectedId=null;
+        let gbDrag=null;
+        let gbResize=null;
+
+        const GB_TYPES={
+            label:{name:'Label + Icon',icon:'fa-heading'}, textbox:{name:'TextBox',icon:'fa-align-left'}, text_input:{name:'TextBar',icon:'fa-keyboard'}, small_text_input:{name:'Small TextBar',icon:'fa-i-cursor'}, checkbox:{name:'Checkbox',icon:'fa-square-check'}, button:{name:'Button',icon:'fa-square'}, spacer:{name:'Spacer',icon:'fa-arrows-up-down'}, search:{name:'Search Bar',icon:'fa-magnifying-glass'}, item_selector:{name:'Item Selector',icon:'fa-cubes'}, player_selector:{name:'Player Selector',icon:'fa-users'}, world_selector:{name:'World Selector',icon:'fa-earth-americas'}, dropdown:{name:'Dropdown',icon:'fa-list'}, image:{name:'Image',icon:'fa-image'}, player_info:{name:'Player Info',icon:'fa-user'}, item_info:{name:'Item Info',icon:'fa-cube'}, progress:{name:'Progress Bar',icon:'fa-bars-progress'}, end:{name:'End Dialog',icon:'fa-xmark'}
+        };
+        function newElement(type){
+            const base={id:uid(type),type,x:8,y:8,width:28,height:10,text:GB_TYPES[type]?.name||type,textColor:'#FFFFFF',bgColor:'#1B1D21',fontSize:15,align:'left'};
+            switch(type){
+                case 'label':Object.assign(base,{size:'big',iconId:'7070'});break;
+                case 'textbox':Object.assign(base,{text:'Tulis informasi atau instruksi di sini...'});break;
+                case 'text_input':Object.assign(base,{id:uid('input'),label:'Nama Anda:',defaultValue:'Guest',maxLength:20});break;
+                case 'small_text_input':Object.assign(base,{id:uid('small'),label:'Angka:',defaultValue:'0',maxLength:3});break;
+                case 'checkbox':Object.assign(base,{id:uid('check'),label:'Aktifkan pilihan ini',initialState:0});break;
+                case 'button':Object.assign(base,{id:uid('btn'),text:'Button',frame:'staticBlueFrame',iconId:'6'});break;
+                case 'spacer':Object.assign(base,{size:'small',height:6,opacity:0});break;
+                case 'search':Object.assign(base,{id:uid('search'),placeholder:'Cari...'});break;
+                case 'item_selector':Object.assign(base,{id:uid('item'),text:'Item Selector'});break;
+                case 'player_selector':Object.assign(base,{id:uid('player'),text:'Player Selector'});break;
+                case 'world_selector':Object.assign(base,{id:uid('world'),text:'World Selector'});break;
+                case 'dropdown':Object.assign(base,{id:uid('drop'),label:'Pilih Opsi:',options:'Merah,Hijau,Biru',defaultIndex:0});break;
+                case 'image':Object.assign(base,{url:'https://placehold.co/240x100/png?text=GTPS',imgW:240,imgH:100});break;
+                case 'player_info':Object.assign(base,{playerId:'123456'});break;
+                case 'item_info':Object.assign(base,{itemId:'7188'});break;
+                case 'progress':Object.assign(base,{id:uid('progress'),current:50,max:100,label:'Progress Quest:'});break;
+                case 'end':Object.assign(base,{dialogName:'my_dialog',closeButton:'Close',width:22,height:8});break;
+            }
+            return base;
+        }
+        function uid(prefix){return prefix+'_'+Math.random().toString(36).slice(2,8);}
+        function defaultGUI(index){return {name:`GUI ${index}`,command:index===1?'/gui':'',description:'Custom GTPS Dialog',role:0,bg:'#121212',alpha:255,trigger:{type:'command',command:index===1?'/gui':'/gui'+index,sourceGui:Math.max(0,index-1),sourceButton:''},elements:[newElement('label'),newElement('textbox'),newElement('button'),newElement('end')]};}
+        function initGUIBuilder(){loadGUIBuilder();renderPalette();renderGUIList();renderCanvas();updateGUIForm();}
+        function loadGUIBuilder(){try{const saved=JSON.parse(localStorage.getItem(GUI_STORAGE_KEY)||'null');if(saved&&Array.isArray(saved.guis)&&saved.guis.length){guiBuilder=saved;if(typeof guiBuilder.simulator!=='string')guiBuilder.simulator='pc';if(guiBuilder.activeIndex>=guiBuilder.guis.length)guiBuilder.activeIndex=0;return;}}catch(e){}guiBuilder={simulator:'pc',activeIndex:0,guis:[defaultGUI(1)]};saveGUIBuilder();}
+        function saveGUIBuilder(){try{localStorage.setItem(GUI_STORAGE_KEY,JSON.stringify(guiBuilder));}catch(e){}}
+        function activeGUI(){return guiBuilder.guis[guiBuilder.activeIndex];}
+        function activeElement(){const g=activeGUI();return g?.elements.find(e=>e.id===gbSelectedId)||null;}
+        function openGUIBuilder(){document.getElementById('gui-builder-modal').classList.remove('hidden');document.getElementById('gui-builder-modal').classList.add('flex');if(!guiBuilder.guis.length)loadGUIBuilder();renderAllBuilder();}
+        function closeGUIBuilder(){document.getElementById('gui-builder-modal').classList.add('hidden');document.getElementById('gui-builder-modal').classList.remove('flex');saveGUIBuilder();}
+        function addGUIBackground(){const g=defaultGUI(guiBuilder.guis.length+1);if(guiBuilder.guis.length){g.trigger={type:'button',command:'',sourceGui:guiBuilder.activeIndex,sourceButton:''};}guiBuilder.guis.push(g);guiBuilder.activeIndex=guiBuilder.guis.length-1;gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
+        function selectGUI(index){guiBuilder.activeIndex=index;gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
+        function deleteActiveGUI(){if(guiBuilder.guis.length<=1)return alert('GUI 1 tidak dapat dihapus.');if(!confirm(`Hapus ${activeGUI().name}?`))return;guiBuilder.guis.splice(guiBuilder.activeIndex,1);guiBuilder.activeIndex=Math.max(0,guiBuilder.activeIndex-1);gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
+        function renderAllBuilder(){renderGUIList();renderCanvas();updateGUIForm();renderInspector();setSimulator(guiBuilder.simulator);}
+        function renderGUIList(){const el=document.getElementById('gb-gui-list');if(!el)return;el.innerHTML='';guiBuilder.guis.forEach((g,i)=>{const card=document.createElement('div');card.className='gb-gui-card '+(i===guiBuilder.activeIndex?'active':'');card.onclick=()=>selectGUI(i);const trigger=g.trigger?.type==='button'?`Klik: ${escapeHTML(g.trigger.sourceButton||'button')}`:escapeHTML(g.trigger?.command||g.command||'Manual');card.innerHTML=`<div class="flex items-center justify-between gap-2"><div class="gb-gui-title">${escapeHTML(g.name||`GUI ${i+1}`)}</div><div class="text-[9px] text-gray-500">${g.elements?.length||0}</div></div><div class="gb-gui-sub">${trigger}</div>`;el.appendChild(card);});if(guiBuilder.guis.length>1){const del=document.createElement('button');del.className='gb-btn gb-btn-danger w-full mt-2';del.innerHTML='<i class="fas fa-trash"></i> Hapus GUI Aktif';del.onclick=deleteActiveGUI;el.appendChild(del);}}
+        function renderPalette(){const el=document.getElementById('gb-element-palette');if(!el)return;el.innerHTML='';Object.entries(GB_TYPES).forEach(([type,meta])=>{const b=document.createElement('button');b.className='gb-chip';b.innerHTML=`<i class="fas ${meta.icon} mr-1"></i>${meta.name}`;b.onclick=()=>addElement(type);el.appendChild(b);});}
+        function addElement(type){const g=activeGUI();if(!g)return;const item=newElement(type);item.x=8+((g.elements.length%5)*6);item.y=8+((g.elements.length%4)*10);if(type==='label')item.y=7;if(type==='textbox')item.width=46;if(type==='button')item.width=30;if(type==='end')item.x=68;g.elements.push(item);gbSelectedId=item.id;saveGUIBuilder();renderCanvas();renderInspector();}
+        function duplicateSelectedElement(){const e=activeElement();if(!e)return;const copy=JSON.parse(JSON.stringify(e));copy.id=uid(e.type);copy.x=Math.min(85,e.x+3);copy.y=Math.min(86,e.y+3);if('id' in copy && ['button','text_input','small_text_input','checkbox','search','item_selector','player_selector','world_selector','dropdown','progress'].includes(copy.type))copy.id=uid(copy.type);activeGUI().elements.push(copy);gbSelectedId=copy.id;saveGUIBuilder();renderCanvas();renderInspector();}
+        function deleteSelectedElement(){const g=activeGUI();if(!g||!gbSelectedId)return;const idx=g.elements.findIndex(e=>e.id===gbSelectedId);if(idx<0)return;g.elements.splice(idx,1);gbSelectedId=null;saveGUIBuilder();renderCanvas();renderInspector();}
+        function setSimulator(mode){guiBuilder.simulator=mode;const c=document.getElementById('gb-canvas');if(c){c.classList.toggle('mobile',mode==='mobile');c.classList.toggle('pc',mode==='pc');}document.getElementById('gb-sim-pc')?.classList.toggle('gb-btn-primary',mode==='pc');document.getElementById('gb-sim-mobile')?.classList.toggle('gb-btn-primary',mode==='mobile');saveGUIBuilder();}
+
+        function colorToRgba(hex,a){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16);return {r:(n>>16)&255,g:(n>>8)&255,b:n&255,a};}
+        function hexFromRgb(r,g,b){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Number(v)||0)).toString(16).padStart(2,'0')).join('');}
+        function rgbaCss(hex,a=255){const c=colorToRgba(hex,a);return `rgba(${c.r},${c.g},${c.b},${(c.a/255).toFixed(3)})`;}
+        function renderCanvas(){const canvas=document.getElementById('gb-canvas');const g=activeGUI();if(!canvas||!g)return;canvas.style.background=rgbaCss(g.bg||'#121212',g.alpha??255);canvas.innerHTML='';const sim=document.createElement('div');sim.className='gb-sim-label';sim.innerText=`${g.name} • ${guiBuilder.simulator==='mobile'?'Mobile Landscape':'PC'}`;canvas.appendChild(sim);(g.elements||[]).forEach(e=>{const el=document.createElement('div');el.className='gb-element '+(gbSelectedId===e.id?'selected':'');el.dataset.id=e.id;el.style.left=e.x+'%';el.style.top=e.y+'%';el.style.width=e.width+'%';el.style.height=e.height+'%';el.innerHTML=elementPreviewHTML(e)+`<div class="gb-resize"></div>`;el.addEventListener('pointerdown',onElementPointerDown);canvas.appendChild(el);});const hint=document.createElement('div');hint.className='gb-canvas-hint';hint.innerText='Drag = pindah • Handle pojok = scale';canvas.appendChild(hint);setSimulator(guiBuilder.simulator);}
+        function elementPreviewHTML(e){
+            const style=`color:${e.textColor||'#fff'};font-size:${Math.max(9,Math.min(26,e.fontSize||15))}px;`;const bg=e.type==='spacer'?'transparent':rgbaCss(e.bgColor||'#1B1D21',255);
+            switch(e.type){
+                case 'label':return `<div style="${style}background:${bg};border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 8px;font-weight:${e.size==='big'?700:500};text-align:${e.align||'left'};height:100%;display:flex;align-items:center;gap:7px"><span>${e.iconId?`<span style="font-size:14px">◈</span>`:''}</span><span>${escapeHTML(e.text||'Label')}</span></div>`;
+                case 'textbox':return `<div style="${style}background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px;height:100%;overflow:hidden;text-align:${e.align||'left'}">${escapeHTML(e.text||'TextBox')}</div>`;
+                case 'text_input':case 'small_text_input':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:4px 7px;display:flex;flex-direction:column;justify-content:center"><span style="${style}font-size:9px;opacity:.65">${escapeHTML(e.label||'Input')}</span><span style="color:#aaa;font-size:10px">${escapeHTML(e.defaultValue||'')}</span></div>`;
+                case 'checkbox':return `<div style="height:100%;display:flex;align-items:center;gap:7px;${style}"><span style="width:14px;height:14px;border:1px solid #8f96a0;border-radius:4px;background:${e.initialState?'#2563eb':'transparent'};display:inline-flex;align-items:center;justify-content:center">${e.initialState?'✓':''}</span><span>${escapeHTML(e.label||'Checkbox')}</span></div>`;
+                case 'button':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.16);border-radius:7px;padding:5px 8px;display:flex;align-items:center;justify-content:${e.align==='center'?'center':e.align==='right'?'flex-end':'flex-start'};gap:6px;font-weight:600;${style}">${e.iconId?'<span style="font-size:12px">◈</span>':''}<span>${escapeHTML(e.text||'Button')}</span></div>`;
+                case 'spacer':return `<div style="height:100%;border-top:1px dashed rgba(255,255,255,.08)"></div>`;
+                case 'search':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:4px 7px;display:flex;align-items:center;gap:6px;${style}"><i class="fas fa-search" style="opacity:.6"></i><span style="opacity:.6">${escapeHTML(e.placeholder||'Cari...')}</span></div>`;
+                case 'item_selector':case 'player_selector':case 'world_selector':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:6px;${style}"><span>▦</span><span>${escapeHTML(e.text||GB_TYPES[e.type].name)}</span></div>`;
+                case 'dropdown':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:4px 7px;display:flex;align-items:center;justify-content:space-between;${style}"><span>${escapeHTML(e.label||'Dropdown')}</span><span>⌄</span></div>`;
+                case 'image':return `<div style="height:100%;border:1px dashed rgba(255,255,255,.18);background:rgba(0,0,0,.22);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${escapeHTML(e.url||'')}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;margin:0;border-radius:0"><span style="position:absolute;color:#777;font-size:10px">IMAGE</span></div>`;
+                case 'player_info':return `<div style="height:100%;background:${bg};border-radius:8px;padding:7px;${style}"><div style="font-weight:700">Player Info</div><div style="font-size:9px;opacity:.65">ID: ${escapeHTML(e.playerId||'123456')} • Level • Name</div></div>`;
+                case 'item_info':return `<div style="height:100%;background:${bg};border-radius:8px;padding:7px;${style}"><div style="font-weight:700">Item Info</div><div style="font-size:9px;opacity:.65">ID: ${escapeHTML(e.itemId||'7188')} • Name • Description</div></div>`;
+                case 'progress':const pv=Math.max(0,Math.min(100,(Number(e.current)||0)/Math.max(1,Number(e.max)||100)*100));return `<div style="height:100%;display:flex;flex-direction:column;justify-content:center;gap:4px"><div style="${style}font-size:10px">${escapeHTML(e.label||'Progress')}</div><div style="height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden"><div style="width:${pv}%;height:100%;background:#3b82f6"></div></div></div>`;
+                case 'end':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.15);border-radius:7px;display:flex;align-items:center;justify-content:center;${style}">${escapeHTML(e.closeButton||'Close')}</div>`;
+                default:return `<div style="${style}">${escapeHTML(e.text||e.type)}</div>`;
+            }
+        }
+        function onElementPointerDown(ev){
+            ev.stopPropagation();
+            const el=ev.currentTarget;
+            const id=el.dataset.id;
+            gbSelectedId=id;
+            document.querySelectorAll('#gb-canvas .gb-element').forEach(x=>x.classList.remove('selected'));
+            el.classList.add('selected');
+            renderInspector();
+            const rect=document.getElementById('gb-canvas').getBoundingClientRect();
+            const e=activeElement();
+            if(!e)return;
+            const startX=ev.clientX,startY=ev.clientY;
+            if(ev.target.classList.contains('gb-resize')){
+                gbResize={id,startX,startY,startW:e.width,startH:e.height,rect,el};
+                el.setPointerCapture(ev.pointerId);
+            }else{
+                gbDrag={id,startX,startY,startLeft:e.x,startTop:e.y,rect,el};
+                el.setPointerCapture(ev.pointerId);
+            }
+            el.addEventListener('pointermove',onElementPointerMove);
+            el.addEventListener('pointerup',onElementPointerUp,{once:true});
+            el.addEventListener('pointercancel',onElementPointerUp,{once:true});
+        }
+        function onElementPointerMove(ev){
+            const e=activeElement();
+            if(!e)return;
+            if(gbResize){
+                const dx=(ev.clientX-gbResize.startX)/gbResize.rect.width*100;
+                const dy=(ev.clientY-gbResize.startY)/gbResize.rect.height*100;
+                e.width=Math.max(4,Math.min(96-e.x,gbResize.startW+dx));
+                e.height=Math.max(4,Math.min(96-e.y,gbResize.startH+dy));
+                gbResize.el.style.width=e.width+'%';
+                gbResize.el.style.height=e.height+'%';
+                return;
+            }
+            if(gbDrag){
+                const dx=(ev.clientX-gbDrag.startX)/gbDrag.rect.width*100;
+                const dy=(ev.clientY-gbDrag.startY)/gbDrag.rect.height*100;
+                e.x=Math.max(0,Math.min(100-e.width,gbDrag.startLeft+dx));
+                e.y=Math.max(0,Math.min(100-e.height,gbDrag.startTop+dy));
+                gbDrag.el.style.left=e.x+'%';
+                gbDrag.el.style.top=e.y+'%';
+            }
+        }
+        function onElementPointerUp(){gbDrag=null;gbResize=null;saveGUIBuilder();renderInspector();}
+
+        function updateGUIForm(){const g=activeGUI();if(!g)return;document.getElementById('gb-command').value=g.command||'';document.getElementById('gb-description').value=g.description||'';document.getElementById('gb-role').value=g.role??0;document.getElementById('gb-bg-color').value=g.bg||'#121212';document.getElementById('gb-bg-alpha').value=g.alpha??255;document.getElementById('gb-trigger-type').value=g.trigger?.type||'command';document.getElementById('gb-trigger-command').value=g.trigger?.command||g.command||'';updateSourceGUISelect();document.getElementById('gb-source-gui').value=String(g.trigger?.sourceGui??Math.max(0,guiBuilder.activeIndex-1));document.getElementById('gb-source-button').value=g.trigger?.sourceButton||'';updateTriggerUI();}
+        function updateSourceGUISelect(){const s=document.getElementById('gb-source-gui');if(!s)return;s.innerHTML=guiBuilder.guis.map((g,i)=>`<option value="${i}">${escapeHTML(g.name||`GUI ${i+1}`)}</option>`).join('');}
+        function updateTriggerUI(){const type=document.getElementById('gb-trigger-type').value;document.getElementById('gb-command-trigger-box').classList.toggle('hidden',type!=='command');document.getElementById('gb-button-trigger-box').classList.toggle('hidden',type!=='button');saveActiveGUIFromForm();}
+        function saveActiveGUIFromForm(){const g=activeGUI();if(!g)return;g.command=document.getElementById('gb-command').value.trim();g.description=document.getElementById('gb-description').value.trim();g.role=Math.max(0,parseInt(document.getElementById('gb-role').value||0));g.bg=document.getElementById('gb-bg-color').value;g.alpha=Math.max(0,Math.min(255,parseInt(document.getElementById('gb-bg-alpha').value||255)));const tt=document.getElementById('gb-trigger-type').value;g.trigger={type:tt,command:document.getElementById('gb-trigger-command').value.trim(),sourceGui:parseInt(document.getElementById('gb-source-gui').value||0),sourceButton:document.getElementById('gb-source-button').value.trim()};if(tt==='command'&&g.command!==''&&guiBuilder.activeIndex===0&&!g.trigger.command)g.trigger.command=g.command;saveGUIBuilder();renderGUIList();renderCanvas();}
+        ['gb-command','gb-description','gb-role','gb-bg-color','gb-bg-alpha','gb-trigger-command','gb-source-button'].forEach(id=>document.getElementById(id).addEventListener('input',saveActiveGUIFromForm));
+        document.getElementById('gb-source-gui').addEventListener('change',saveActiveGUIFromForm);
+
+        function renderInspector(){const box=document.getElementById('gb-inspector-content');const e=activeElement();if(!box)return;if(!e){box.className='gb-empty';box.innerText='Pilih elemen di canvas untuk mengatur properti, warna, ukuran, dan teks.';return;}box.className='space-y-2';box.innerHTML=`<div class="text-white font-bold text-xs mb-2">${escapeHTML(GB_TYPES[e.type]?.name||e.type)}</div><div><div class="gb-label !normal-case !tracking-normal">ID / Key</div><input id="prop-id" class="gb-input" value="${escapeHTML(e.id||'')}" data-prop="id"></div>`+elementPropertyFields(e)+`<div class="gb-divider"></div><div class="gb-label">Layout</div><div class="gb-prop-grid"><div><div class="gb-label !normal-case !tracking-normal">X %</div><input id="prop-x" class="gb-input" type="number" min="0" max="100" value="${e.x}" data-prop="x"></div><div><div class="gb-label !normal-case !tracking-normal">Y %</div><input id="prop-y" class="gb-input" type="number" min="0" max="100" value="${e.y}" data-prop="y"></div><div><div class="gb-label !normal-case !tracking-normal">Width %</div><input id="prop-width" class="gb-input" type="number" min="4" max="100" value="${e.width}" data-prop="width"></div><div><div class="gb-label !normal-case !tracking-normal">Height %</div><input id="prop-height" class="gb-input" type="number" min="4" max="100" value="${e.height}" data-prop="height"></div></div>`;box.querySelectorAll('[data-prop]').forEach(inp=>inp.addEventListener('input',()=>{applyInspectorValue(inp.dataset.prop,inp.value); }));box.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>applyInspectorValue(btn.dataset.action,btn.value||btn.innerText)));}
+        function field(label,html){return `<div><div class="gb-label !normal-case !tracking-normal">${label}</div>${html}</div>`;}
+        function colorField(label,prop,val){return field(label,`<div class="gb-color-row"><input type="color" class="gb-color" data-prop="${prop}" value="${escapeHTML(val||'#ffffff')}"><input class="gb-input" data-prop="${prop}" value="${escapeHTML(val||'#ffffff')}"></div>`);}
+        function elementPropertyFields(e){let s='';if(['label','textbox','button'].includes(e.type))s+=field('Text',`<textarea class="gb-textarea" data-prop="text">${escapeHTML(e.text||'')}</textarea>`);if(['text_input','small_text_input'].includes(e.type))s+=field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'')}">`)+field('Default Value',`<input class="gb-input" data-prop="defaultValue" value="${escapeHTML(e.defaultValue||'')}">`)+field('Max Length',`<input class="gb-input" type="number" data-prop="maxLength" value="${Number(e.maxLength)||20}">`);if(e.type==='checkbox')s+=field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'')}">`)+field('Initial State',`<select class="gb-select" data-prop="initialState"><option value="0" ${!e.initialState?'selected':''}>0 • Unchecked</option><option value="1" ${e.initialState?'selected':''}>1 • Checked</option></select>`);if(e.type==='label')s+=field('Size',`<select class="gb-select" data-prop="size"><option ${e.size==='big'?'selected':''}>big</option><option ${e.size==='small'?'selected':''}>small</option></select>`)+field('Icon ID',`<input class="gb-input" data-prop="iconId" value="${escapeHTML(e.iconId||'')}">`);if(e.type==='button')s+=field('Frame',`<input class="gb-input" data-prop="frame" value="${escapeHTML(e.frame||'staticBlueFrame')}">`)+field('Icon ID',`<input class="gb-input" data-prop="iconId" value="${escapeHTML(e.iconId||'')}">`);if(['label','textbox','button'].includes(e.type))s+=field('Alignment',`<select class="gb-select" data-prop="align"><option value="left" ${e.align==='left'?'selected':''}>left</option><option value="center" ${e.align==='center'?'selected':''}>center</option><option value="right" ${e.align==='right'?'selected':''}>right</option></select>`)+field('Font Size',`<input class="gb-input" type="number" min="9" max="30" data-prop="fontSize" value="${e.fontSize||15}">`);if(e.type==='spacer')s+=field('Size',`<select class="gb-select" data-prop="size"><option ${e.size==='small'?'selected':''}>small</option><option ${e.size==='medium'?'selected':''}>medium</option><option ${e.size==='large'?'selected':''}>large</option></select>`);if(e.type==='search')s+=field('Placeholder',`<input class="gb-input" data-prop="placeholder" value="${escapeHTML(e.placeholder||'Cari...')}">`);if(['item_selector','player_selector','world_selector'].includes(e.type))s+=field('Label Preview',`<input class="gb-input" data-prop="text" value="${escapeHTML(e.text||GB_TYPES[e.type].name)}">`);if(e.type==='dropdown')s+=field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'Pilih:')}">`)+field('Options (comma)',`<input class="gb-input" data-prop="options" value="${escapeHTML(e.options||'A,B,C')}">`)+field('Default Index',`<input class="gb-input" type="number" data-prop="defaultIndex" value="${Number(e.defaultIndex)||0}">`);if(e.type==='image')s+=field('Image URL',`<input class="gb-input" data-prop="url" value="${escapeHTML(e.url||'')}">`)+field('Image Width',`<input class="gb-input" type="number" data-prop="imgW" value="${Number(e.imgW)||240}">`)+field('Image Height',`<input class="gb-input" type="number" data-prop="imgH" value="${Number(e.imgH)||100}">`);if(e.type==='player_info')s+=field('Player ID',`<input class="gb-input" data-prop="playerId" value="${escapeHTML(e.playerId||'123456')}">`);if(e.type==='item_info')s+=field('Item ID',`<input class="gb-input" data-prop="itemId" value="${escapeHTML(e.itemId||'7188')}">`);if(e.type==='progress')s+=field('Current',`<input class="gb-input" type="number" data-prop="current" value="${Number(e.current)||0}">`)+field('Max',`<input class="gb-input" type="number" data-prop="max" value="${Number(e.max)||100}">`)+field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'Progress:')}">`);if(e.type==='end')s+=field('Dialog Name',`<input class="gb-input" data-prop="dialogName" value="${escapeHTML(e.dialogName||'my_dialog')}">`)+field('Close Button',`<input class="gb-input" data-prop="closeButton" value="${escapeHTML(e.closeButton||'Close')}">`);s+=colorField('Text Color','textColor',e.textColor||'#ffffff');s+=colorField('Background','bgColor',e.bgColor||'#1b1d21');return s;}
+        function applyInspectorValue(prop,val){
+            const e=activeElement();
+            if(!e)return;
+            let v=val;
+            if(['x','y','width','height','fontSize','maxLength','defaultIndex','imgW','imgH','playerId','itemId','current','max','initialState'].includes(prop))v=Number(val);
+            if(prop==='id'){
+                const oldId=e.id;
+                guiBuilder.guis.forEach(g=>{
+                    if(g.trigger?.type==='button' && Number(g.trigger.sourceGui)===guiBuilder.activeIndex && g.trigger.sourceButton===oldId) g.trigger.sourceButton=String(val);
+                });
+                gbSelectedId=String(val);
+            }
+            e[prop]=v;
+            saveGUIBuilder();
+            renderCanvas();
+            renderInspector();
+            renderGUIList();
+        }
+
+        function luaEscape(s){return String(s??'').replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r/g,'').replace(/\n/g,'\\n');}
+        function safeLuaNumber(v, fallback=0){const n=Number(v);return Number.isFinite(n)?n:fallback;}
+        function guiDialogName(index){return `custom_gui_${index+1}`;}
+        function generateGUIElementLua(e){
+            switch(e.type){
+                case 'label':return `add_label_with_icon|${e.size||'big'}|${luaEscape(e.text||'Label')}|${e.align||'left'}|${luaEscape(e.iconId||'')}|`;
+                case 'textbox':return `add_textbox|${luaEscape(e.text||'')}|${e.align||'left'}|`;
+                case 'text_input':return `add_text_input|${luaEscape(e.id||'input')}|${luaEscape(e.label||'Label:')}|${luaEscape(e.defaultValue||'')}|${safeLuaNumber(e.maxLength,20)}|`;
+                case 'small_text_input':return `add_small_text_input|${luaEscape(e.id||'input')}|${luaEscape(e.label||'Label:')}|${luaEscape(e.defaultValue||'')}|${safeLuaNumber(e.maxLength,3)}|`;
+                case 'checkbox':return `add_checkbox|${luaEscape(e.id||'checkbox')}|${luaEscape(e.label||'Checkbox')}|${e.initialState?1:0}|`;
+                case 'button':return `add_button_with_icon|${luaEscape(e.id||'btn')}|${luaEscape(e.text||'Button')}|${luaEscape(e.frame||'staticBlueFrame')}|${luaEscape(e.iconId||'')}||${e.align||'left'}|`;
+                case 'spacer':return `add_spacer|${e.size||'small'}|`;
+                case 'search':return `add_search_bar|${luaEscape(e.id||'search')}|${luaEscape(e.placeholder||'Cari...')}|`;
+                case 'item_selector':return `add_item_selector|${luaEscape(e.id||'item_selector')}|`;
+                case 'player_selector':return `add_player_selector|${luaEscape(e.id||'player_selector')}|`;
+                case 'world_selector':return `add_world_selector|${luaEscape(e.id||'world_selector')}|`;
+                case 'dropdown':return `add_dropdown|${luaEscape(e.id||'dropdown')}|${luaEscape(e.label||'Pilih:')}|${luaEscape(e.options||'A,B,C')}|${safeLuaNumber(e.defaultIndex,0)}|`;
+                case 'image':return `add_image|${luaEscape(e.url||'')}|${safeLuaNumber(e.imgW,240)}|${safeLuaNumber(e.imgH,100)}|`;
+                case 'player_info':return `add_player_info|${luaEscape(e.playerId||'123456')}|`;
+                case 'item_info':return `add_item_info|${luaEscape(e.itemId||'7188')}|`;
+                case 'progress':return `add_progress_bar|${luaEscape(e.id||'progress')}|${safeLuaNumber(e.current,0)}|${safeLuaNumber(e.max,100)}|${luaEscape(e.label||'Progress:')}|`;
+                case 'end':return `end_dialog|${luaEscape(e.dialogName||'my_dialog')}|${luaEscape(e.closeButton||'Close')}|`;
+                default:return `-- Unknown element: ${luaEscape(e.type)}`;
+            }
+        }
+        function effectiveButtonIds(guiIndex){const g=guiBuilder.guis[guiIndex];return (g?.elements||[]).filter(e=>e.type==='button').map(e=>({id:e.id,text:e.text}));}
+        function resolveSourceButtonId(sourceGuiIndex,name){const list=effectiveButtonIds(sourceGuiIndex);const found=list.find(b=>b.id===name)||list.find(b=>b.text===name);return found?.id||name;}
+        function generateLuaScript(){
+            const lines=[];lines.push('-- Generated by GTPS Script AI Studio - Custom Dialog Builder');lines.push('-- Visual layout positions are used for editor preview; GTPS Dialog uses vertical element order.');lines.push('');
+            guiBuilder.guis.forEach((g,i)=>{const dialogName=guiDialogName(i);const role=safeLuaNumber(g.role,0);const trigger=g.trigger?.type||'command';const command=(trigger==='command'?(g.trigger?.command||g.command):'').trim();if(command){lines.push(`registerLuaCommand({ command = "${luaEscape(command.replace(/^\//,''))}", roleRequired = ${role}, description = "${luaEscape(g.description||'Custom Dialog')}" })`);}lines.push(`local function showGUI${i+1}(player)`);lines.push('    local dialog = "set_bg_color|'+(()=>{const c=colorToRgba(g.bg||'#121212',g.alpha??255);return `${c.r},${c.g},${c.b},${c.a}`;})()+'|\\n"');const elems=[...(g.elements||[])].sort((a,b)=>a.y-b.y||a.x-b.x);elems.forEach(e=>{const cmd=generateGUIElementLua(e).replace(/\\/g,'\\\\').replace(/"/g,'\\"');lines.push(`    dialog = dialog .. "${cmd}\\n"`);});lines.push(`    player:onDialogRequest(dialog)`);lines.push('end');lines.push('');});
+            lines.push('onPlayerCommandCallback(function(world, player, fullCommand)');lines.push('    local command = fullCommand:match("^(%S+)")');guiBuilder.guis.forEach((g,i)=>{const trigger=g.trigger?.type||'command';if(trigger==='command'){const c=(g.trigger?.command||g.command||'').trim().replace(/^\//,'');if(c){lines.push(`    if command == "${luaEscape(c)}" then`);if(safeLuaNumber(g.role,0)>0)lines.push(`        if not player:hasRole(${safeLuaNumber(g.role,0)}) then return true end`);lines.push(`        showGUI${i+1}(player)`);lines.push('        return true');lines.push('    end');}}});lines.push('    return false');lines.push('end)');lines.push('');
+            lines.push('onPlayerDialogCallback(function(world, player, data)');lines.push('    local dialogName = data["dialog_name"] or ""');lines.push('    local btn = data["buttonClicked"] or ""');guiBuilder.guis.forEach((g,i)=>{if((g.trigger?.type||'command')==='button' && i>0){const source=Math.max(0,Math.min(guiBuilder.guis.length-1,Number(g.trigger.sourceGui)||0));const buttonId=resolveSourceButtonId(source,g.trigger.sourceButton||'');lines.push(`    if dialogName == "${guiDialogName(source)}" and btn == "${luaEscape(buttonId)}" then`);if(safeLuaNumber(g.role,0)>0)lines.push(`        if not player:hasRole(${safeLuaNumber(g.role,0)}) then return true end`);lines.push(`        showGUI${i+1}(player)`);lines.push('        return true');lines.push('    end');}});lines.push('    return false');lines.push('end)');
+            return lines.join('\n');
+        }
+        function buildBuilderPrompt(){
+            const lua=generateLuaScript();
+            const fence=String.fromCharCode(96).repeat(3);
+            const design=guiBuilder.guis.map((g,i)=>{
+                const elems=[...(g.elements||[])].sort((a,b)=>a.y-b.y||a.x-b.x);
+                const triggerText=g.trigger?.type==='button'
+                    ? `If Button Clicked on GUI ${Number(g.trigger.sourceGui)+1}: ${g.trigger.sourceButton||'(set button)'}`
+                    : `Command: ${g.trigger?.command||g.command||'(none)'}`;
+                const lines=[
+                    `GUI ${i+1}:`,
+                    `- Name: ${g.name}`,
+                    `- Command: ${g.command||'(none)'}`,
+                    `- Description: ${g.description||''}`,
+                    `- Role ID: ${g.role??0}`,
+                    `- Background: ${g.bg} alpha ${g.alpha}`,
+                    `- Trigger: ${triggerText}`,
+                    '- Elements:',
+                    elems.map(e=>`  • ${GB_TYPES[e.type]?.name||e.type} | id=${e.id||''} | x=${e.x}% y=${e.y}% w=${e.width}% h=${e.height}%`).join('\\n')
+                ];
+                return lines.join('\\n');
+            }).join('\\n\\n');
+            return [
+                'Buatkan script Lua GTPS Cloud (GTPS10) berdasarkan desain Custom Dialog GUI berikut.',
+                '',
+                'ATURAN:',
+                '1. Hanya gunakan API GTPS Cloud yang diizinkan oleh dokumentasi yang diberikan user.',
+                '2. Buat fungsi showGUI1, showGUI2, dst untuk setiap GUI.',
+                '3. GUI 1 dan GUI lain yang memakai Command harus memakai registerLuaCommand.',
+                '4. GUI yang memakai "If Button Clicked" harus dibuka dari onPlayerDialogCallback dengan dialog_name dan buttonClicked. Cocokkan Button ID, bukan hanya teks tampilannya.',
+                '5. Pertahankan urutan elemen secara visual: sort berdasarkan posisi Y lalu X, karena Dialog GTPS menggunakan alur vertikal.',
+                '6. Gunakan set_bg_color dengan nilai RGBA dari desain.',
+                '7. Sertakan registerLuaCommand description dan roleRequired bila Command digunakan.',
+                '8. Beri judul script, lalu satu blok kode lua.',
+                '9. Jangan gunakan fungsi yang tidak ada di dokumentasi.',
+                '',
+                'DESAIN VISUAL:',
+                design,
+                '',
+                'DRAFT LUA DARI BUILDER (boleh kamu rapikan/perbaiki sesuai API resmi):',
+                `${fence}lua`,
+                lua,
+                fence
+            ].join('\\n');
+        }
+        function openBuilderPromptModal(){const prompt=buildBuilderPrompt();document.getElementById('builder-prompt-output').value=prompt;document.getElementById('builder-lua-preview').textContent=generateLuaScript();document.getElementById('builder-prompt-modal').classList.remove('hidden');document.getElementById('builder-prompt-modal').classList.add('flex');}
+        function closeBuilderPromptModal(){document.getElementById('builder-prompt-modal').classList.add('hidden');document.getElementById('builder-prompt-modal').classList.remove('flex');}
+        async function copyBuilderPrompt(){const t=document.getElementById('builder-prompt-output').value;try{await navigator.clipboard.writeText(t);showCopyToast({clientX:window.innerWidth/2,clientY:window.innerHeight/2});}catch(e){document.getElementById('builder-prompt-output').select();document.execCommand('copy');}}
+        function generateAndSendBuilderPrompt(){
+            const prompt=buildBuilderPrompt();
+            closeBuilderPromptModal();
+            closeGUIBuilder();
+            const input=document.getElementById('user-input');
+            input.value='';
+            input.style.height='auto';
+            appendMessage('user',prompt,[]);
+            processAI();
+        }
+
+        /* UX / anti-contextmenu */
+        document.addEventListener('contextmenu',function(e){if(e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'&&e.target.tagName!=='SELECT')e.preventDefault();});
+        document.addEventListener('keydown',function(e){if(e.keyCode===123||(e.ctrlKey&&e.shiftKey&&(e.keyCode===73||e.keyCode===74))||(e.ctrlKey&&e.keyCode===85)){e.preventDefault();}});
+        let holdTimer;const HOLD_DURATION=600;document.addEventListener('touchstart',handleHoldStart,{passive:true});document.addEventListener('touchend',handleHoldEnd);document.addEventListener('touchmove',handleHoldEnd);document.addEventListener('mousedown',handleHoldStart);document.addEventListener('mouseup',handleHoldEnd);document.addEventListener('mousemove',handleHoldEnd);
+        function handleHoldStart(e){const bubble=e.target.closest('.chat-bubble-content');if(!bubble||e.target.closest('button')||e.target.closest('details')||e.target.tagName==='CODE')return;holdTimer=setTimeout(()=>{const textToCopy=bubble.innerText;if(textToCopy.trim())navigator.clipboard.writeText(textToCopy).then(()=>showCopyToast(e));},HOLD_DURATION);}
+        function handleHoldEnd(){clearTimeout(holdTimer);}
+        function showCopyToast(e){let x,y;if(e.touches&&e.touches.length>0){x=e.touches[0].clientX;y=e.touches[0].clientY;}else{x=e.clientX||window.innerWidth/2;y=e.clientY||window.innerHeight/2;}const toast=document.createElement('div');toast.innerHTML='<i class="fas fa-check-circle"></i> Teks Disalin!';toast.className='fixed bg-[#4CAF50] text-white px-4 py-2 rounded-full text-xs font-bold shadow-2xl z-[9999] animate-pop-in flex items-center gap-2 pointer-events-none';toast.style.left=`${x}px`;toast.style.top=`${y-60}px`;toast.style.transform='translate(-50%, -50%)';document.body.appendChild(toast);setTimeout(()=>{toast.style.opacity='0';toast.style.transition='opacity 0.4s ease-out';setTimeout(()=>toast.remove(),400);},1200);}
+
+        // Keyboard shortcut: Ctrl/Cmd + Shift + G -> Custom Dialog Builder
+        document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='g'){e.preventDefault();openGUIBuilder();}});
+    </script>
+</body>
+</html>
