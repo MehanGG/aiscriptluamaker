@@ -106,7 +106,43 @@
             .gb-topbar .gb-btn { padding:7px 8px; font-size:10px; }
             .gb-canvas-wrap { padding:10px; }
         }
-    </style>
+    
+        /* ===== Full landscape builder override ===== */
+        .gb-fullscreen-modal{background:rgba(0,0,0,.96);backdrop-filter:blur(12px)}
+        .gb-app{width:100vw;height:100vh;background:#08090b;color:#eef0f3;display:flex;flex-direction:column;overflow:hidden}
+        .gb-appbar{height:62px;flex:0 0 62px;background:#0d0f12;border-bottom:1px solid #202329;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;gap:10px}
+        .gb-app-actions{display:flex;gap:8px;align-items:center}
+        .gb-icon-btn{width:38px;height:38px;border:1px solid #292d34;background:#14171b;color:#d6d9de;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;transition:.15s}
+        .gb-icon-btn:hover{background:#1d2127;border-color:#3a404a;color:#fff}
+        .gb-gui-tabs-wrap{height:56px;flex:0 0 56px;background:#0b0d10;border-bottom:1px solid #1f2228;display:flex;align-items:center;gap:8px;padding:7px 10px;overflow:hidden}
+        .gb-gui-tabs{display:flex;gap:7px;overflow-x:auto;min-width:0;flex:1;height:100%;align-items:center}
+        .gb-gui-tab{height:40px;min-width:112px;padding:6px 9px;border:1px solid #282c32;background:#111419;border-radius:11px;color:#bfc4cb;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:center;position:relative;flex:0 0 auto}
+        .gb-gui-tab:hover{border-color:#37404c;color:#fff}.gb-gui-tab.active{border-color:#3b82f6;background:rgba(37,99,235,.12);color:#fff;box-shadow:inset 0 -2px 0 #3b82f6}
+        .gb-gui-tab .name{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gb-gui-tab .sub{font-size:8px;color:#727985;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+        .gb-add-gui{height:40px;padding:0 11px;border:1px dashed #354050;background:#0e1218;color:#b9c8de;border-radius:11px;display:flex;align-items:center;gap:7px;flex:0 0 auto;font-size:10px;font-weight:800}.gb-add-gui:hover{border-color:#60a5fa;color:#fff;background:#111a25}
+        .gb-add-circle{width:24px;height:24px;border-radius:7px;background:#1d4ed8;color:#fff;display:inline-flex;align-items:center;justify-content:center}
+        .gb-project-meta{flex:0 0 auto;background:#0f1115;border-bottom:1px solid #202329;padding:8px 10px;display:grid;grid-template-columns:1.1fr 1.5fr .5fr 2.4fr auto;gap:8px;align-items:end}
+        .gb-meta-field label,.gb-trigger-row label{display:block;color:#8e949d;font-size:8px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;margin:0 0 4px 2px}.gb-meta-field label span{color:#636a74;text-transform:none;letter-spacing:0;font-weight:600}
+        .gb-feature-input{height:42px;min-height:42px;resize:none;line-height:1.3}.gb-meta-actions{display:flex;gap:6px;align-items:center}
+        .gb-trigger-row{grid-column:1/-1;display:grid;grid-template-columns:130px 220px 1fr auto;gap:8px;align-items:end;padding-top:2px}.gb-button-trigger{display:grid;grid-template-columns:150px 180px 1fr;gap:8px}.gb-trigger-hint{font-size:9px;color:#676e78;align-self:center;padding-bottom:8px}.gb-manual-button{min-width:0}
+        .gb-editor-main{flex:1;min-height:0;display:flex;position:relative}.gb-canvas-zone{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 25%,#171b21 0%,#0b0d10 58%,#08090b 100%)}
+        .gb-canvas-topbar{height:34px;flex:0 0 34px;padding:5px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #20242a;background:rgba(10,12,15,.75)}
+        .gb-live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.6)}.gb-canvas-size{font-size:8px;color:#66707d;border:1px solid #222730;border-radius:99px;padding:3px 6px;margin-left:2px}
+        .gb-canvas-area{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:14px 18px 8px}
+        .gb-device-frame{width:min(1180px,100%);aspect-ratio:16/9;position:relative;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 24px 50px rgba(0,0,0,.5))}
+        .gb-device-frame:before{content:"";position:absolute;inset:-1px;border:7px solid #08090b;border-radius:21px;box-shadow:inset 0 0 0 1px #2a2e35;pointer-events:none;z-index:5}.gb-device-frame:after{content:"";position:absolute;inset:7px;border:1px solid rgba(255,255,255,.06);border-radius:14px;pointer-events:none;z-index:4}
+        .gb-canvas{position:absolute!important;inset:7px;width:auto!important;height:auto!important;max-width:none!important;border-radius:14px!important;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);touch-action:none;background:#121212}
+        .gb-canvas.pc{aspect-ratio:16/9}.gb-canvas.mobile{aspect-ratio:16/9;width:auto}
+        .gb-canvas-empty{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:9px;color:#707782;background:rgba(6,8,10,.72);border:1px solid #242932;padding:5px 9px;border-radius:99px;pointer-events:none}.gb-canvas-empty b{color:#9dbfff}
+        .gb-element-dock{flex:0 0 106px;background:rgba(10,12,15,.96);border-top:1px solid #20242a;padding:7px 8px 8px;display:flex;flex-direction:column;min-height:0}.gb-dock-title{height:20px;display:flex;align-items:center;gap:6px;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:#9097a1}.gb-dock-scroll{flex:1;min-height:0;display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;align-items:center;padding:2px 1px}
+        .gb-element-card{width:102px;min-width:102px;height:70px;border:1px solid #272b32;background:#12151a;border-radius:10px;padding:5px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;justify-content:space-between}.gb-element-card:hover{transform:translateY(-1px);border-color:#3f7bdc;background:#141a23}.gb-element-card .preview{height:43px;border-radius:7px;background:#090b0e;border:1px solid #21262d;display:flex;align-items:center;justify-content:center;overflow:hidden}.gb-element-card .title{font-size:8px;color:#e0e4e9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gb-element-card .add{font-size:8px;color:#67a6ff;font-weight:800}.gb-element-card .preview *{pointer-events:none}
+        .gb-inspector-panel{width:300px;flex:0 0 300px;background:#0f1115;border-left:1px solid #20242a;display:flex;flex-direction:column;min-height:0}.gb-inspector-head{height:55px;flex:0 0 55px;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #20242a}.gb-inspector-scroll{flex:1;min-height:0;overflow:auto;padding:10px}.gb-inspector-bg{flex:0 0 auto;border-top:1px solid #20242a;padding:9px 10px}.gb-inspector-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#646b75;gap:8px;font-size:10px}.gb-inspector-empty i{font-size:24px;color:#3e4651}.gb-bg-row{display:flex;align-items:center;gap:7px}.gb-bg-row .gb-input{width:72px}.gb-bg-row .gb-color{flex:0 0 40px}
+        .gb-inspector-panel.closed{display:none}.gb-inspector-toggle.active{background:#1e3a66;border-color:#3b82f6;color:#fff}
+        .gb-property-block{margin-bottom:9px}.gb-property-block label{display:block;color:#8e949d;font-size:8px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin:0 0 4px 2px}.gb-prop-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.gb-color-row{display:flex;align-items:center;gap:6px}.gb-color-row .gb-input{flex:1}.gb-prop-note{font-size:8px;color:#606873;margin-top:4px;line-height:1.4}
+        .gb-quick-action{display:flex;gap:6px}.gb-quick-action .gb-btn{flex:1}.gb-btn{white-space:nowrap}.gb-sim-btn.gb-btn-primary{background:#1d4ed8;border-color:#2563eb;color:#fff}
+        @media(max-width:1050px){.gb-project-meta{grid-template-columns:1fr 1.3fr .6fr auto}.feature-field{grid-column:1/-2}.gb-trigger-row{grid-template-columns:120px 180px 1fr}.gb-trigger-hint{display:none}.gb-inspector-panel{width:280px;flex-basis:280px}.gb-button-trigger{grid-template-columns:130px 150px 1fr}}
+        @media(max-width:760px){.gb-appbar{height:56px;flex-basis:56px}.gb-app-actions .gb-btn span{display:none}.gb-gui-tabs-wrap{height:52px;flex-basis:52px}.gb-add-gui{width:40px;padding:0;justify-content:center}.gb-add-gui span:last-child{display:none}.gb-project-meta{grid-template-columns:1fr 1fr;padding:7px}.command-field{grid-column:1}.role-field{grid-column:2}.gb-meta-field:nth-child(2){grid-column:1/-1}.feature-field{grid-column:1/-1}.gb-meta-actions{grid-column:1/-1}.gb-meta-actions .gb-btn:nth-child(2),.gb-meta-actions .gb-btn:nth-child(3){width:38px;padding:0}.gb-meta-actions .gb-btn:nth-child(1){flex:1}.gb-trigger-row{grid-template-columns:1fr 1fr;gap:6px}.gb-trigger-main{grid-column:1}.gb-trigger-row>#gb-command-trigger-box{grid-column:2}.gb-button-trigger{grid-column:1/-1;grid-template-columns:1fr 1fr}.gb-manual-button{grid-column:1/-1}.gb-inspector-panel{position:absolute;z-index:50;right:0;top:0;bottom:0;width:min(92vw,310px);box-shadow:-18px 0 40px rgba(0,0,0,.5)}.gb-canvas-area{padding:10px 7px 5px}.gb-element-dock{flex-basis:92px}.gb-element-card{width:90px;min-width:90px;height:61px}.gb-element-card .preview{height:36px}.gb-canvas-empty{bottom:6px}}
+</style>
 </head>
 <body class="text-gray-200 h-screen flex flex-col font-sans overflow-hidden">
 
@@ -177,88 +213,86 @@
         </div>
     </div>
 
-    <!-- ================= GUI BUILDER MODAL ================= -->
-    <div id="gui-builder-modal" class="fixed inset-0 hidden items-center justify-center z-[90]">
-        <div class="gb-shell">
-            <div class="gb-topbar">
-                <div class="flex items-center gap-3 min-w-0">
-                    <button onclick="closeGUIBuilder()" class="gb-btn w-10 h-10 p-0"><i class="fas fa-arrow-left"></i></button>
+    <!-- ================= FULL LANDSCAPE GUI BUILDER ================= -->
+    <div id="gui-builder-modal" class="fixed inset-0 hidden items-center justify-center z-[90] gb-fullscreen-modal">
+        <div class="gb-app">
+            <header class="gb-appbar">
+                <div class="flex items-center gap-2 min-w-0">
+                    <button onclick="closeGUIBuilder()" class="gb-icon-btn" title="Kembali"><i class="fas fa-arrow-left"></i></button>
                     <div class="min-w-0">
-                        <div class="text-white font-bold text-sm truncate">Make Custom Dialog</div>
-                        <div class="text-[10px] text-gray-500 truncate">Visual GTPS Cloud Dialog GUI Builder</div>
+                        <div class="text-white font-bold text-sm">Make Custom Dialog</div>
+                        <div class="text-[10px] text-gray-500 truncate">GTPS Cloud • Full Landscape GUI Editor</div>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 flex-wrap justify-end">
-                    <button onclick="openBuilderPromptModal()" class="gb-btn"><i class="fas fa-wand-magic-sparkles text-purple-400"></i> Generate Prompt</button>
-                    <button onclick="generateAndSendBuilderPrompt()" class="gb-btn gb-btn-primary"><i class="fas fa-code"></i> Generate Script</button>
+                <div class="gb-app-actions">
+                    <button onclick="openBuilderPromptModal()" class="gb-btn"><i class="fas fa-wand-magic-sparkles text-purple-400"></i><span>Generate Prompt</span></button>
+                    <button onclick="generateAndSendBuilderPrompt()" class="gb-btn gb-btn-primary"><i class="fas fa-code"></i><span>Generate Script</span></button>
+                </div>
+            </header>
+
+            <div class="gb-gui-tabs-wrap">
+                <div class="gb-gui-tabs" id="gb-gui-list"></div>
+                <button onclick="addGUIBackground()" class="gb-add-gui"><span class="gb-add-circle"><i class="fas fa-plus"></i></span><span>Add GUI Background</span></button>
+            </div>
+
+            <div class="gb-project-meta">
+                <div class="gb-meta-field command-field"><label>Command</label><input id="gb-command" class="gb-input allow-select" placeholder="/gui"></div>
+                <div class="gb-meta-field"><label>Description</label><input id="gb-description" class="gb-input allow-select" placeholder="Buka custom dialog"></div>
+                <div class="gb-meta-field role-field"><label>Role ID</label><input id="gb-role" class="gb-input allow-select" type="number" min="0" value="0"></div>
+                <div class="gb-meta-field feature-field"><label>Fitur di GUI <span>• GUI ini nanti ngapain?</span></label><textarea id="gb-feature" class="gb-input gb-feature-input allow-select" placeholder="Contoh: Menu convert DL ke BGL, input jumlah, tombol Convert, tombol Close, dan validasi item."></textarea></div>
+                <div class="gb-meta-actions">
+                    <button onclick="toggleBuilderInspector()" class="gb-btn" id="gb-inspector-toggle"><i class="fas fa-sliders"></i><span>Properti</span></button>
+                    <button onclick="duplicateSelectedElement()" class="gb-btn" title="Duplikat elemen"><i class="fas fa-copy"></i></button>
+                    <button onclick="deleteSelectedElement()" class="gb-btn gb-btn-danger" title="Hapus elemen"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="gb-trigger-row">
+                    <div class="gb-trigger-main"><label>Trigger GUI</label><select id="gb-trigger-type" onchange="updateTriggerUI()" class="gb-input"><option value="command">Command</option><option value="button">If Button Clicked</option></select></div>
+                    <div id="gb-command-trigger-box"><label>Command Trigger</label><input id="gb-trigger-command" class="gb-input allow-select" placeholder="/gui2"></div>
+                    <div id="gb-button-trigger-box" class="hidden gb-button-trigger">
+                        <div><label>GUI sumber</label><select id="gb-source-gui" class="gb-input" onchange="updateSourceButtonSelect();saveActiveGUIFromForm()"></select></div>
+                        <div><label>Button ID</label><select id="gb-source-button-select" class="gb-input" onchange="syncSourceButtonField()"></select></div>
+                        <div class="gb-manual-button"><label>Atau ketik sendiri</label><input id="gb-source-button" class="gb-input allow-select" placeholder="button_id" oninput="saveActiveGUIFromForm()"></div>
+                    </div>
+                    <div class="gb-trigger-hint" id="gb-trigger-hint">GUI pertama biasanya dibuka lewat command.</div>
                 </div>
             </div>
 
-            <div class="gb-layout">
-                <aside class="gb-sidebar gb-scroll">
-                    <div class="gb-section">
-                        <div class="flex items-center justify-between mb-2"><div class="gb-label m-0">GUI Background</div><button onclick="addGUIBackground()" class="gb-btn !p-1.5" title="Tambah GUI Background"><i class="fas fa-plus"></i></button></div>
-                        <div id="gb-gui-list"></div>
-                    </div>
-                    <div class="gb-section">
-                        <div class="gb-add-element-title"><div class="gb-label m-0">Add Element</div><span class="gb-add-element-badge">CLICK TO ADD</span></div>
-                        <div class="gb-chip-grid" id="gb-element-palette"></div>
-                    </div>
-                </aside>
-
-                <section class="gb-workspace">
-                    <div class="gb-toolbar">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="gb-mini">Simulator:</span>
-                            <button id="gb-sim-pc" onclick="setSimulator('pc')" class="gb-btn !px-3 !py-1.5"><i class="fas fa-desktop"></i> PC</button>
-                            <button id="gb-sim-mobile" onclick="setSimulator('mobile')" class="gb-btn !px-3 !py-1.5"><i class="fas fa-mobile-screen-button"></i> Mobile</button>
+            <main class="gb-editor-main">
+                <section class="gb-canvas-zone">
+                    <div class="gb-canvas-topbar">
+                        <div class="flex items-center gap-2">
+                            <span class="gb-live-dot"></span><span id="gb-current-gui-name" class="text-[11px] font-bold text-white">GUI 1</span>
+                            <span class="gb-canvas-size">16:9 Landscape</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="duplicateSelectedElement()" class="gb-btn !px-3 !py-1.5"><i class="fas fa-copy"></i> Duplicate</button>
-                            <button onclick="deleteSelectedElement()" class="gb-btn gb-btn-danger !px-3 !py-1.5"><i class="fas fa-trash"></i> Delete</button>
+                            <button id="gb-sim-pc" onclick="setSimulator('pc')" class="gb-btn gb-sim-btn"><i class="fas fa-desktop"></i> PC</button>
+                            <button id="gb-sim-mobile" onclick="setSimulator('mobile')" class="gb-btn gb-sim-btn"><i class="fas fa-mobile-screen-button"></i> Mobile</button>
+                            <span class="gb-mini">Drag • Resize</span>
                         </div>
                     </div>
 
-                    <div class="gb-meta">
-                        <div class="gb-meta-grid">
-                            <div><div class="gb-field-title">Command</div><input id="gb-command" class="gb-input allow-select" placeholder="/gui"></div>
-                            <div><div class="gb-field-title">Description</div><input id="gb-description" class="gb-input allow-select" placeholder="Buka custom dialog"></div>
-                            <div><div class="gb-field-title">Role ID</div><input id="gb-role" class="gb-input allow-select" type="number" min="0" value="0"></div>
-                            <div class="gb-meta-wide"><div class="gb-field-title">Fitur di GUI • GUI ini nanti ngapain?</div><textarea id="gb-feature" class="gb-textarea gb-feature allow-select" placeholder="Contoh: Menampilkan menu convert DL → BGL, menerima input jumlah, lalu punya tombol Convert dan Close."></textarea></div>
-                        </div>
-
-                        <div class="gb-connection-grid">
-                            <div><div class="gb-field-title">Trigger / Sambungan</div><select id="gb-trigger-type" onchange="updateTriggerUI()" class="gb-select"><option value="command">Command</option><option value="button">If Button Clicked</option></select></div>
-                            <div id="gb-command-trigger-box"><div class="gb-field-title">Command Trigger</div><input id="gb-trigger-command" class="gb-input allow-select" placeholder="/gui2"></div>
-                            <div id="gb-button-trigger-box" class="hidden col-span-2">
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div><div class="gb-field-title">Klik Button pada GUI</div><select id="gb-source-gui" class="gb-select" onchange="updateSourceButtonSelect();saveActiveGUIFromForm()"></select></div>
-                                    <div><div class="gb-field-title">Nama / ID Button</div><select id="gb-source-button-select" class="gb-select" onchange="syncSourceButtonField()"></select></div>
-                                    <div class="col-span-2"><input id="gb-source-button" class="gb-input allow-select" placeholder="Atau ketik Button ID sendiri..." oninput="saveActiveGUIFromForm()"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="gb-mini mt-2">GUI 2, 3, 4, dst. bisa disambungkan dari Command atau Button GUI lain.</div>
-                    </div>
-
-                    <div class="gb-canvas-wrap">
-                        <div class="gb-stage">
+                    <div class="gb-canvas-area">
+                        <div class="gb-device-frame" id="gb-device-frame">
                             <div id="gb-canvas" class="gb-canvas pc"></div>
                         </div>
+                        <div class="gb-canvas-empty" id="gb-canvas-empty">Klik <b>+ Add</b> di toolbar untuk menambahkan elemen.</div>
+                    </div>
+
+                    <div class="gb-element-dock">
+                        <div class="gb-dock-title"><i class="fas fa-layer-group"></i><span>Tambah Elemen</span></div>
+                        <div class="gb-dock-scroll" id="gb-element-palette"></div>
                     </div>
                 </section>
 
-                <aside class="gb-inspector gb-scroll">
-                    <div class="gb-section">
-                        <div class="gb-label">Selected Element</div>
-                        <div id="gb-inspector-content" class="gb-empty">Pilih elemen di canvas untuk mengatur properti, warna, ukuran, dan teks.</div>
-                    </div>
-                    <div class="gb-section">
-                        <div class="gb-label">Background</div>
-                        <div class="flex items-center gap-2"><input id="gb-bg-color" type="color" class="gb-color" value="#121212"><input id="gb-bg-alpha" class="gb-input" type="number" min="0" max="255" value="255" title="Alpha"></div>
+                <aside id="gb-inspector" class="gb-inspector-panel">
+                    <div class="gb-inspector-head"><div><div class="text-xs font-bold text-white">Properti Elemen</div><div class="text-[9px] text-gray-500">Edit teks, ID, warna, posisi, dan ukuran.</div></div><button onclick="toggleBuilderInspector(false)" class="gb-icon-btn"><i class="fas fa-times"></i></button></div>
+                    <div id="gb-inspector-content" class="gb-inspector-scroll"><div class="gb-inspector-empty"><i class="fas fa-arrow-pointer"></i><p>Pilih elemen di GUI untuk mengeditnya.</p></div></div>
+                    <div class="gb-inspector-bg">
+                        <div class="gb-field-title">Background GUI</div>
+                        <div class="gb-bg-row"><input id="gb-bg-color" type="color" class="gb-color" value="#121212"><input id="gb-bg-alpha" class="gb-input" type="number" min="0" max="255" value="255" title="Alpha"><span class="gb-mini">RGBA</span></div>
                     </div>
                 </aside>
-            </div>
+            </main>
         </div>
     </div>
 
@@ -347,254 +381,113 @@
         async function processAI(){const p=localStorage.getItem('_active_provider');if(!p){openSettings();return;}const encKeyVal=localStorage.getItem(`_key_${p}`);if(!encKeyVal){openSettings();return;}let apiKey='';try{apiKey=decKey(encKeyVal);}catch(error){alert('API Key tidak valid. Silakan atur ulang di setelan.');localStorage.removeItem(`_key_${p}`);openSettings();return;}const model=localStorage.getItem(`_model_${p}`);if(!model){openSettings();return;}appendTyping();try{let resText='';let tokens='N/A';const lastUserMsg=chatHistory[chatHistory.length-1];const lastTxt=lastUserMsg?lastUserMsg.content:'';if(p==='gemini'){const history=chatHistory.map(h=>({role:h.role==='assistant'?'model':h.role,parts:h.parts}));const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:SYSTEM_PROMPT}]},contents:history,generationConfig:{temperature:0.4}})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||'Error API Gemini');resText=d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'Tidak ada respons.';tokens=d.usageMetadata?.totalTokenCount||'N/A';}else if(p==='openai'){let messages=[{role:'system',content:SYSTEM_PROMPT}];chatHistory.forEach(h=>{let contentArr=[];h.parts.forEach(pt=>{if(pt.text)contentArr.push({type:'text',text:pt.text});if(pt.inlineData)contentArr.push({type:'image_url',image_url:{url:`data:${pt.inlineData.mimeType};base64,${pt.inlineData.data}`}});});messages.push({role:h.role,content:contentArr.length===1&&contentArr[0].type==='text'?contentArr[0].text:contentArr});});const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},body:JSON.stringify({model,messages,temperature:0.4})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||'Error API OpenAI');resText=d.choices?.[0]?.message?.content||'Tidak ada respons.';tokens=d.usage?.total_tokens||'N/A';}else{let messages=[];chatHistory.forEach(h=>{let contentArr=[];h.parts.forEach(pt=>{if(pt.text)contentArr.push({type:'text',text:pt.text});if(pt.inlineData)contentArr.push({type:'image',source:{type:'base64',media_type:pt.inlineData.mimeType,data:pt.inlineData.data}});});messages.push({role:h.role,content:contentArr.length===1&&contentArr[0].type==='text'?contentArr[0].text:contentArr});});const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,system:SYSTEM_PROMPT,messages,max_tokens:4096,temperature:0.4})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||'Error API Claude');resText=d.content?.map(x=>x.text||'').join('')||'Tidak ada respons.';tokens=(d.usage?.input_tokens+d.usage?.output_tokens)||'N/A';}removeTyping();const timeTaken=((Date.now()-aiStartTime)/1000).toFixed(2);appendMessage('ai',resText,[],{time:timeTaken,tokens,lastPrompt:lastTxt});}catch(err){removeTyping();appendMessage('ai',`**Error Sistem:** ${err.message}`);}}
 
         /* ========================= GUI BUILDER LOGIC ========================= */
-        const GUI_STORAGE_KEY='GTPS_GUI_BUILDER_V1';
+        /* ================= FULL LANDSCAPE GUI BUILDER LOGIC ================= */
+        const GUI_STORAGE_KEY='GTPS_GUI_BUILDER_V2';
         let guiBuilder={simulator:'pc',activeIndex:0,guis:[]};
         let gbSelectedId=null;
         let gbDrag=null;
         let gbResize=null;
+        let gbInspectorOpen=true;
+        let gbSaveTimer=null;
 
         const GB_TYPES={
             label:{name:'Label + Icon',icon:'fa-heading'}, textbox:{name:'TextBox',icon:'fa-align-left'}, text_input:{name:'TextBar',icon:'fa-keyboard'}, small_text_input:{name:'Small TextBar',icon:'fa-i-cursor'}, checkbox:{name:'Checkbox',icon:'fa-square-check'}, button:{name:'Button',icon:'fa-square'}, spacer:{name:'Spacer',icon:'fa-arrows-up-down'}, search:{name:'Search Bar',icon:'fa-magnifying-glass'}, item_selector:{name:'Item Selector',icon:'fa-cubes'}, player_selector:{name:'Player Selector',icon:'fa-users'}, world_selector:{name:'World Selector',icon:'fa-earth-americas'}, dropdown:{name:'Dropdown',icon:'fa-list'}, image:{name:'Image',icon:'fa-image'}, player_info:{name:'Player Info',icon:'fa-user'}, item_info:{name:'Item Info',icon:'fa-cube'}, progress:{name:'Progress Bar',icon:'fa-bars-progress'}, end:{name:'End Dialog',icon:'fa-xmark'}
         };
+        const ID_TYPES=new Set(['button','text_input','small_text_input','checkbox','search','item_selector','player_selector','world_selector','dropdown','progress']);
+        function uid(prefix){return prefix+'_'+Math.random().toString(36).slice(2,8);}
         function newElement(type){
-            const base={id:uid(type),type,x:8,y:8,width:28,height:10,text:GB_TYPES[type]?.name||type,textColor:'#FFFFFF',bgColor:'#1B1D21',fontSize:15,align:'left'};
+            const base={id:ID_TYPES.has(type)?uid(type):'',type,x:6,y:7,width:32,height:10,text:GB_TYPES[type]?.name||type,textColor:'#FFFFFF',bgColor:'#1B1D21',fontSize:15,align:'left'};
             switch(type){
-                case 'label':Object.assign(base,{size:'big',iconId:'7070'});break;
-                case 'textbox':Object.assign(base,{text:'Tulis informasi atau instruksi di sini...'});break;
-                case 'text_input':Object.assign(base,{id:uid('input'),label:'Nama Anda:',defaultValue:'Guest',maxLength:20});break;
-                case 'small_text_input':Object.assign(base,{id:uid('small'),label:'Angka:',defaultValue:'0',maxLength:3});break;
-                case 'checkbox':Object.assign(base,{id:uid('check'),label:'Aktifkan pilihan ini',initialState:0});break;
-                case 'button':Object.assign(base,{id:uid('btn'),text:'Button',frame:'staticBlueFrame',iconId:'6'});break;
-                case 'spacer':Object.assign(base,{size:'small',height:6,opacity:0});break;
-                case 'search':Object.assign(base,{id:uid('search'),placeholder:'Cari...'});break;
-                case 'item_selector':Object.assign(base,{id:uid('item'),text:'Item Selector'});break;
-                case 'player_selector':Object.assign(base,{id:uid('player'),text:'Player Selector'});break;
-                case 'world_selector':Object.assign(base,{id:uid('world'),text:'World Selector'});break;
-                case 'dropdown':Object.assign(base,{id:uid('drop'),label:'Pilih Opsi:',options:'Merah,Hijau,Biru',defaultIndex:0});break;
-                case 'image':Object.assign(base,{url:'https://placehold.co/240x100/png?text=GTPS',imgW:240,imgH:100});break;
-                case 'player_info':Object.assign(base,{playerId:'123456'});break;
-                case 'item_info':Object.assign(base,{itemId:'7188'});break;
-                case 'progress':Object.assign(base,{id:uid('progress'),current:50,max:100,label:'Progress Quest:'});break;
-                case 'end':Object.assign(base,{dialogName:'my_dialog',closeButton:'Close',width:22,height:8});break;
+                case 'label':Object.assign(base,{size:'big',iconId:'7070',width:35,height:9});break;
+                case 'textbox':Object.assign(base,{text:'Tulis informasi atau instruksi di sini...',width:48,height:16});break;
+                case 'text_input':Object.assign(base,{id:uid('input'),label:'Nama Anda:',defaultValue:'Guest',maxLength:20,width:38,height:12});break;
+                case 'small_text_input':Object.assign(base,{id:uid('small'),label:'Angka:',defaultValue:'0',maxLength:3,width:28,height:10});break;
+                case 'checkbox':Object.assign(base,{id:uid('check'),label:'Aktifkan pilihan ini',initialState:0,width:36,height:7});break;
+                case 'button':Object.assign(base,{id:uid('btn'),text:'Button',frame:'staticBlueFrame',iconId:'6',width:31,height:9});break;
+                case 'spacer':Object.assign(base,{size:'small',height:5,width:60,opacity:0});break;
+                case 'search':Object.assign(base,{id:uid('search'),placeholder:'Cari...',width:40,height:10});break;
+                case 'item_selector':Object.assign(base,{id:uid('item'),text:'Item Selector',width:36,height:11});break;
+                case 'player_selector':Object.assign(base,{id:uid('player'),text:'Player Selector',width:36,height:11});break;
+                case 'world_selector':Object.assign(base,{id:uid('world'),text:'World Selector',width:36,height:11});break;
+                case 'dropdown':Object.assign(base,{id:uid('drop'),label:'Pilih Opsi:',options:'Merah,Hijau,Biru',defaultIndex:0,width:38,height:10});break;
+                case 'image':Object.assign(base,{url:'',imgW:240,imgH:100,width:36,height:18});break;
+                case 'player_info':Object.assign(base,{playerId:'123456',width:40,height:13});break;
+                case 'item_info':Object.assign(base,{itemId:'7188',width:40,height:13});break;
+                case 'progress':Object.assign(base,{id:uid('progress'),current:50,max:100,label:'Progress Quest:',width:42,height:11});break;
+                case 'end':Object.assign(base,{dialogName:'',closeButton:'Close',width:24,height:8});break;
             }
             return base;
         }
-        function uid(prefix){return prefix+'_'+Math.random().toString(36).slice(2,8);}
-        function defaultGUI(index){return {name:`GUI ${index}`,command:index===1?'/gui':'',description:'Custom GTPS Dialog',feature:index===1?'Jelaskan fungsi GUI ini dan aksi apa saja yang harus bisa dilakukan pemain.':'',role:0,bg:'#121212',alpha:255,trigger:{type:'command',command:index===1?'/gui':'/gui'+index,sourceGui:Math.max(0,index-1),sourceButton:''},elements:[newElement('label'),newElement('textbox'),newElement('button'),newElement('end')]};}
-        function initGUIBuilder(){loadGUIBuilder();renderPalette();renderGUIList();renderCanvas();updateGUIForm();}
-        function loadGUIBuilder(){try{const saved=JSON.parse(localStorage.getItem(GUI_STORAGE_KEY)||'null');if(saved&&Array.isArray(saved.guis)&&saved.guis.length){guiBuilder=saved;if(typeof guiBuilder.simulator!=='string')guiBuilder.simulator='pc';if(guiBuilder.activeIndex>=guiBuilder.guis.length)guiBuilder.activeIndex=0;return;}}catch(e){}guiBuilder={simulator:'pc',activeIndex:0,guis:[defaultGUI(1)]};saveGUIBuilder();}
-        function saveGUIBuilder(){try{localStorage.setItem(GUI_STORAGE_KEY,JSON.stringify(guiBuilder));}catch(e){}}
-        function activeGUI(){return guiBuilder.guis[guiBuilder.activeIndex];}
-        function activeElement(){const g=activeGUI();return g?.elements.find(e=>e.id===gbSelectedId)||null;}
-        function openGUIBuilder(){document.getElementById('gui-builder-modal').classList.remove('hidden');document.getElementById('gui-builder-modal').classList.add('flex');if(!guiBuilder.guis.length)loadGUIBuilder();renderAllBuilder();}
-        function closeGUIBuilder(){document.getElementById('gui-builder-modal').classList.add('hidden');document.getElementById('gui-builder-modal').classList.remove('flex');saveGUIBuilder();}
-        function addGUIBackground(){const g=defaultGUI(guiBuilder.guis.length+1);if(guiBuilder.guis.length){g.trigger={type:'button',command:'',sourceGui:guiBuilder.activeIndex,sourceButton:''};}guiBuilder.guis.push(g);guiBuilder.activeIndex=guiBuilder.guis.length-1;gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
-        function selectGUI(index){guiBuilder.activeIndex=index;gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
-        function deleteActiveGUI(){if(guiBuilder.guis.length<=1)return alert('GUI 1 tidak dapat dihapus.');if(!confirm(`Hapus ${activeGUI().name}?`))return;guiBuilder.guis.splice(guiBuilder.activeIndex,1);guiBuilder.activeIndex=Math.max(0,guiBuilder.activeIndex-1);gbSelectedId=null;saveGUIBuilder();renderAllBuilder();}
-        function renderAllBuilder(){renderGUIList();renderCanvas();updateGUIForm();renderInspector();setSimulator(guiBuilder.simulator);}
-        function renderGUIList(){const el=document.getElementById('gb-gui-list');if(!el)return;el.innerHTML='';guiBuilder.guis.forEach((g,i)=>{const card=document.createElement('div');card.className='gb-gui-card '+(i===guiBuilder.activeIndex?'active':'');card.onclick=()=>selectGUI(i);const trigger=g.trigger?.type==='button'?`Klik GUI ${Number(g.trigger.sourceGui)+1}: ${escapeHTML(g.trigger.sourceButton||'Button')}`:escapeHTML(g.trigger?.command||g.command||'Manual');card.innerHTML=`<div class="flex items-center justify-between gap-2"><div class="gb-gui-title">${escapeHTML(g.name||`GUI ${i+1}`)}</div><div class="text-[9px] text-gray-500">${g.elements?.length||0}</div></div><div class="gb-gui-sub">${trigger}</div><div class="gb-gui-sub mt-1">${escapeHTML(g.feature||'Fitur GUI belum diisi')}</div>`;el.appendChild(card);});if(guiBuilder.guis.length>1){const del=document.createElement('button');del.className='gb-btn gb-btn-danger w-full mt-2';del.innerHTML='<i class="fas fa-trash"></i> Hapus GUI Aktif';del.onclick=deleteActiveGUI;el.appendChild(del);}}
-        function renderPalette(){const el=document.getElementById('gb-element-palette');if(!el)return;el.innerHTML='';Object.entries(GB_TYPES).forEach(([type,meta])=>{const b=document.createElement('button');b.type='button';b.className='gb-chip';const preview=document.createElement('div');preview.className='gb-chip-preview';const sample=newElement(type);sample.id='preview_'+type;sample.width=86;sample.height=72;sample.x=7;sample.y=7;preview.innerHTML=elementPreviewHTML(sample);b.innerHTML=`<div class="gb-chip-preview"></div><span class="gb-chip-name"></span><span class="gb-chip-add">+ Add ${escapeHTML(meta.name)}</span>`;b.querySelector('.gb-chip-preview').innerHTML=elementPreviewHTML(sample);b.querySelector('.gb-chip-name').textContent=meta.name;b.onclick=()=>addElement(type);el.appendChild(b);});}
-        function addElement(type){const g=activeGUI();if(!g)return;const item=newElement(type);item.x=8+((g.elements.length%5)*6);item.y=8+((g.elements.length%4)*10);if(type==='label')item.y=7;if(type==='textbox')item.width=46;if(type==='button')item.width=30;if(type==='end')item.x=68;g.elements.push(item);gbSelectedId=item.id;saveGUIBuilder();renderCanvas();renderInspector();}
-        function duplicateSelectedElement(){const e=activeElement();if(!e)return;const copy=JSON.parse(JSON.stringify(e));copy.id=uid(e.type);copy.x=Math.min(85,e.x+3);copy.y=Math.min(86,e.y+3);if('id' in copy && ['button','text_input','small_text_input','checkbox','search','item_selector','player_selector','world_selector','dropdown','progress'].includes(copy.type))copy.id=uid(copy.type);activeGUI().elements.push(copy);gbSelectedId=copy.id;saveGUIBuilder();renderCanvas();renderInspector();}
-        function deleteSelectedElement(){const g=activeGUI();if(!g||!gbSelectedId)return;const idx=g.elements.findIndex(e=>e.id===gbSelectedId);if(idx<0)return;g.elements.splice(idx,1);gbSelectedId=null;saveGUIBuilder();renderCanvas();renderInspector();}
-        function setSimulator(mode){guiBuilder.simulator=mode;const c=document.getElementById('gb-canvas');if(c){c.classList.toggle('mobile',mode==='mobile');c.classList.toggle('pc',mode==='pc');}document.getElementById('gb-sim-pc')?.classList.toggle('gb-btn-primary',mode==='pc');document.getElementById('gb-sim-mobile')?.classList.toggle('gb-btn-primary',mode==='mobile');saveGUIBuilder();}
-
-        function colorToRgba(hex,a){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16);return {r:(n>>16)&255,g:(n>>8)&255,b:n&255,a};}
-        function hexFromRgb(r,g,b){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Number(v)||0)).toString(16).padStart(2,'0')).join('');}
-        function rgbaCss(hex,a=255){const c=colorToRgba(hex,a);return `rgba(${c.r},${c.g},${c.b},${(c.a/255).toFixed(3)})`;}
-        function renderCanvas(){const canvas=document.getElementById('gb-canvas');const g=activeGUI();if(!canvas||!g)return;canvas.style.background=rgbaCss(g.bg||'#121212',g.alpha??255);canvas.innerHTML='';const sim=document.createElement('div');sim.className='gb-sim-label';sim.innerText=`${g.name} • ${guiBuilder.simulator==='mobile'?'Mobile Landscape':'PC'}`;canvas.appendChild(sim);(g.elements||[]).forEach(e=>{const el=document.createElement('div');el.className='gb-element '+(gbSelectedId===e.id?'selected':'');el.dataset.id=e.id;el.style.left=e.x+'%';el.style.top=e.y+'%';el.style.width=e.width+'%';el.style.height=e.height+'%';el.innerHTML=elementPreviewHTML(e)+`<div class="gb-resize"></div>`;el.addEventListener('pointerdown',onElementPointerDown);canvas.appendChild(el);});const hint=document.createElement('div');hint.className='gb-canvas-hint';hint.innerText='Drag = pindah • Handle pojok = scale';canvas.appendChild(hint);setSimulator(guiBuilder.simulator);}
-        function elementPreviewHTML(e){
-            const style=`color:${e.textColor||'#fff'};font-size:${Math.max(9,Math.min(26,e.fontSize||15))}px;`;const bg=e.type==='spacer'?'transparent':rgbaCss(e.bgColor||'#1B1D21',255);
-            switch(e.type){
-                case 'label':return `<div style="${style}background:${bg};border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 8px;font-weight:${e.size==='big'?700:500};text-align:${e.align||'left'};height:100%;display:flex;align-items:center;gap:7px"><span>${e.iconId?`<span style="font-size:14px">◈</span>`:''}</span><span>${escapeHTML(e.text||'Label')}</span></div>`;
-                case 'textbox':return `<div style="${style}background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px;height:100%;overflow:hidden;text-align:${e.align||'left'}">${escapeHTML(e.text||'TextBox')}</div>`;
-                case 'text_input':case 'small_text_input':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:4px 7px;display:flex;flex-direction:column;justify-content:center"><span style="${style}font-size:9px;opacity:.65">${escapeHTML(e.label||'Input')}</span><span style="color:#aaa;font-size:10px">${escapeHTML(e.defaultValue||'')}</span></div>`;
-                case 'checkbox':return `<div style="height:100%;display:flex;align-items:center;gap:7px;${style}"><span style="width:14px;height:14px;border:1px solid #8f96a0;border-radius:4px;background:${e.initialState?'#2563eb':'transparent'};display:inline-flex;align-items:center;justify-content:center">${e.initialState?'✓':''}</span><span>${escapeHTML(e.label||'Checkbox')}</span></div>`;
-                case 'button':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.16);border-radius:7px;padding:5px 8px;display:flex;align-items:center;justify-content:${e.align==='center'?'center':e.align==='right'?'flex-end':'flex-start'};gap:6px;font-weight:600;${style}">${e.iconId?'<span style="font-size:12px">◈</span>':''}<span>${escapeHTML(e.text||'Button')}</span></div>`;
-                case 'spacer':return `<div style="height:100%;border-top:1px dashed rgba(255,255,255,.08)"></div>`;
-                case 'search':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:4px 7px;display:flex;align-items:center;gap:6px;${style}"><i class="fas fa-search" style="opacity:.6"></i><span style="opacity:.6">${escapeHTML(e.placeholder||'Cari...')}</span></div>`;
-                case 'item_selector':case 'player_selector':case 'world_selector':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:6px;${style}"><span>▦</span><span>${escapeHTML(e.text||GB_TYPES[e.type].name)}</span></div>`;
-                case 'dropdown':return `<div style="height:100%;border:1px solid rgba(255,255,255,.12);background:${bg};border-radius:7px;padding:4px 7px;display:flex;align-items:center;justify-content:space-between;${style}"><span>${escapeHTML(e.label||'Dropdown')}</span><span>⌄</span></div>`;
-                case 'image':return `<div style="height:100%;border:1px dashed rgba(255,255,255,.18);background:rgba(0,0,0,.22);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${escapeHTML(e.url||'')}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;margin:0;border-radius:0"><span style="position:absolute;color:#777;font-size:10px">IMAGE</span></div>`;
-                case 'player_info':return `<div style="height:100%;background:${bg};border-radius:8px;padding:7px;${style}"><div style="font-weight:700">Player Info</div><div style="font-size:9px;opacity:.65">ID: ${escapeHTML(e.playerId||'123456')} • Level • Name</div></div>`;
-                case 'item_info':return `<div style="height:100%;background:${bg};border-radius:8px;padding:7px;${style}"><div style="font-weight:700">Item Info</div><div style="font-size:9px;opacity:.65">ID: ${escapeHTML(e.itemId||'7188')} • Name • Description</div></div>`;
-                case 'progress':const pv=Math.max(0,Math.min(100,(Number(e.current)||0)/Math.max(1,Number(e.max)||100)*100));return `<div style="height:100%;display:flex;flex-direction:column;justify-content:center;gap:4px"><div style="${style}font-size:10px">${escapeHTML(e.label||'Progress')}</div><div style="height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden"><div style="width:${pv}%;height:100%;background:#3b82f6"></div></div></div>`;
-                case 'end':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.15);border-radius:7px;display:flex;align-items:center;justify-content:center;${style}">${escapeHTML(e.closeButton||'Close')}</div>`;
-                default:return `<div style="${style}">${escapeHTML(e.text||e.type)}</div>`;
-            }
-        }
-        function onElementPointerDown(ev){
-            ev.stopPropagation();
-            const el=ev.currentTarget;
-            const id=el.dataset.id;
-            gbSelectedId=id;
-            document.querySelectorAll('#gb-canvas .gb-element').forEach(x=>x.classList.remove('selected'));
-            el.classList.add('selected');
-            renderInspector();
-            const rect=document.getElementById('gb-canvas').getBoundingClientRect();
-            const e=activeElement();
-            if(!e)return;
-            const startX=ev.clientX,startY=ev.clientY;
-            if(ev.target.classList.contains('gb-resize')){
-                gbResize={id,startX,startY,startW:e.width,startH:e.height,rect,el};
-                el.setPointerCapture(ev.pointerId);
-            }else{
-                gbDrag={id,startX,startY,startLeft:e.x,startTop:e.y,rect,el};
-                el.setPointerCapture(ev.pointerId);
-            }
-            el.addEventListener('pointermove',onElementPointerMove);
-            el.addEventListener('pointerup',onElementPointerUp,{once:true});
-            el.addEventListener('pointercancel',onElementPointerUp,{once:true});
-        }
-        function onElementPointerMove(ev){
-            const e=activeElement();
-            if(!e)return;
-            if(gbResize){
-                const dx=(ev.clientX-gbResize.startX)/gbResize.rect.width*100;
-                const dy=(ev.clientY-gbResize.startY)/gbResize.rect.height*100;
-                e.width=Math.max(4,Math.min(96-e.x,gbResize.startW+dx));
-                e.height=Math.max(4,Math.min(96-e.y,gbResize.startH+dy));
-                gbResize.el.style.width=e.width+'%';
-                gbResize.el.style.height=e.height+'%';
-                return;
-            }
-            if(gbDrag){
-                const dx=(ev.clientX-gbDrag.startX)/gbDrag.rect.width*100;
-                const dy=(ev.clientY-gbDrag.startY)/gbDrag.rect.height*100;
-                e.x=Math.max(0,Math.min(100-e.width,gbDrag.startLeft+dx));
-                e.y=Math.max(0,Math.min(100-e.height,gbDrag.startTop+dy));
-                gbDrag.el.style.left=e.x+'%';
-                gbDrag.el.style.top=e.y+'%';
-            }
-        }
-        function onElementPointerUp(){gbDrag=null;gbResize=null;saveGUIBuilder();renderInspector();}
-
-        function updateGUIForm(){const g=activeGUI();if(!g)return;document.getElementById('gb-command').value=g.command||'';document.getElementById('gb-description').value=g.description||'';document.getElementById('gb-feature').value=g.feature||'';document.getElementById('gb-role').value=g.role??0;document.getElementById('gb-bg-color').value=g.bg||'#121212';document.getElementById('gb-bg-alpha').value=g.alpha??255;document.getElementById('gb-trigger-type').value=g.trigger?.type||'command';document.getElementById('gb-trigger-command').value=g.trigger?.command||g.command||'';updateSourceGUISelect();document.getElementById('gb-source-gui').value=String(g.trigger?.sourceGui??Math.max(0,guiBuilder.activeIndex-1));updateSourceButtonSelect();document.getElementById('gb-source-button').value=g.trigger?.sourceButton||'';syncSourceButtonSelectFromField();updateTriggerUI();}
-        function updateSourceGUISelect(){const s=document.getElementById('gb-source-gui');if(!s)return;s.innerHTML=guiBuilder.guis.map((g,i)=>`<option value="${i}">GUI ${i+1} — ${escapeHTML(g.name||`GUI ${i+1}`)}</option>`).join('');if(guiBuilder.guis.length<=1){s.disabled=true;}else{s.disabled=false;}}
-        function updateSourceButtonSelect(){const select=document.getElementById('gb-source-button-select');const source=Number(document.getElementById('gb-source-gui')?.value||0);if(!select)return;const buttons=effectiveButtonIds(source);select.innerHTML='';if(buttons.length){buttons.forEach(b=>{const o=document.createElement('option');o.value=b.id;o.textContent=`${b.id} — ${b.text||'Button'}`;select.appendChild(o);});select.disabled=false;}else{const o=document.createElement('option');o.value='';o.textContent='(Belum ada Button di GUI ini)';select.appendChild(o);select.disabled=true;}}
-        function syncSourceButtonSelectFromField(){const select=document.getElementById('gb-source-button-select');if(!select)return;const current=String(document.getElementById('gb-source-button')?.value||'');if(current&&Array.from(select.options).some(o=>o.value===current))select.value=current;}
-        function syncSourceButtonField(){const select=document.getElementById('gb-source-button-select');const input=document.getElementById('gb-source-button');if(select&&input&&select.value)input.value=select.value;saveActiveGUIFromForm();}
-        function updateTriggerUI(){const type=document.getElementById('gb-trigger-type').value;document.getElementById('gb-command-trigger-box').classList.toggle('hidden',type!=='command');document.getElementById('gb-button-trigger-box').classList.toggle('hidden',type!=='button');if(type==='button'){updateSourceGUISelect();updateSourceButtonSelect();syncSourceButtonSelectFromField();}saveActiveGUIFromForm();}
-        function saveActiveGUIFromForm(){const g=activeGUI();if(!g)return;g.command=document.getElementById('gb-command').value.trim();g.description=document.getElementById('gb-description').value.trim();g.feature=document.getElementById('gb-feature').value.trim();g.role=Math.max(0,parseInt(document.getElementById('gb-role').value||0));g.bg=document.getElementById('gb-bg-color').value;g.alpha=Math.max(0,Math.min(255,parseInt(document.getElementById('gb-bg-alpha').value||255)));const tt=document.getElementById('gb-trigger-type').value;g.trigger={type:tt,command:document.getElementById('gb-trigger-command').value.trim(),sourceGui:parseInt(document.getElementById('gb-source-gui').value||0),sourceButton:document.getElementById('gb-source-button').value.trim()};if(tt==='command'&&g.command!==''&&guiBuilder.activeIndex===0&&!g.trigger.command)g.trigger.command=g.command;saveGUIBuilder();renderGUIList();renderCanvas();}
-        ['gb-command','gb-description','gb-feature','gb-role','gb-bg-color','gb-bg-alpha','gb-trigger-command','gb-source-button'].forEach(id=>document.getElementById(id).addEventListener('input',saveActiveGUIFromForm));
-        document.getElementById('gb-source-gui').addEventListener('change',()=>{updateSourceButtonSelect();saveActiveGUIFromForm();});
-
-        function renderInspector(){const box=document.getElementById('gb-inspector-content');const e=activeElement();if(!box)return;if(!e){box.className='gb-empty';box.innerText='Pilih elemen di canvas untuk mengatur properti, warna, ukuran, dan teks.';return;}box.className='space-y-2';box.innerHTML=`<div class="text-white font-bold text-xs mb-2">${escapeHTML(GB_TYPES[e.type]?.name||e.type)}</div><div><div class="gb-label !normal-case !tracking-normal">ID / Key</div><input id="prop-id" class="gb-input" value="${escapeHTML(e.id||'')}" data-prop="id"></div>`+elementPropertyFields(e)+`<div class="gb-divider"></div><div class="gb-label">Layout</div><div class="gb-prop-grid"><div><div class="gb-label !normal-case !tracking-normal">X %</div><input id="prop-x" class="gb-input" type="number" min="0" max="100" value="${e.x}" data-prop="x"></div><div><div class="gb-label !normal-case !tracking-normal">Y %</div><input id="prop-y" class="gb-input" type="number" min="0" max="100" value="${e.y}" data-prop="y"></div><div><div class="gb-label !normal-case !tracking-normal">Width %</div><input id="prop-width" class="gb-input" type="number" min="4" max="100" value="${e.width}" data-prop="width"></div><div><div class="gb-label !normal-case !tracking-normal">Height %</div><input id="prop-height" class="gb-input" type="number" min="4" max="100" value="${e.height}" data-prop="height"></div></div>`;box.querySelectorAll('[data-prop]').forEach(inp=>inp.addEventListener('input',()=>{applyInspectorValue(inp.dataset.prop,inp.value); }));box.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>applyInspectorValue(btn.dataset.action,btn.value||btn.innerText)));}
-        function field(label,html){return `<div><div class="gb-label !normal-case !tracking-normal">${label}</div>${html}</div>`;}
-        function colorField(label,prop,val){return field(label,`<div class="gb-color-row"><input type="color" class="gb-color" data-prop="${prop}" value="${escapeHTML(val||'#ffffff')}"><input class="gb-input" data-prop="${prop}" value="${escapeHTML(val||'#ffffff')}"></div>`);}
-        function elementPropertyFields(e){let s='';if(['label','textbox','button'].includes(e.type))s+=field('Text',`<textarea class="gb-textarea" data-prop="text">${escapeHTML(e.text||'')}</textarea>`);if(['text_input','small_text_input'].includes(e.type))s+=field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'')}">`)+field('Default Value',`<input class="gb-input" data-prop="defaultValue" value="${escapeHTML(e.defaultValue||'')}">`)+field('Max Length',`<input class="gb-input" type="number" data-prop="maxLength" value="${Number(e.maxLength)||20}">`);if(e.type==='checkbox')s+=field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'')}">`)+field('Initial State',`<select class="gb-select" data-prop="initialState"><option value="0" ${!e.initialState?'selected':''}>0 • Unchecked</option><option value="1" ${e.initialState?'selected':''}>1 • Checked</option></select>`);if(e.type==='label')s+=field('Size',`<select class="gb-select" data-prop="size"><option ${e.size==='big'?'selected':''}>big</option><option ${e.size==='small'?'selected':''}>small</option></select>`)+field('Icon ID',`<input class="gb-input" data-prop="iconId" value="${escapeHTML(e.iconId||'')}">`);if(e.type==='button')s+=field('Frame',`<input class="gb-input" data-prop="frame" value="${escapeHTML(e.frame||'staticBlueFrame')}">`)+field('Icon ID',`<input class="gb-input" data-prop="iconId" value="${escapeHTML(e.iconId||'')}">`);if(['label','textbox','button'].includes(e.type))s+=field('Alignment',`<select class="gb-select" data-prop="align"><option value="left" ${e.align==='left'?'selected':''}>left</option><option value="center" ${e.align==='center'?'selected':''}>center</option><option value="right" ${e.align==='right'?'selected':''}>right</option></select>`)+field('Font Size',`<input class="gb-input" type="number" min="9" max="30" data-prop="fontSize" value="${e.fontSize||15}">`);if(e.type==='spacer')s+=field('Size',`<select class="gb-select" data-prop="size"><option ${e.size==='small'?'selected':''}>small</option><option ${e.size==='medium'?'selected':''}>medium</option><option ${e.size==='large'?'selected':''}>large</option></select>`);if(e.type==='search')s+=field('Placeholder',`<input class="gb-input" data-prop="placeholder" value="${escapeHTML(e.placeholder||'Cari...')}">`);if(['item_selector','player_selector','world_selector'].includes(e.type))s+=field('Label Preview',`<input class="gb-input" data-prop="text" value="${escapeHTML(e.text||GB_TYPES[e.type].name)}">`);if(e.type==='dropdown')s+=field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'Pilih:')}">`)+field('Options (comma)',`<input class="gb-input" data-prop="options" value="${escapeHTML(e.options||'A,B,C')}">`)+field('Default Index',`<input class="gb-input" type="number" data-prop="defaultIndex" value="${Number(e.defaultIndex)||0}">`);if(e.type==='image')s+=field('Image URL',`<input class="gb-input" data-prop="url" value="${escapeHTML(e.url||'')}">`)+field('Image Width',`<input class="gb-input" type="number" data-prop="imgW" value="${Number(e.imgW)||240}">`)+field('Image Height',`<input class="gb-input" type="number" data-prop="imgH" value="${Number(e.imgH)||100}">`);if(e.type==='player_info')s+=field('Player ID',`<input class="gb-input" data-prop="playerId" value="${escapeHTML(e.playerId||'123456')}">`);if(e.type==='item_info')s+=field('Item ID',`<input class="gb-input" data-prop="itemId" value="${escapeHTML(e.itemId||'7188')}">`);if(e.type==='progress')s+=field('Current',`<input class="gb-input" type="number" data-prop="current" value="${Number(e.current)||0}">`)+field('Max',`<input class="gb-input" type="number" data-prop="max" value="${Number(e.max)||100}">`)+field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'Progress:')}">`);if(e.type==='end')s+=field('Dialog Name',`<input class="gb-input" data-prop="dialogName" value="${escapeHTML(e.dialogName||'my_dialog')}">`)+field('Close Button',`<input class="gb-input" data-prop="closeButton" value="${escapeHTML(e.closeButton||'Close')}">`);s+=colorField('Text Color','textColor',e.textColor||'#ffffff');s+=colorField('Background','bgColor',e.bgColor||'#1b1d21');return s;}
-        function applyInspectorValue(prop,val){
-            const e=activeElement();
-            if(!e)return;
-            let v=val;
-            if(['x','y','width','height','fontSize','maxLength','defaultIndex','imgW','imgH','playerId','itemId','current','max','initialState'].includes(prop))v=Number(val);
-            if(prop==='id'){
-                const oldId=e.id;
-                guiBuilder.guis.forEach(g=>{
-                    if(g.trigger?.type==='button' && Number(g.trigger.sourceGui)===guiBuilder.activeIndex && g.trigger.sourceButton===oldId) g.trigger.sourceButton=String(val);
-                });
-                gbSelectedId=String(val);
-            }
-            e[prop]=v;
+        function defaultGUI(index){return {name:`GUI ${index}`,command:index===1?'/gui':'',description:'Custom GTPS Dialog',feature:'',role:0,bg:'#121212',alpha:255,trigger:{type:index===1?'command':'button',command:index===1?'/gui':'',sourceGui:Math.max(0,index-2),sourceButton:''},elements:[newElement('label'),newElement('textbox'),newElement('button'),newElement('end')]};}
+        function loadGUIBuilder(){
+            let migrated=null;
+            try{migrated=JSON.parse(localStorage.getItem(GUI_STORAGE_KEY)||'null');}catch(e){migrated=null;}
+            if(!migrated){try{migrated=JSON.parse(localStorage.getItem('GTPS_GUI_BUILDER_V1')||'null');}catch(e){migrated=null;}}
+            if(migrated&&Array.isArray(migrated.guis)&&migrated.guis.length){
+                guiBuilder={...migrated,simulator:migrated.simulator==='mobile'?'mobile':'pc',activeIndex:Math.min(Math.max(0,Number(migrated.activeIndex)||0),migrated.guis.length-1),guis:migrated.guis.map((g,i)=>normalizeGUI(g,i))};
+            }else{guiBuilder={simulator:'pc',activeIndex:0,guis:[defaultGUI(1)]};}
             saveGUIBuilder();
-            renderCanvas();
-            renderInspector();
-            renderGUIList();
         }
-
+        function normalizeGUI(g,i){
+            const ng={name:g.name||`GUI ${i+1}`,command:g.command||'',description:g.description||'',feature:g.feature||'',role:Number.isFinite(Number(g.role))?Number(g.role):0,bg:g.bg||'#121212',alpha:Math.max(0,Math.min(255,Number(g.alpha??255))),trigger:g.trigger||{type:i===0?'command':'button',command:g.command||'',sourceGui:Math.max(0,i-1),sourceButton:''},elements:Array.isArray(g.elements)?g.elements:[]};
+            ng.elements=ng.elements.map(e=>({id:'',type:'label',x:6,y:7,width:30,height:10,textColor:'#FFFFFF',bgColor:'#1B1D21',fontSize:15,align:'left',...e}));
+            return ng;
+        }
+        function initGUIBuilder(){loadGUIBuilder();renderPalette();renderAllBuilder();toggleBuilderInspector(gbInspectorOpen);}
+        function saveGUIBuilder(){try{localStorage.setItem(GUI_STORAGE_KEY,JSON.stringify(guiBuilder));}catch(e){}}
+        function scheduleSave(){clearTimeout(gbSaveTimer);gbSaveTimer=setTimeout(saveGUIBuilder,120);}
+        function activeGUI(){return guiBuilder.guis[guiBuilder.activeIndex]||null;}
+        function activeElement(){const g=activeGUI();return g?.elements.find(e=>e.id===gbSelectedId)||null;}
+        function openGUIBuilder(){const m=document.getElementById('gui-builder-modal');m.classList.remove('hidden');m.classList.add('flex');if(!guiBuilder.guis.length)loadGUIBuilder();renderAllBuilder();}
+        function closeGUIBuilder(){document.getElementById('gui-builder-modal').classList.add('hidden');document.getElementById('gui-builder-modal').classList.remove('flex');saveGUIBuilder();}
+        function addGUIBackground(){const index=guiBuilder.guis.length+1;const g=defaultGUI(index);g.trigger={type:'button',command:'',sourceGui:Math.max(0,guiBuilder.activeIndex),sourceButton:''};g.elements=[newElement('label'),newElement('button'),newElement('end')];guiBuilder.guis.push(g);guiBuilder.activeIndex=guiBuilder.guis.length-1;gbSelectedId=null;fixConnectionSources();saveGUIBuilder();renderAllBuilder();}
+        function selectGUI(index){if(index<0||index>=guiBuilder.guis.length)return;saveActiveGUIFromForm();guiBuilder.activeIndex=index;gbSelectedId=null;renderAllBuilder();scheduleSave();}
+        function deleteActiveGUI(){if(guiBuilder.guis.length<=1){alert('Minimal harus ada 1 GUI.');return;}const g=activeGUI();if(!confirm(`Hapus ${g.name||`GUI ${guiBuilder.activeIndex+1}`}?`))return;guiBuilder.guis.splice(guiBuilder.activeIndex,1);guiBuilder.activeIndex=Math.max(0,guiBuilder.activeIndex-1);gbSelectedId=null;fixConnectionSources();saveGUIBuilder();renderAllBuilder();}
+        function fixConnectionSources(){guiBuilder.guis.forEach((g,i)=>{if(g.trigger?.type==='button'){g.trigger.sourceGui=Math.max(0,Math.min(guiBuilder.guis.length-1,Number(g.trigger.sourceGui)||0));if(!resolveSourceButtonId(g.trigger.sourceGui,g.trigger.sourceButton||''))g.trigger.sourceButton='';}});}
+        function renderAllBuilder(){renderGUIList();updateGUIForm();renderCanvas();renderInspector();setSimulator(guiBuilder.simulator);updateTriggerUI(false);}
+        function renderGUIList(){const el=document.getElementById('gb-gui-list');if(!el)return;el.innerHTML='';guiBuilder.guis.forEach((g,i)=>{const tab=document.createElement('button');tab.type='button';tab.className='gb-gui-tab'+(i===guiBuilder.activeIndex?' active':'');tab.innerHTML=`<span class="name">${escapeHTML(g.name||`GUI ${i+1}`)}</span><span class="sub">${g.trigger?.type==='button'?`Klik GUI ${Number(g.trigger.sourceGui)+1}: ${escapeHTML(g.trigger.sourceButton||'Button')}`:escapeHTML(g.command||g.trigger?.command||'Command')} • ${g.elements?.length||0} elemen</span>`;tab.onclick=()=>selectGUI(i);el.appendChild(tab);});}
+        function renderPalette(){const el=document.getElementById('gb-element-palette');if(!el)return;el.innerHTML='';Object.entries(GB_TYPES).forEach(([type,meta])=>{const b=document.createElement('button');b.type='button';b.className='gb-element-card';const sample=newElement(type);sample.id=sample.id||'preview';sample.x=4;sample.y=4;sample.width=92;sample.height=92;sample.fontSize=10;b.innerHTML=`<div class="preview"></div><div class="flex items-center justify-between gap-2"><span class="title">${escapeHTML(meta.name)}</span><span class="add">+ Add</span></div>`;b.querySelector('.preview').innerHTML=elementPreviewHTML(sample);b.title=`Add ${meta.name}`;b.onclick=()=>addElement(type);el.appendChild(b);});}
+        function addElement(type){const g=activeGUI();if(!g)return;const item=newElement(type);const col=g.elements.length%4,row=Math.floor(g.elements.length/4)%4;item.x=Math.min(90-item.width,col*22+4);item.y=Math.min(88-item.height,row*18+5);if(type==='end'){item.x=100-item.width-4;item.y=90-item.height;}g.elements.push(item);gbSelectedId=item.id||uid('el');if(!item.id)item.id=gbSelectedId;scheduleSave();renderCanvas();renderInspector();}
+        function duplicateSelectedElement(){const e=activeElement();if(!e)return;const copy=JSON.parse(JSON.stringify(e));copy.id=ID_TYPES.has(e.type)?uid(e.type):uid('el');copy.x=Math.min(96-copy.width,e.x+4);copy.y=Math.min(94-copy.height,e.y+4);activeGUI().elements.push(copy);gbSelectedId=copy.id;scheduleSave();renderCanvas();renderInspector();}
+        function deleteSelectedElement(){const g=activeGUI();if(!g||!gbSelectedId)return;const idx=g.elements.findIndex(e=>e.id===gbSelectedId);if(idx<0)return;g.elements.splice(idx,1);gbSelectedId=null;scheduleSave();renderCanvas();renderInspector();}
+        function setSimulator(mode){guiBuilder.simulator=mode==='mobile'?'mobile':'pc';const c=document.getElementById('gb-canvas'),frame=document.getElementById('gb-device-frame');if(c){c.classList.toggle('mobile',guiBuilder.simulator==='mobile');c.classList.toggle('pc',guiBuilder.simulator==='pc');}if(frame)frame.classList.toggle('mobile-sim',guiBuilder.simulator==='mobile');document.getElementById('gb-sim-pc')?.classList.toggle('gb-btn-primary',guiBuilder.simulator==='pc');document.getElementById('gb-sim-mobile')?.classList.toggle('gb-btn-primary',guiBuilder.simulator==='mobile');scheduleSave();}
+        function toggleBuilderInspector(force){if(typeof force==='boolean')gbInspectorOpen=force;else gbInspectorOpen=!gbInspectorOpen;const panel=document.getElementById('gb-inspector');const btn=document.getElementById('gb-inspector-toggle');if(panel)panel.classList.toggle('closed',!gbInspectorOpen);if(btn)btn.classList.toggle('active',gbInspectorOpen);}
+        function updateGUIForm(){const g=activeGUI();if(!g)return;['gb-command','gb-description','gb-feature','gb-role','gb-bg-color','gb-bg-alpha','gb-trigger-command','gb-source-button'].forEach(id=>{const el=document.getElementById(id);if(!el)return;});document.getElementById('gb-command').value=g.command||'';document.getElementById('gb-description').value=g.description||'';document.getElementById('gb-feature').value=g.feature||'';document.getElementById('gb-role').value=String(g.role??0);document.getElementById('gb-bg-color').value=g.bg||'#121212';document.getElementById('gb-bg-alpha').value=String(g.alpha??255);document.getElementById('gb-trigger-type').value=g.trigger?.type||'command';document.getElementById('gb-trigger-command').value=g.trigger?.command||'';updateSourceGUISelect();updateSourceButtonSelect();document.getElementById('gb-source-button').value=g.trigger?.sourceButton||'';document.getElementById('gb-current-gui-name').textContent=g.name||`GUI ${guiBuilder.activeIndex+1}`;}
+        function saveActiveGUIFromForm(){const g=activeGUI();if(!g)return;g.command=document.getElementById('gb-command').value.trim();g.description=document.getElementById('gb-description').value.trim();g.feature=document.getElementById('gb-feature').value.trim();g.role=Math.max(0,parseInt(document.getElementById('gb-role').value||'0',10)||0);g.bg=document.getElementById('gb-bg-color').value||'#121212';g.alpha=Math.max(0,Math.min(255,parseInt(document.getElementById('gb-bg-alpha').value||'255',10)||0));const tt=document.getElementById('gb-trigger-type').value;g.trigger={type:tt,command:document.getElementById('gb-trigger-command').value.trim(),sourceGui:Number(document.getElementById('gb-source-gui').value)||0,sourceButton:document.getElementById('gb-source-button').value.trim()};scheduleSave();renderGUIList();renderCanvas();}
+        function wireBuilderForm(){['gb-command','gb-description','gb-feature','gb-role','gb-bg-color','gb-bg-alpha','gb-trigger-command','gb-source-button'].forEach(id=>document.getElementById(id)?.addEventListener('input',saveActiveGUIFromForm));document.getElementById('gb-source-gui')?.addEventListener('change',()=>{updateSourceButtonSelect();saveActiveGUIFromForm();});document.getElementById('gb-bg-color')?.addEventListener('input',()=>{const g=activeGUI();if(g){g.bg=document.getElementById('gb-bg-color').value;renderCanvas();scheduleSave();}});document.getElementById('gb-bg-alpha')?.addEventListener('input',()=>{const g=activeGUI();if(g){g.alpha=Math.max(0,Math.min(255,Number(document.getElementById('gb-bg-alpha').value)||0));renderCanvas();scheduleSave();}});}
+        function updateSourceGUISelect(){const select=document.getElementById('gb-source-gui');if(!select)return;const current=Number(activeGUI()?.trigger?.sourceGui||0);select.innerHTML='';guiBuilder.guis.forEach((g,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=`GUI ${i+1} — ${g.name||'Untitled'}`;select.appendChild(o);});select.value=String(Math.min(Math.max(0,current),guiBuilder.guis.length-1));}
+        function sourceButtonOptions(index){return effectiveButtonIds(index);}
+        function updateSourceButtonSelect(){const select=document.getElementById('gb-source-button-select');if(!select)return;const g=activeGUI();const idx=Number(document.getElementById('gb-source-gui').value||g?.trigger?.sourceGui||0);select.innerHTML='';const list=sourceButtonOptions(idx);if(!list.length){const o=document.createElement('option');o.value='';o.textContent='(Belum ada Button di GUI ini)';select.appendChild(o);select.disabled=true;return;}select.disabled=false;const blank=document.createElement('option');blank.value='';blank.textContent='Pilih Button...';select.appendChild(blank);list.forEach(b=>{const o=document.createElement('option');o.value=b.id;o.textContent=`${b.id} • ${b.text}`;select.appendChild(o);});syncSourceButtonSelectFromField();}
+        function syncSourceButtonSelectFromField(){const select=document.getElementById('gb-source-button-select');const val=String(document.getElementById('gb-source-button')?.value||'');if(select&&val&&Array.from(select.options).some(o=>o.value===val))select.value=val;}
+        function syncSourceButtonField(){const s=document.getElementById('gb-source-button-select');const i=document.getElementById('gb-source-button');if(s&&i&&s.value){i.value=s.value;saveActiveGUIFromForm();}}
+        function updateTriggerUI(save=true){const g=activeGUI();const type=document.getElementById('gb-trigger-type').value;document.getElementById('gb-command-trigger-box').classList.toggle('hidden',type!=='command');document.getElementById('gb-button-trigger-box').classList.toggle('hidden',type!=='button');if(type==='button'){updateSourceGUISelect();updateSourceButtonSelect();document.getElementById('gb-trigger-hint').textContent='GUI ini akan tampil saat Button ID dari GUI sumber diklik.';}else{document.getElementById('gb-trigger-hint').textContent='GUI ini dibuka lewat command yang kamu tentukan.';}if(save)saveActiveGUIFromForm();}
+        function renderCanvas(){const canvas=document.getElementById('gb-canvas'),g=activeGUI();if(!canvas||!g)return;canvas.style.background=rgbaCss(g.bg||'#121212',g.alpha??255);canvas.innerHTML='';const elems=(g.elements||[]);elems.forEach(e=>{const el=document.createElement('div');el.className='gb-element '+(gbSelectedId===e.id?'selected':'');el.dataset.id=e.id;el.style.left=Math.max(0,Math.min(100-e.width,Number(e.x)||0))+'%';el.style.top=Math.max(0,Math.min(100-e.height,Number(e.y)||0))+'%';el.style.width=Math.max(3,Math.min(100,Number(e.width)||10))+'%';el.style.height=Math.max(3,Math.min(100,Number(e.height)||10))+'%';el.innerHTML=elementPreviewHTML(e)+`<div class="gb-resize"></div>`;el.addEventListener('pointerdown',onElementPointerDown);canvas.appendChild(el);});document.getElementById('gb-canvas-empty').style.display=elems.length?'none':'block';document.getElementById('gb-current-gui-name').textContent=g.name||`GUI ${guiBuilder.activeIndex+1}`;}
+        function elementPreviewHTML(e){const style=`color:${e.textColor||'#fff'};font-size:${Math.max(8,Math.min(26,Number(e.fontSize)||15))}px;`;const bg=e.type==='spacer'?'transparent':rgbaCss(e.bgColor||'#1B1D21',255);switch(e.type){case 'label':return `<div style="${style}background:${bg};border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:4px 7px;font-weight:${e.size==='big'?700:500};text-align:${e.align||'left'};height:100%;display:flex;align-items:center;gap:6px"><span style="width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#7c8aa0,#39465b);display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex:0 0 18px">${e.iconId?'◆':''}</span><span>${escapeHTML(e.text||'Label')}</span></div>`;case 'textbox':return `<div style="${style}background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:6px 8px;height:100%;overflow:hidden;text-align:${e.align||'left'}">${escapeHTML(e.text||'TextBox')}</div>`;case 'text_input':case 'small_text_input':return `<div style="height:100%;border:1px solid rgba(255,255,255,.13);background:${bg};border-radius:7px;padding:4px 7px;display:flex;flex-direction:column;justify-content:center"><span style="${style}font-size:9px;opacity:.68">${escapeHTML(e.label||'Input')}</span><span style="color:#aeb4bc;font-size:10px">${escapeHTML(e.defaultValue||'')}</span></div>`;case 'checkbox':return `<div style="height:100%;display:flex;align-items:center;gap:6px;${style}"><span style="width:13px;height:13px;border:1px solid #9aa2ae;border-radius:3px;background:${e.initialState?'#2563eb':'transparent'};display:inline-flex;align-items:center;justify-content:center;font-size:9px">${e.initialState?'✓':''}</span><span>${escapeHTML(e.label||'Checkbox')}</span></div>`;case 'button':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.17);border-radius:7px;padding:4px 8px;display:flex;align-items:center;justify-content:${e.align==='center'?'center':e.align==='right'?'flex-end':'flex-start'};gap:6px;font-weight:700;${style}"><span style="width:16px;height:16px;border-radius:4px;background:rgba(255,255,255,.12);display:inline-flex;align-items:center;justify-content:center;font-size:8px">${e.iconId?'◆':''}</span><span>${escapeHTML(e.text||'Button')}</span></div>`;case 'spacer':return `<div style="height:100%;border-top:1px dashed rgba(255,255,255,.16)"></div>`;case 'search':return `<div style="height:100%;border:1px solid rgba(255,255,255,.13);background:${bg};border-radius:7px;padding:4px 7px;display:flex;align-items:center;gap:6px;${style}"><i class="fas fa-search" style="opacity:.65"></i><span style="opacity:.6">${escapeHTML(e.placeholder||'Cari...')}</span></div>`;case 'item_selector':return selectorPreview('cube','Item Selector',e);case 'player_selector':return selectorPreview('user','Player Selector',e);case 'world_selector':return selectorPreview('globe','World Selector',e);case 'dropdown':return `<div style="height:100%;border:1px solid rgba(255,255,255,.13);background:${bg};border-radius:7px;padding:4px 7px;display:flex;align-items:center;justify-content:space-between;${style}"><span>${escapeHTML(e.label||'Dropdown')}</span><span style="opacity:.7">⌄</span></div>`;case 'image':return `<div style="height:100%;border:1px dashed rgba(255,255,255,.18);background:rgba(0,0,0,.22);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">${e.url?`<img src="${escapeHTML(e.url)}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;margin:0;border-radius:0">`:''}<span style="color:#727985;font-size:9px;letter-spacing:.08em">${e.url?'IMAGE':'+ IMAGE'}</span></div>`;case 'player_info':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px;${style}"><div style="font-weight:800">Player Info</div><div style="font-size:9px;opacity:.65">ID: ${escapeHTML(e.playerId||'123456')} • Name • Level</div></div>`;case 'item_info':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px;${style}"><div style="font-weight:800">Item Info</div><div style="font-size:9px;opacity:.65">ID: ${escapeHTML(e.itemId||'7188')} • Name</div></div>`;case 'progress':const pv=Math.max(0,Math.min(100,(Number(e.current)||0)/Math.max(1,Number(e.max)||100)*100));return `<div style="height:100%;display:flex;flex-direction:column;justify-content:center;gap:4px"><div style="${style}font-size:10px">${escapeHTML(e.label||'Progress')}</div><div style="height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden"><div style="width:${pv}%;height:100%;background:#3b82f6"></div></div></div>`;case 'end':return `<div style="height:100%;background:${bg};border:1px solid rgba(255,255,255,.15);border-radius:7px;display:flex;align-items:center;justify-content:center;${style}">${escapeHTML(e.closeButton||'Close')}</div>`;default:return `<div style="${style}">${escapeHTML(e.text||e.type)}</div>`;}}
+        function selectorPreview(icon,type,e){const iconCls=icon==='user'?'fa-user':icon==='globe'?'fa-globe':'fa-cube';return `<div style="height:100%;border:1px solid rgba(255,255,255,.13);background:${rgbaCss(e.bgColor||'#1B1D21',255)};border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:7px;color:${e.textColor||'#fff'};font-size:${Math.max(8,Math.min(22,Number(e.fontSize)||15))}px"><i class="fas ${iconCls}" style="opacity:.72"></i><span>${escapeHTML(e.text||type)}</span><span style="margin-left:auto;opacity:.5">›</span></div>`;}
+        function rgbaCss(hex,a=255){const c=colorToRgba(hex,a);return `rgba(${c.r},${c.g},${c.b},${(c.a/255).toFixed(3)})`;}
+        function colorToRgba(hex,a){const h=String(hex||'#121212').replace('#','');const n=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16)||0;return{r:(n>>16)&255,g:(n>>8)&255,b:n&255,a:Number(a)||0};}
+        function onElementPointerDown(ev){ev.stopPropagation();const el=ev.currentTarget;gbSelectedId=el.dataset.id;document.querySelectorAll('#gb-canvas .gb-element').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(!gbInspectorOpen)toggleBuilderInspector(true);renderInspector();const e=activeElement();if(!e)return;const rect=document.getElementById('gb-canvas').getBoundingClientRect();const base={id:e.id,startX:ev.clientX,startY:ev.clientY,rect,el};if(ev.target.classList.contains('gb-resize')){gbResize={...base,startW:e.width,startH:e.height};}else{gbDrag={...base,startLeft:e.x,startTop:e.y};}el.setPointerCapture(ev.pointerId);el.addEventListener('pointermove',onElementPointerMove);el.addEventListener('pointerup',onElementPointerUp,{once:true});el.addEventListener('pointercancel',onElementPointerUp,{once:true});}
+        function onElementPointerMove(ev){const e=activeElement();if(!e)return;if(gbResize){const dx=(ev.clientX-gbResize.startX)/gbResize.rect.width*100,dy=(ev.clientY-gbResize.startY)/gbResize.rect.height*100;e.width=Math.max(3,Math.min(100-e.x,gbResize.startW+dx));e.height=Math.max(3,Math.min(100-e.y,gbResize.startH+dy));gbResize.el.style.width=e.width+'%';gbResize.el.style.height=e.height+'%';return;}if(gbDrag){const dx=(ev.clientX-gbDrag.startX)/gbDrag.rect.width*100,dy=(ev.clientY-gbDrag.startY)/gbDrag.rect.height*100;e.x=Math.max(0,Math.min(100-e.width,gbDrag.startLeft+dx));e.y=Math.max(0,Math.min(100-e.height,gbDrag.startTop+dy));gbDrag.el.style.left=e.x+'%';gbDrag.el.style.top=e.y+'%';}}
+        function onElementPointerUp(){gbDrag=null;gbResize=null;scheduleSave();renderInspector();}
+        function field(label,html){return `<div class="gb-property-block"><label>${label}</label>${html}</div>`;}
+        function colorField(label,prop,val){return field(label,`<div class="gb-color-row"><input type="color" class="gb-color" data-prop="${prop}" value="${escapeHTML(val||'#ffffff')}"><input class="gb-input allow-select" data-prop="${prop}" value="${escapeHTML(val||'#ffffff')}"></div>`);}
+        function elementPropertyFields(e){let s='';if(['label','textbox'].includes(e.type))s+=field('Text',`<textarea class="gb-input" data-prop="text" style="min-height:62px;resize:vertical">${escapeHTML(e.text||'')}</textarea>`);if(e.type==='button')s+=field('Button Text',`<input class="gb-input allow-select" data-prop="text" value="${escapeHTML(e.text||'Button')}">`);if(['text_input','small_text_input'].includes(e.type))s+=field('Label',`<input class="gb-input allow-select" data-prop="label" value="${escapeHTML(e.label||'')}">`)+field('Default Value',`<input class="gb-input allow-select" data-prop="defaultValue" value="${escapeHTML(e.defaultValue||'')}">`)+field('Max Length',`<input class="gb-input" type="number" data-prop="maxLength" value="${Number(e.maxLength)||20}">`);if(e.type==='checkbox')s+=field('Label',`<input class="gb-input allow-select" data-prop="label" value="${escapeHTML(e.label||'')}">`)+field('Initial State',`<select class="gb-input" data-prop="initialState"><option value="0" ${!e.initialState?'selected':''}>0 • Unchecked</option><option value="1" ${e.initialState?'selected':''}>1 • Checked</option></select>`);if(e.type==='label')s+=field('Size',`<select class="gb-input" data-prop="size"><option value="big" ${e.size==='big'?'selected':''}>big</option><option value="small" ${e.size==='small'?'selected':''}>small</option></select>`)+field('Icon ID',`<input class="gb-input" data-prop="iconId" value="${escapeHTML(e.iconId||'')}" type="number">`);if(e.type==='button')s+=field('Frame Style',`<input class="gb-input" data-prop="frame" value="${escapeHTML(e.frame||'staticBlueFrame')}">`)+field('Icon ID',`<input class="gb-input" data-prop="iconId" value="${escapeHTML(e.iconId||'')}" type="number">`);if(['label','textbox','button'].includes(e.type))s+=field('Alignment',`<select class="gb-input" data-prop="align"><option value="left" ${e.align==='left'?'selected':''}>left</option><option value="center" ${e.align==='center'?'selected':''}>center</option><option value="right" ${e.align==='right'?'selected':''}>right</option></select>`)+field('Font Size',`<input class="gb-input" type="number" min="8" max="32" data-prop="fontSize" value="${Number(e.fontSize)||15}">`);if(e.type==='spacer')s+=field('Spacer Size',`<select class="gb-input" data-prop="size"><option value="small" ${e.size==='small'?'selected':''}>small</option><option value="medium" ${e.size==='medium'?'selected':''}>medium</option><option value="large" ${e.size==='large'?'selected':''}>large</option></select>`);if(e.type==='search')s+=field('Placeholder',`<input class="gb-input" data-prop="placeholder" value="${escapeHTML(e.placeholder||'Cari...')}">`);if(['item_selector','player_selector','world_selector'].includes(e.type))s+=field('Preview Text',`<input class="gb-input" data-prop="text" value="${escapeHTML(e.text||GB_TYPES[e.type].name)}">`);if(e.type==='dropdown')s+=field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'Pilih:')}">`)+field('Options (comma)',`<input class="gb-input" data-prop="options" value="${escapeHTML(e.options||'A,B,C')}">`)+field('Default Index',`<input class="gb-input" type="number" data-prop="defaultIndex" value="${Number(e.defaultIndex)||0}">`);if(e.type==='image')s+=field('Image URL',`<input class="gb-input" data-prop="url" value="${escapeHTML(e.url||'')}">`)+field('Image Width',`<input class="gb-input" type="number" data-prop="imgW" value="${Number(e.imgW)||240}">`)+field('Image Height',`<input class="gb-input" type="number" data-prop="imgH" value="${Number(e.imgH)||100}">`);if(e.type==='player_info')s+=field('Player ID',`<input class="gb-input" data-prop="playerId" value="${escapeHTML(e.playerId||'123456')}">`);if(e.type==='item_info')s+=field('Item ID',`<input class="gb-input" data-prop="itemId" value="${escapeHTML(e.itemId||'7188')}">`);if(e.type==='progress')s+=field('Current',`<input class="gb-input" type="number" data-prop="current" value="${Number(e.current)||0}">`)+field('Max',`<input class="gb-input" type="number" data-prop="max" value="${Number(e.max)||100}">`)+field('Label',`<input class="gb-input" data-prop="label" value="${escapeHTML(e.label||'Progress:')}">`);if(e.type==='end')s+=field('Dialog Name',`<input class="gb-input" data-prop="dialogName" value="${escapeHTML(e.dialogName||'')}"><div class="gb-prop-note">Kosong = otomatis memakai nama dialog GUI ini.</div>`)+field('Close Button',`<input class="gb-input" data-prop="closeButton" value="${escapeHTML(e.closeButton||'Close')}">`);return s;}
+        function renderInspector(){const box=document.getElementById('gb-inspector-content');const e=activeElement();if(!box)return;if(!e){box.innerHTML='<div class="gb-inspector-empty"><i class="fas fa-arrow-pointer"></i><p>Pilih elemen di GUI untuk mengeditnya.</p></div>';return;}box.innerHTML=`<div class="gb-property-block"><div class="text-white font-bold text-xs mb-2">${escapeHTML(GB_TYPES[e.type]?.name||e.type)}</div></div><div class="gb-quick-action"><button class="gb-btn" type="button" id="gb-dup-now"><i class="fas fa-copy"></i> Duplikat</button><button class="gb-btn gb-btn-danger" type="button" id="gb-del-now"><i class="fas fa-trash"></i> Hapus</button></div><div class="gb-divider"></div>${ID_TYPES.has(e.type)?field('ID / Key',`<input class="gb-input allow-select" data-prop="id" value="${escapeHTML(e.id||'')}">`):''}${elementPropertyFields(e)}${colorField('Text Color','textColor',e.textColor||'#ffffff')}${colorField('Background Color','bgColor',e.bgColor||'#1b1d21')}<div class="gb-divider"></div>${field('Position X %',`<input class="gb-input" type="number" min="0" max="100" data-prop="x" value="${Number(e.x)||0}">`)+field('Position Y %',`<input class="gb-input" type="number" min="0" max="100" data-prop="y" value="${Number(e.y)||0}">`)}<div class="gb-prop-grid">${field('Width %',`<input class="gb-input" type="number" min="3" max="100" data-prop="width" value="${Number(e.width)||30}">`)}${field('Height %',`<input class="gb-input" type="number" min="3" max="100" data-prop="height" value="${Number(e.height)||10}">`)}</div>`;box.querySelector('#gb-dup-now').onclick=duplicateSelectedElement;box.querySelector('#gb-del-now').onclick=deleteSelectedElement;box.querySelectorAll('[data-prop]').forEach(inp=>inp.addEventListener('input',()=>applyInspectorValue(inp.dataset.prop,inp.value)));}
+        function applyInspectorValue(prop,val){const e=activeElement();if(!e)return;let v=val;if(['x','y','width','height','fontSize','maxLength','defaultIndex','imgW','imgH','playerId','itemId','current','max','initialState'].includes(prop))v=Number(val);if(prop==='id'){const old=e.id;e.id=String(val||uid(e.type));gbSelectedId=e.id;guiBuilder.guis.forEach(g=>{if(g.trigger?.type==='button'&&Number(g.trigger.sourceGui)===guiBuilder.activeIndex&&g.trigger.sourceButton===old)g.trigger.sourceButton=e.id;});}else e[prop]=v;if(['text','label','defaultValue','placeholder','options','url','frame','iconId','size','align','dialogName','closeButton','textColor','bgColor','id','initialState'].includes(prop)||['x','y','width','height','fontSize','current','max'].includes(prop)){renderCanvas();}scheduleSave();if(prop==='id'||prop==='text')renderGUIList();}
+        function activeDialogName(index){const g=guiBuilder.guis[index];const end=(g?.elements||[]).find(e=>e.type==='end'&&String(e.dialogName||'').trim());return end?.dialogName?.trim()||`custom_gui_${index+1}`;}
         function luaEscape(s){return String(s??'').replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r/g,'').replace(/\n/g,'\\n');}
-        function safeLuaNumber(v, fallback=0){const n=Number(v);return Number.isFinite(n)?n:fallback;}
-        function guiDialogName(index){return `custom_gui_${index+1}`;}
-        function generateGUIElementLua(e){
-            switch(e.type){
-                case 'label':return `add_label_with_icon|${e.size||'big'}|${luaEscape(e.text||'Label')}|${e.align||'left'}|${luaEscape(e.iconId||'')}|`;
-                case 'textbox':return `add_textbox|${luaEscape(e.text||'')}|${e.align||'left'}|`;
-                case 'text_input':return `add_text_input|${luaEscape(e.id||'input')}|${luaEscape(e.label||'Label:')}|${luaEscape(e.defaultValue||'')}|${safeLuaNumber(e.maxLength,20)}|`;
-                case 'small_text_input':return `add_small_text_input|${luaEscape(e.id||'input')}|${luaEscape(e.label||'Label:')}|${luaEscape(e.defaultValue||'')}|${safeLuaNumber(e.maxLength,3)}|`;
-                case 'checkbox':return `add_checkbox|${luaEscape(e.id||'checkbox')}|${luaEscape(e.label||'Checkbox')}|${e.initialState?1:0}|`;
-                case 'button':return `add_button_with_icon|${luaEscape(e.id||'btn')}|${luaEscape(e.text||'Button')}|${luaEscape(e.frame||'staticBlueFrame')}|${luaEscape(e.iconId||'')}||${e.align||'left'}|`;
-                case 'spacer':return `add_spacer|${e.size||'small'}|`;
-                case 'search':return `add_search_bar|${luaEscape(e.id||'search')}|${luaEscape(e.placeholder||'Cari...')}|`;
-                case 'item_selector':return `add_item_selector|${luaEscape(e.id||'item_selector')}|`;
-                case 'player_selector':return `add_player_selector|${luaEscape(e.id||'player_selector')}|`;
-                case 'world_selector':return `add_world_selector|${luaEscape(e.id||'world_selector')}|`;
-                case 'dropdown':return `add_dropdown|${luaEscape(e.id||'dropdown')}|${luaEscape(e.label||'Pilih:')}|${luaEscape(e.options||'A,B,C')}|${safeLuaNumber(e.defaultIndex,0)}|`;
-                case 'image':return `add_image|${luaEscape(e.url||'')}|${safeLuaNumber(e.imgW,240)}|${safeLuaNumber(e.imgH,100)}|`;
-                case 'player_info':return `add_player_info|${luaEscape(e.playerId||'123456')}|`;
-                case 'item_info':return `add_item_info|${luaEscape(e.itemId||'7188')}|`;
-                case 'progress':return `add_progress_bar|${luaEscape(e.id||'progress')}|${safeLuaNumber(e.current,0)}|${safeLuaNumber(e.max,100)}|${luaEscape(e.label||'Progress:')}|`;
-                case 'end':return `end_dialog|${luaEscape(e.dialogName||'my_dialog')}|${luaEscape(e.closeButton||'Close')}|`;
-                default:return `-- Unknown element: ${luaEscape(e.type)}`;
-            }
-        }
-        function effectiveButtonIds(guiIndex){const g=guiBuilder.guis[guiIndex];return (g?.elements||[]).filter(e=>e.type==='button').map(e=>({id:e.id,text:e.text}));}
-        function resolveSourceButtonId(sourceGuiIndex,name){const list=effectiveButtonIds(sourceGuiIndex);const found=list.find(b=>b.id===name)||list.find(b=>b.text===name);return found?.id||name;}
-        function generateLuaScript(){
-            const lines=[];lines.push('-- Generated by GTPS Script AI Studio - Custom Dialog Builder');lines.push('-- Visual layout positions are used for editor preview; GTPS Dialog uses vertical element order.');lines.push('');
-            guiBuilder.guis.forEach((g,i)=>{const dialogName=guiDialogName(i);const role=safeLuaNumber(g.role,0);const trigger=g.trigger?.type||'command';const command=(trigger==='command'?(g.trigger?.command||g.command):'').trim();if(command){lines.push(`registerLuaCommand({ command = "${luaEscape(command.replace(/^\//,''))}", roleRequired = ${role}, description = "${luaEscape(g.description||'Custom Dialog')}" })`);}lines.push(`local function showGUI${i+1}(player)`);lines.push('    local dialog = "set_bg_color|'+(()=>{const c=colorToRgba(g.bg||'#121212',g.alpha??255);return `${c.r},${c.g},${c.b},${c.a}`;})()+'|\\n"');const elems=[...(g.elements||[])].sort((a,b)=>a.y-b.y||a.x-b.x);elems.forEach(e=>{const cmd=generateGUIElementLua(e).replace(/\\/g,'\\\\').replace(/"/g,'\\"');lines.push(`    dialog = dialog .. "${cmd}\\n"`);});lines.push(`    player:onDialogRequest(dialog)`);lines.push('end');lines.push('');});
-            lines.push('onPlayerCommandCallback(function(world, player, fullCommand)');lines.push('    local command = fullCommand:match("^(%S+)")');guiBuilder.guis.forEach((g,i)=>{const trigger=g.trigger?.type||'command';if(trigger==='command'){const c=(g.trigger?.command||g.command||'').trim().replace(/^\//,'');if(c){lines.push(`    if command == "${luaEscape(c)}" then`);if(safeLuaNumber(g.role,0)>0)lines.push(`        if not player:hasRole(${safeLuaNumber(g.role,0)}) then return true end`);lines.push(`        showGUI${i+1}(player)`);lines.push('        return true');lines.push('    end');}}});lines.push('    return false');lines.push('end)');lines.push('');
-            lines.push('onPlayerDialogCallback(function(world, player, data)');lines.push('    local dialogName = data["dialog_name"] or ""');lines.push('    local btn = data["buttonClicked"] or ""');guiBuilder.guis.forEach((g,i)=>{if((g.trigger?.type||'command')==='button' && i>0){const source=Math.max(0,Math.min(guiBuilder.guis.length-1,Number(g.trigger.sourceGui)||0));const buttonId=resolveSourceButtonId(source,g.trigger.sourceButton||'');lines.push(`    if dialogName == "${guiDialogName(source)}" and btn == "${luaEscape(buttonId)}" then`);if(safeLuaNumber(g.role,0)>0)lines.push(`        if not player:hasRole(${safeLuaNumber(g.role,0)}) then return true end`);lines.push(`        showGUI${i+1}(player)`);lines.push('        return true');lines.push('    end');}});lines.push('    return false');lines.push('end)');
-            return lines.join('\n');
-        }
-        function buildBuilderPrompt(){
-            const lua=generateLuaScript();
-            const fence=String.fromCharCode(96).repeat(3);
-            const design=guiBuilder.guis.map((g,i)=>{
-                const elems=[...(g.elements||[])].sort((a,b)=>a.y-b.y||a.x-b.x);
-                const triggerText=g.trigger?.type==='button'
-                    ? `If Button Clicked on GUI ${Number(g.trigger.sourceGui)+1}: ${g.trigger.sourceButton||'(set button)'}`
-                    : `Command: ${g.trigger?.command||g.command||'(none)'}`;
-                const lines=[
-                    `GUI ${i+1}:`,
-                    `- Name: ${g.name}`,
-                    `- Command: ${g.command||'(none)'}`,
-                    `- Description: ${g.description||''}`,
-                    `- Fitur di GUI: ${g.feature||'(jelaskan fungsi GUI)'}`,
-                    `- Role ID: ${g.role??0}`,
-                    `- Background: ${g.bg} alpha ${g.alpha}`,
-                    `- Trigger: ${triggerText}`,
-                    '- Elements:',
-                    elems.map(e=>`  • ${GB_TYPES[e.type]?.name||e.type} | id=${e.id||''} | x=${e.x}% y=${e.y}% w=${e.width}% h=${e.height}%`).join('\\n')
-                ];
-                return lines.join('\\n');
-            }).join('\\n\\n');
-            return [
-                'Buatkan script Lua GTPS Cloud (GTPS10) berdasarkan desain Custom Dialog GUI berikut.',
-                '',
-                'ATURAN:',
-                '1. Hanya gunakan API GTPS Cloud yang diizinkan oleh dokumentasi yang diberikan user.',
-                '2. Buat fungsi showGUI1, showGUI2, dst untuk setiap GUI.',
-                '3. GUI 1 dan GUI lain yang memakai Command harus memakai registerLuaCommand.',
-                '4. GUI yang memakai "If Button Clicked" harus dibuka dari onPlayerDialogCallback dengan dialog_name dan buttonClicked. Cocokkan Button ID, bukan hanya teks tampilannya.',
-                '4a. Gunakan kolom Fitur di GUI sebagai requirement utama untuk menentukan apa yang GUI lakukan dan aksi tombol/input-nya.',
-                '5. Pertahankan urutan elemen secara visual: sort berdasarkan posisi Y lalu X, karena Dialog GTPS menggunakan alur vertikal.',
-                '6. Gunakan set_bg_color dengan nilai RGBA dari desain.',
-                '7. Sertakan registerLuaCommand description dan roleRequired bila Command digunakan.',
-                '8. Beri judul script, lalu satu blok kode lua.',
-                '9. Jangan gunakan fungsi yang tidak ada di dokumentasi.',
-                '',
-                'DESAIN VISUAL:',
-                design,
-                '',
-                'DRAFT LUA DARI BUILDER (boleh kamu rapikan/perbaiki sesuai API resmi):',
-                `${fence}lua`,
-                lua,
-                fence
-            ].join('\\n');
-        }
-        function openBuilderPromptModal(){const prompt=buildBuilderPrompt();document.getElementById('builder-prompt-output').value=prompt;document.getElementById('builder-lua-preview').textContent=generateLuaScript();document.getElementById('builder-prompt-modal').classList.remove('hidden');document.getElementById('builder-prompt-modal').classList.add('flex');}
+        function safeLuaNumber(v,fallback=0){const n=Number(v);return Number.isFinite(n)?n:fallback;}
+        function generateGUIElementLua(e,guiIndex){switch(e.type){case 'label':return `add_label_with_icon|${e.size||'big'}|${luaEscape(e.text||'Label')}|${e.align||'left'}|${luaEscape(e.iconId||'')}|`;case 'textbox':return `add_textbox|${luaEscape(e.text||'')}|${e.align||'left'}|`;case 'text_input':return `add_text_input|${luaEscape(e.id||'input')}|${luaEscape(e.label||'Label:')}|${luaEscape(e.defaultValue||'')}|${safeLuaNumber(e.maxLength,20)}|`;case 'small_text_input':return `add_small_text_input|${luaEscape(e.id||'input')}|${luaEscape(e.label||'Label:')}|${luaEscape(e.defaultValue||'')}|${safeLuaNumber(e.maxLength,3)}|`;case 'checkbox':return `add_checkbox|${luaEscape(e.id||'checkbox')}|${luaEscape(e.label||'Checkbox')}|${e.initialState?1:0}|`;case 'button':return `add_button_with_icon|${luaEscape(e.id||'btn')}|${luaEscape(e.text||'Button')}|${luaEscape(e.frame||'staticBlueFrame')}|${luaEscape(e.iconId||'')}||${e.align||'left'}|`;case 'spacer':return `add_spacer|${e.size||'small'}|`;case 'search':return `add_search_bar|${luaEscape(e.id||'search')}|${luaEscape(e.placeholder||'Cari...')}|`;case 'item_selector':return `add_item_selector|${luaEscape(e.id||'item_selector')}|`;case 'player_selector':return `add_player_selector|${luaEscape(e.id||'player_selector')}|`;case 'world_selector':return `add_world_selector|${luaEscape(e.id||'world_selector')}|`;case 'dropdown':return `add_dropdown|${luaEscape(e.id||'dropdown')}|${luaEscape(e.label||'Pilih:')}|${luaEscape(e.options||'A,B,C')}|${safeLuaNumber(e.defaultIndex,0)}|`;case 'image':return `add_image|${luaEscape(e.url||'')}|${safeLuaNumber(e.imgW,240)}|${safeLuaNumber(e.imgH,100)}|`;case 'player_info':return `add_player_info|${luaEscape(e.playerId||'123456')}|`;case 'item_info':return `add_item_info|${luaEscape(e.itemId||'7188')}|`;case 'progress':return `add_progress_bar|${luaEscape(e.id||'progress')}|${safeLuaNumber(e.current,0)}|${safeLuaNumber(e.max,100)}|${luaEscape(e.label||'Progress:')}|`;case 'end':return `end_dialog|${luaEscape(e.dialogName||activeDialogName(guiIndex))}|${luaEscape(e.closeButton||'Close')}|`;default:return `-- Unknown element: ${luaEscape(e.type)}`;}}
+        function effectiveButtonIds(guiIndex){const g=guiBuilder.guis[guiIndex];return (g?.elements||[]).filter(e=>e.type==='button').map(e=>({id:String(e.id||''),text:String(e.text||'Button')})).filter(b=>b.id);}
+        function resolveSourceButtonId(sourceGuiIndex,name){const n=String(name||'').trim();const list=effectiveButtonIds(sourceGuiIndex);if(!n)return '';return (list.find(b=>b.id===n)||list.find(b=>b.text===n))?.id||n;}
+        function generateLuaScript(){const lines=['-- Generated by GTPS Script AI Studio - Custom Dialog Builder','-- Visual positions are editor-only; GTPS Dialog executes elements vertically in their generated order.',''];guiBuilder.guis.forEach((g,i)=>{const role=safeLuaNumber(g.role,0),trigger=g.trigger?.type||'command',cmd=(trigger==='command'?(g.trigger?.command||g.command||''):'').trim().replace(/^\//,'');if(cmd)lines.push(`registerLuaCommand({ command = "${luaEscape(cmd)}", roleRequired = ${role}, description = "${luaEscape(g.description||'Custom Dialog')}" })`);lines.push(`local function showGUI${i+1}(player)`);const c=colorToRgba(g.bg||'#121212',g.alpha??255);lines.push(`    local dialog = "set_bg_color|${c.r},${c.g},${c.b},${c.a}|\\n"`);[...(g.elements||[])].sort((a,b)=>Number(a.y)-Number(b.y)||Number(a.x)-Number(b.x)).forEach(e=>{const cmdLine=generateGUIElementLua(e,i).replace(/\\/g,'\\\\').replace(/"/g,'\\"');lines.push(`    dialog = dialog .. "${cmdLine}\\n"`);});lines.push('    player:onDialogRequest(dialog)');lines.push('end','');});lines.push('onPlayerCommandCallback(function(world, player, fullCommand)','    local command = fullCommand:match("^(%S+)")');guiBuilder.guis.forEach((g,i)=>{if((g.trigger?.type||'command')==='command'){const c=(g.trigger?.command||g.command||'').trim().replace(/^\//,'');if(c){lines.push(`    if command == "${luaEscape(c)}" then`);if(safeLuaNumber(g.role,0)>0)lines.push(`        if not player:hasRole(${safeLuaNumber(g.role,0)}) then return true end`);lines.push(`        showGUI${i+1}(player)`,'        return true','    end');}}});lines.push('    return false','end)','');lines.push('onPlayerDialogCallback(function(world, player, data)','    local dialogName = data["dialog_name"] or ""','    local btn = data["buttonClicked"] or ""');guiBuilder.guis.forEach((g,i)=>{if((g.trigger?.type||'command')==='button'){const source=Math.max(0,Math.min(guiBuilder.guis.length-1,Number(g.trigger.sourceGui)||0)),buttonId=resolveSourceButtonId(source,g.trigger.sourceButton||'');if(buttonId){lines.push(`    if dialogName == "${luaEscape(activeDialogName(source))}" and btn == "${luaEscape(buttonId)}" then`);if(safeLuaNumber(g.role,0)>0)lines.push(`        if not player:hasRole(${safeLuaNumber(g.role,0)}) then return true end`);lines.push(`        showGUI${i+1}(player)`,'        return true','    end');}}});lines.push('    return false','end)');return lines.join('\n');}
+        function buildBuilderPrompt(){const fence=String.fromCharCode(96).repeat(3),lua=generateLuaScript();const design=guiBuilder.guis.map((g,i)=>{const elems=[...(g.elements||[])].sort((a,b)=>Number(a.y)-Number(b.y)||Number(a.x)-Number(b.x));const triggerText=g.trigger?.type==='button'?`If Button Clicked on GUI ${Number(g.trigger.sourceGui)+1}: ${g.trigger.sourceButton||'(set button)'}`:`Command: ${g.trigger?.command||g.command||'(none)'}`;return [`GUI ${i+1}:`,`- Name: ${g.name||`GUI ${i+1}`}`,`- Command: ${g.command||'(none)'}`,`- Description: ${g.description||''}`,`- Role ID: ${g.role??0}`,`- Fitur di GUI: ${g.feature||'(jelaskan fungsi GUI ini)'}`,`- Trigger: ${triggerText}`,`- Background RGBA: ${(()=>{const c=colorToRgba(g.bg,g.alpha);return `${c.r},${c.g},${c.b},${c.a}`;})()}`,'- Elements:',elems.map((e,n)=>`  ${n+1}. ${GB_TYPES[e.type]?.name||e.type} | id=${e.id||''} | x=${e.x}% y=${e.y}% w=${e.width}% h=${e.height}% | props=${JSON.stringify(elementPromptProps(e))}`).join('\n')].join('\n');}).join('\n\n');return ['Buatkan script Lua GTPS Cloud (GTPS10) berdasarkan desain Custom Dialog GUI berikut.','','WAJIB:','1. Hanya gunakan API GTPS Cloud yang diberikan pada system prompt/dokumentasi user.','2. Buat showGUI1, showGUI2, dst.','3. Command GUI memakai registerLuaCommand dengan command, roleRequired, dan description.','4. Trigger Button memakai onPlayerDialogCallback, cocokkan dialog_name dan buttonClicked dengan Button ID GUI sumber.','5. Kolom "Fitur di GUI" adalah requirement perilaku utama: implementasikan validasi, proses data, aksi tombol, input, dan pesan yang dijelaskan di sana. Jangan hanya membuat UI kosong.','6. Urutan elemen mengikuti posisi Y lalu X dari desain.','7. Pertahankan background RGBA.','8. Jangan mengarang API yang tidak ada di dokumentasi.','9. Berikan judul script lalu satu blok kode Lua.','', 'DESAIN GUI:',design,'','DRAFT LUA BUILDER: ',`${fence}lua`,lua,fence].join('\n');}
+        function elementPromptProps(e){const keys=['text','label','defaultValue','maxLength','initialState','frame','iconId','size','align','placeholder','options','defaultIndex','url','imgW','imgH','playerId','itemId','current','max','dialogName','closeButton','textColor','bgColor','fontSize'];const out={};keys.forEach(k=>{if(e[k]!==undefined)out[k]=e[k];});return out;}
+        function openBuilderPromptModal(){document.getElementById('builder-prompt-output').value=buildBuilderPrompt();document.getElementById('builder-lua-preview').textContent=generateLuaScript();document.getElementById('builder-prompt-modal').classList.remove('hidden');document.getElementById('builder-prompt-modal').classList.add('flex');}
         function closeBuilderPromptModal(){document.getElementById('builder-prompt-modal').classList.add('hidden');document.getElementById('builder-prompt-modal').classList.remove('flex');}
-        async function copyBuilderPrompt(){const t=document.getElementById('builder-prompt-output').value;try{await navigator.clipboard.writeText(t);showCopyToast({clientX:window.innerWidth/2,clientY:window.innerHeight/2});}catch(e){document.getElementById('builder-prompt-output').select();document.execCommand('copy');}}
-        function generateAndSendBuilderPrompt(){
-            const prompt=buildBuilderPrompt();
-            closeBuilderPromptModal();
-            closeGUIBuilder();
-            const input=document.getElementById('user-input');
-            input.value='';
-            input.style.height='auto';
-            appendMessage('user',prompt,[]);
-            processAI();
-        }
+        async function copyBuilderPrompt(){const t=document.getElementById('builder-prompt-output').value;try{await navigator.clipboard.writeText(t);showCopyToast({clientX:window.innerWidth/2,clientY:window.innerHeight/2});}catch(e){const ta=document.getElementById('builder-prompt-output');ta.focus();ta.select();document.execCommand('copy');}}
+        function generateAndSendBuilderPrompt(){const prompt=buildBuilderPrompt();closeBuilderPromptModal();closeGUIBuilder();appendMessage('user',prompt,[]);processAI();}
+        document.addEventListener('DOMContentLoaded',wireBuilderForm);
 
         /* UX / anti-contextmenu */
         document.addEventListener('contextmenu',function(e){if(e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'&&e.target.tagName!=='SELECT')e.preventDefault();});
